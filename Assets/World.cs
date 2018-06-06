@@ -3,26 +3,60 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class World : MonoBehaviour {
-	public Material grassMaterial;
-	// Use this for initialization
+	public Component cellPrefab;
+	public Component cityPrefab;
+
+	public float width = 10f;
+	public float height = 10f;
+
+	private Construction[,] map;
+	private List<City> cities;
+
 	void Start () {
-		var cellSize = new Vector3(1F, 0.05F, 1F);
-		const float width = 10F;
-		const float height = 10F;
+		Generate ();
+		StartCoroutine ("Simulation");
+	}
 
-		Debug.Log (grassMaterial.name);
+	void Generate() {
+		var w = (int)width;
+		var h = (int)height;
+		map = new Construction [w,h]; 
 
-		for (float x = 0.5F; x < width; x++) {
-			for (float y = 0.5F; y < height; y++) {
-				GameObject cube = GameObject.CreatePrimitive (PrimitiveType.Cube);
-				cube.transform.position = new Vector3 (x,0F,y);
-				cube.transform.localScale = cellSize;
-				cube.GetComponent<Renderer>().material = grassMaterial;
+		Cities (w, h);
+
+		for (float x = 0f; x < width; x++) {
+			for (float y = 0f; y < height; y++) {
+				Terrain (x, y);			
 			}
 		}
 	}
-	
-	// Update is called once per frame
-	void Update () {
+
+	IEnumerator Simulation() {
+		while (true) {
+			foreach (City c in cities) {
+				c.GenerateCargo ();
+			}
+			yield return new WaitForSeconds (0.02f);
+		}
+	}
+
+	void Terrain(float x, float y) {
+		Instantiate(cellPrefab,new Vector3 (x,-0.05f,y),Quaternion.identity);
+	}
+
+	void Cities(int w, int h){
+		var quantity = City.Quantity(w,h);
+		cities = new List<City> (quantity);
+		var n = 0;
+		while(n<quantity){
+			int x = Random.Range (0, w);
+			int y = Random.Range (0, h);
+			if (map [x, y] == null) {
+				City c = new City (x,y, cityPrefab);
+				map [x, y] = c;
+				cities.Add (c);
+				n++;
+			}
+		}
 	}
 }
