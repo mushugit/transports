@@ -6,6 +6,8 @@ public class Cam : MonoBehaviour {
 	Vector3 defaultPosition;
 
 	public float moveSpeed = 30f;
+	public float minZoom = 2f;
+	public float maxZoom = 64f;
 
 	// Use this for initialization
 	void Start () {
@@ -25,12 +27,15 @@ public class Cam : MonoBehaviour {
 
 		transform.Translate(new Vector3(hMove*moveSpeed*Time.deltaTime,0,vMove*moveSpeed*Time.deltaTime));
 
-		if (Input.GetButton ("Reset"))
+		if (Input.GetButton ("ResetView"))
 			transform.position = defaultPosition;
 
 		transform.rotation = r;
-
+		Vector3 positionBeforeZoom = transform.position;
 		transform.Translate (new Vector3 (0f, 0f, Input.GetAxis ("Zoom") * Time.deltaTime));
+
+		if (transform.position.y < minZoom || transform.position.y > maxZoom)
+			transform.position = positionBeforeZoom;
 
 	}
 }
