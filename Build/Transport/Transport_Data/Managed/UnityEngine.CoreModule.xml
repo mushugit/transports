@@ -1865,14 +1865,14 @@ Here is an example of handling the callback:</para>
     </member>
     <member name="M:UnityEngine.Application.LoadLevel(System.Int32)">
       <summary>
-        <para>Loads the level by its name or index.</para>
+        <para>Note: This is now obsolete. Use SceneManager.LoadScene instead.</para>
       </summary>
       <param name="index">The level to load.</param>
       <param name="name">The name of the level to load.</param>
     </member>
     <member name="M:UnityEngine.Application.LoadLevel(System.String)">
       <summary>
-        <para>Loads the level by its name or index.</para>
+        <para>Note: This is now obsolete. Use SceneManager.LoadScene instead.</para>
       </summary>
       <param name="index">The level to load.</param>
       <param name="name">The name of the level to load.</param>
@@ -21125,34 +21125,34 @@ The Player ID is always 1, because only one Editor can be connected.</param>
     </member>
     <member name="M:UnityEngine.Profiling.Profiler.AddFramesFromFile(System.String)">
       <summary>
-        <para>Displays the recorded profiledata in the profiler.</para>
+        <para>Displays the recorded profile data in the profiler.</para>
       </summary>
-      <param name="file"></param>
+      <param name="file">The name of the file containing the frame data, including extension.</param>
     </member>
     <member name="M:UnityEngine.Profiling.Profiler.BeginSample(System.String)">
       <summary>
         <para>Begin profiling a piece of code with a custom label.</para>
       </summary>
-      <param name="name"></param>
-      <param name="targetObject"></param>
+      <param name="name">A string to identify the sample in the Profiler window.</param>
+      <param name="targetObject">An object that provides context to the sample,.</param>
     </member>
     <member name="M:UnityEngine.Profiling.Profiler.BeginSample(System.String,UnityEngine.Object)">
       <summary>
         <para>Begin profiling a piece of code with a custom label.</para>
       </summary>
-      <param name="name"></param>
-      <param name="targetObject"></param>
+      <param name="name">A string to identify the sample in the Profiler window.</param>
+      <param name="targetObject">An object that provides context to the sample,.</param>
     </member>
     <member name="M:UnityEngine.Profiling.Profiler.BeginThreadProfiling(System.String,System.String)">
       <summary>
-        <para>Enables profiling on the thread which calls this method.</para>
+        <para>Enables profiling on the thread from which you call this method.</para>
       </summary>
-      <param name="threadGroupName">The name of the thread group the thread belongs to.</param>
+      <param name="threadGroupName">The name of the thread group to which the thread belongs.</param>
       <param name="threadName">The name of the thread.</param>
     </member>
     <member name="M:UnityEngine.Profiling.Profiler.EndSample">
       <summary>
-        <para>End profiling a piece of code with a custom label.</para>
+        <para>Ends the current profiling sample.</para>
       </summary>
     </member>
     <member name="M:UnityEngine.Profiling.Profiler.EndThreadProfiling">

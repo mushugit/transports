@@ -764,7 +764,7 @@ Rotation of the tree on X-Z plane (in radians).</para>
     </member>
     <member name="P:UnityEngine.TreePrototype.prefab">
       <summary>
-        <para>Retrieves the actual GameObect used by the tree.</para>
+        <para>Retrieves the actual GameObject used by the tree.</para>
       </summary>
     </member>
     <member name="A:UnityEngine.TerrainModule">
