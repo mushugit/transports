@@ -17,10 +17,15 @@ public class World : MonoBehaviour
     public Component[,] Terrains { get; private set; }
     private List<City> cities;
 
+    void ReloadLevel()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
     void Update()
     {
         if (Input.GetButton("Reload"))
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            ReloadLevel();
     }
 
     void Start()
@@ -159,13 +164,15 @@ public class World : MonoBehaviour
                 cameFrom[cities.Last().Point.X, cities.Last().Point.Y] = n.Point;
                 Terrains[n.Point.X, n.Point.Y].SendMessage("MakeRed");
                 var path = TraceBackPath(cameFrom, n);
-                Debug.Log("Found !");
+                /*Debug.Log("Found !");
                 foreach (Point p in path)
                 {
                     Debug.Log(p.ToString());
 
-                }
-                yield break;
+                }*/
+                yield return new WaitForSeconds(1f);
+                ReloadLevel();
+                yield return null;
             }
 
             opened.Remove(n);
@@ -184,7 +191,7 @@ public class World : MonoBehaviour
                 neighbor.Score(tentative);
                 neighbor.Distance((int)Mathf.Round(neighbor.Cost) + neighbor.Point.ManhattanDistance(cities.Last().Point));
             }
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(0.3f);
         }
 
         Debug.Log("No path found !");
