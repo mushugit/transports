@@ -15,9 +15,6 @@ public class City : Construction
         if (cityNames == null)
         {
             TextAsset allCityNames = Resources.Load("Text/CityNames/françaises") as TextAsset;
-            Debug.Log("allCityNames" + allCityNames);
-            Debug.Log(allCityNames.text.Substring(0, 100));
-            Debug.Log(allCityNames.text.Split('\n'));
             cityNames = new List<string>(allCityNames.text.Split('\n'));
         }
     }
@@ -43,7 +40,8 @@ public class City : Construction
 
     public static int Quantity(int w, int h)
     {
-        return Mathf.RoundToInt(Mathf.Sqrt(Mathf.Sqrt((float)(w * h)))) + 1;
+        var averageSquareSize = Mathf.Sqrt((float)(w * h));
+        return Mathf.RoundToInt(Mathf.Sqrt(averageSquareSize*2)) + 1;
     }
 
     public City(Point position, Component cityPrefab)

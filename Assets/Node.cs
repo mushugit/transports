@@ -35,24 +35,24 @@ public class Node : IComparable<Node>
         return -1;
     }
 
-    public List<Node> Neighbors()
+    public List<Node> Neighbors(bool avoidCities)
     {
         var neighbors = new List<Node>();
         //left
         if (Point.X > 0)
-            if (World.Constructions[Point.X - 1, Point.Y] == null)
+            if (!avoidCities || World.Constructions[Point.X - 1, Point.Y] == null)
                 neighbors.Add(new Node(World, new Point(Point.X - 1, Point.Y), float.MaxValue, 0));
         //right
         if (Point.X < World.width - 1)
-            if (World.Constructions[Point.X + 1, Point.Y] == null)
+            if (!avoidCities || World.Constructions[Point.X + 1, Point.Y] == null)
                 neighbors.Add(new Node(World, new Point(Point.X + 1, Point.Y), float.MaxValue, 0));
         //up
         if (Point.Y < World.height - 1)
-            if (World.Constructions[Point.X, Point.Y + 1] == null)
+            if (!avoidCities || World.Constructions[Point.X, Point.Y + 1] == null)
                 neighbors.Add(new Node(World, new Point(Point.X, Point.Y + 1), float.MaxValue, 0));
         //down
         if (Point.Y > 0)
-            if (World.Constructions[Point.X, Point.Y - 1] == null)
+            if (!avoidCities || World.Constructions[Point.X, Point.Y - 1] == null)
                 neighbors.Add(new Node(World, new Point(Point.X, Point.Y - 1), float.MaxValue, 0));
 
         return neighbors;

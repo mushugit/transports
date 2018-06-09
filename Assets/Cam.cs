@@ -10,13 +10,26 @@ public class Cam : MonoBehaviour
     public float minZoom = 2f;
     public float maxZoom = 64f;
 
-    // Use this for initialization
+    void Center(Vector2 center)
+    {
+        var backward = transform.forward / -transform.forward.magnitude;
+        int maxIteration = (int)maxZoom;
+        int iteration = 0;
+        for(iteration=0;iteration<maxIteration; iteration++)
+        {
+            if (Physics.Raycast(transform.position, Vector3.zero - transform.position))
+                break;
+            transform.Translate(backward);
+            transform.SetPositionAndRotation(new Vector3(transform.position.x, transform.position.y, transform.position.x), transform.rotation);
+        }
+        defaultPosition = transform.position;
+    }
+
     void Start()
     {
         defaultPosition = transform.position;
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (Input.GetKey(KeyCode.Escape))

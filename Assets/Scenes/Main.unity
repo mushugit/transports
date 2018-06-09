@@ -44,7 +44,7 @@ RenderSettings:
 LightmapSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 11
-  m_GIWorkflowMode: 0
+  m_GIWorkflowMode: 1
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -89,7 +89,8 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaIndirect: 2
     m_PVRFilteringAtrousPositionSigmaAO: 1
     m_ShowResolutionOverlay: 1
-  m_LightingDataAsset: {fileID: 0}
+  m_LightingDataAsset: {fileID: 112000002, guid: e91cfee7cb2293a48a07692a1cfb3f6c,
+    type: 2}
   m_UseShadowmask: 1
 --- !u!196 &4
 NavMeshSettings:
@@ -337,8 +338,8 @@ MonoBehaviour:
   cityPrefab: {fileID: 4810296838302192, guid: 2ae782aba1327bd448b7becce750d4bf, type: 2}
   roadPrefabs:
   - {fileID: 4702397551271700, guid: 61e577368479e214186efb33399088ef, type: 2}
-  width: 10
-  height: 10
+  width: 30
+  height: 30
 --- !u!4 &1970645009
 Transform:
   m_ObjectHideFlags: 0

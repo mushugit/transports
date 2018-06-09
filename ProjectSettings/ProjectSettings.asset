@@ -662,7 +662,7 @@ PlayerSettings:
   cloudServicesEnabled:
     UNet: 1
   facebookSdkVersion: 7.9.4
-  apiCompatibilityLevel: 2
+  apiCompatibilityLevel: 3
   cloudProjectId: dc5af5b9-29b1-4606-b62c-e3e7d705a017
   projectName: Transports
   organizationId: mushu22
