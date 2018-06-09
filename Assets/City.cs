@@ -8,6 +8,29 @@ public class City : Construction
     public string Name { get; }
     public float CargoLevel { get; }
 
+    private static List<string> cityNames = null;
+
+    static void InitNames()
+    {
+        if (cityNames == null)
+        {
+            TextAsset allCityNames = Resources.Load("Text/CityNames/françaises") as TextAsset;
+            Debug.Log("allCityNames" + allCityNames);
+            Debug.Log(allCityNames.text.Substring(0, 100));
+            Debug.Log(allCityNames.text.Split('\n'));
+            cityNames = new List<string>(allCityNames.text.Split('\n'));
+        }
+    }
+
+    public static string RandomName()
+    {
+        InitNames();
+        int r = Random.Range(0, cityNames.Count - 1);
+        string name = cityNames[r];
+        cityNames.RemoveAt(r);
+        return name;
+    }
+
     public static int Quantity(int w, int h)
     {
         return Mathf.RoundToInt(Mathf.Sqrt(Mathf.Sqrt((float)(w * h)))) + 1;
@@ -17,7 +40,7 @@ public class City : Construction
     {
         Point = position;
         cityRender = CityRender.Build(new Vector3(Point.X + 0.5f, 0.5f, Point.Y + 0.5f), cityPrefab);
-        Name = "Ville [" + Point.X + "," + Point.Y + "]";
+        Name = RandomName();
         cityRender.SendMessage("Label", Name);
 
         CargoLevel = 0.3f;

@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class CityRender : MonoBehaviour
 {
+    public GUIStyle labelStyle;
+
     string label;
 
     public void Label(string name)
@@ -25,7 +27,9 @@ public class CityRender : MonoBehaviour
     void OnGUI()
     {
         var point = Camera.main.WorldToScreenPoint(transform.position);
-        GUI.Label(new Rect(point.x - 30f, Screen.height - point.y, 100f, 25f), label); // display its name, or other string
+        var labelStyle = GUI.skin.GetStyle("Label");
+        labelStyle.alignment = TextAnchor.UpperCenter;
+        GUI.Label(new Rect(point.x - 100f, Screen.height - point.y, 200f, 25f), label, labelStyle);
     }
 
 }

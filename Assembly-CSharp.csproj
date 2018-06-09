@@ -69,6 +69,7 @@
     <Compile Include="Assets\RoadRender.cs" />
     <Compile Include="Assets\TerrainRender.cs" />
     <Compile Include="Assets\World.cs" />
+    <None Include="Assets\Resources\Text\CityNames\françaises.txt" />
     <Reference Include="UnityEditor.StandardEvents">
       <HintPath>R:/UnityProject/Transports/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
     </Reference>
