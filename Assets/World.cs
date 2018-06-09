@@ -76,12 +76,24 @@ public class World : MonoBehaviour
         {
             int x = Random.Range(0, w);
             int y = Random.Range(0, h);
+            var cityCenter = new Point(x, y);
             if (Constructions[x, y] == null)
             {
-                var c = new City(new Point(x, y), cityPrefab);
-                Constructions[x, y] = c;
-                cities.Add(c);
-                n++;
+                var canBuild = true;
+                foreach (City otherCity in cities)
+                {
+                    if (otherCity.ManhattanDistance(cityCenter) < 3)
+                    {
+                        canBuild = false;
+                    }
+                }
+                if (canBuild)
+                {
+                    var c = new City(cityCenter, cityPrefab);
+                    Constructions[x, y] = c;
+                    cities.Add(c);
+                    n++;
+                }
             }
         }
     }
@@ -131,9 +143,9 @@ public class World : MonoBehaviour
         while (opened.Count > 0)
         {
             /*Debug.Log("Opened=");
-			opened.ForEach(o=>Debug.Log(o.p.ToString()));
-			Debug.Log("Closed=");
-			closed.ForEach(o=>Debug.Log(o.p.ToString()));*/
+            opened.ForEach(o=>Debug.Log(o.p.ToString()));
+            Debug.Log("Closed=");
+            closed.ForEach(o=>Debug.Log(o.p.ToString()));*/
 
             opened.ForEach(o => Terrains[o.Point.X, o.Point.Y].SendMessage("MakeBlue"));
             closed.ForEach(o => Terrains[o.Point.X, o.Point.Y].SendMessage("MakeRed")); ;

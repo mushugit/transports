@@ -22,6 +22,16 @@ public class City : Construction
         }
     }
 
+    public int ManhattanDistance(City city)
+    {
+        return Point.ManhattanDistance(city.Point);
+    }
+
+    public int ManhattanDistance(Point point)
+    {
+        return Point.ManhattanDistance(point);
+    }
+
     public static string RandomName()
     {
         InitNames();
