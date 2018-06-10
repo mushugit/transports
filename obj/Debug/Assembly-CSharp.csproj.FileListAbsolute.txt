@@ -1,2 +1,0 @@
-R:\UnityProject\Transports\obj\Debug\Assembly-CSharp.csprojAssemblyReference.cache
-R:\UnityProject\Transports\obj\Debug\Assembly-CSharp.csproj.CoreCompileInputs.cache
