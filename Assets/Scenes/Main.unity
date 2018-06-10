@@ -336,10 +336,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cellPrefab: {fileID: 4907302487358432, guid: 82d822260bc8984438345eba8c3e3c7a, type: 2}
   cityPrefab: {fileID: 4810296838302192, guid: 2ae782aba1327bd448b7becce750d4bf, type: 2}
-  roadPrefabs:
-  - {fileID: 4702397551271700, guid: 61e577368479e214186efb33399088ef, type: 2}
-  width: 30
-  height: 30
+  roadPrefab: {fileID: 4645302532763130, guid: f712999e280ed5847a151a46282ddce3, type: 2}
+  width: 200
+  height: 200
 --- !u!4 &1970645009
 Transform:
   m_ObjectHideFlags: 0
