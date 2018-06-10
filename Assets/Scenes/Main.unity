@@ -89,7 +89,7 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaIndirect: 2
     m_PVRFilteringAtrousPositionSigmaAO: 1
     m_ShowResolutionOverlay: 1
-  m_LightingDataAsset: {fileID: 112000002, guid: e91cfee7cb2293a48a07692a1cfb3f6c,
+  m_LightingDataAsset: {fileID: 112000004, guid: 5619bc144a15b724aa9cf9db8e17719e,
     type: 2}
   m_UseShadowmask: 1
 --- !u!196 &4
@@ -145,7 +145,7 @@ Light:
   m_SpotAngle: 30
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 2
+    m_Type: 1
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -337,8 +337,8 @@ MonoBehaviour:
   cellPrefab: {fileID: 4907302487358432, guid: 82d822260bc8984438345eba8c3e3c7a, type: 2}
   cityPrefab: {fileID: 4810296838302192, guid: 2ae782aba1327bd448b7becce750d4bf, type: 2}
   roadPrefab: {fileID: 4645302532763130, guid: f712999e280ed5847a151a46282ddce3, type: 2}
-  width: 200
-  height: 200
+  width: 10
+  height: 10
 --- !u!4 &1970645009
 Transform:
   m_ObjectHideFlags: 0
