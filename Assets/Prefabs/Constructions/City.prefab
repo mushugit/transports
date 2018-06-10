@@ -11,6 +11,25 @@ Prefab:
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 1419470739133756}
   m_IsPrefabParent: 1
+--- !u!1 &1230911349809282
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 4965779996612360}
+  - component: {fileID: 33107443234274702}
+  - component: {fileID: 23327717559448428}
+  - component: {fileID: 65266747215552292}
+  - component: {fileID: 114869915045365514}
+  m_Layer: 0
+  m_Name: CityObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &1419470739133756
 GameObject:
   m_ObjectHideFlags: 0
@@ -19,10 +38,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4810296838302192}
-  - component: {fileID: 33106247582446028}
-  - component: {fileID: 23439897216769834}
-  - component: {fileID: 65415478368271882}
-  - component: {fileID: 114290490902507462}
+  - component: {fileID: 114651176440888596}
   m_Layer: 0
   m_Name: City
   m_TagString: Untagged
@@ -37,18 +53,32 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1419470739133756}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -390.41998, y: 211.6146, z: -300.90775}
-  m_LocalScale: {x: 0.7, y: 1, z: 0.7}
-  m_Children: []
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 4965779996612360}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &23439897216769834
+--- !u!4 &4965779996612360
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1230911349809282}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalScale: {x: 0.7, y: 1, z: 0.7}
+  m_Children: []
+  m_Father: {fileID: 4810296838302192}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!23 &23327717559448428
 MeshRenderer:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1419470739133756}
+  m_GameObject: {fileID: 1230911349809282}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -78,26 +108,26 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!33 &33106247582446028
+--- !u!33 &33107443234274702
 MeshFilter:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1419470739133756}
+  m_GameObject: {fileID: 1230911349809282}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!65 &65415478368271882
+--- !u!65 &65266747215552292
 BoxCollider:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1419470739133756}
+  m_GameObject: {fileID: 1230911349809282}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &114290490902507462
+--- !u!114 &114651176440888596
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -105,7 +135,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 1419470739133756}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0c0b5e0527a6e8648a9c391ad0722af3, type: 3}
+  m_Script: {fileID: 11500000, guid: cb16010015362e447b4220197dd1ff80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   guiSkin: {fileID: 11400000, guid: 5568fc9307c5d3d4fbb5eaea01bcaa80, type: 2}
+--- !u!114 &114869915045365514
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1230911349809282}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c0b5e0527a6e8648a9c391ad0722af3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

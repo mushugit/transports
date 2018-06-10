@@ -13,7 +13,7 @@ public class City : Construction
     public City(Point position, Component cityPrefab)
     {
         Point = position;
-        cityRender = CityRender.Build(new Vector3(Point.X + 0.5f, 0.5f, Point.Y + 0.5f), cityPrefab);
+        cityRender = CityRender.Build(new Vector3(Point.X, 0f, Point.Y), cityPrefab);
         Name = RandomName();
         cityRender.SendMessage("Label", Name);
 

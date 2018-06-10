@@ -145,7 +145,7 @@ public class World : MonoBehaviour
 
     Component Terrain(float x, float y)
     {
-        return Instantiate(cellPrefab, new Vector3(x, -0.05f, y), Quaternion.identity);
+        return Instantiate(cellPrefab, new Vector3(x, 0f, y), Quaternion.identity);
     }
 
     void Cities(int w, int h)

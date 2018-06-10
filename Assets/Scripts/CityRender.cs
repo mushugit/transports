@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CityRender : MonoBehaviour
-{
+public class CityRender : MonoBehaviour {
+
     public GUISkin guiSkin;
 
     string label;
@@ -18,19 +18,12 @@ public class CityRender : MonoBehaviour
         return Instantiate(cityPrefab, position, Quaternion.identity);
     }
 
-    void Start()
-    {
-        var c = Random.ColorHSV();
-        GetComponent<Renderer>().material.color = c;
-    }
-
     void OnGUI()
     {
         GUI.skin = guiSkin;
         var point = Camera.main.WorldToScreenPoint(transform.position);
         var labelStyle = GUI.skin.GetStyle("Label");
         labelStyle.alignment = TextAnchor.UpperCenter;
-        GUI.Label(new Rect(point.x - 100f, Screen.height - point.y, 200f, 25f), label, labelStyle);
+        GUI.Label(new Rect(point.x - 100f, Screen.height - point.y-60f, 200f, 25f), label, labelStyle);
     }
-
 }
