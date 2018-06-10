@@ -4,9 +4,11 @@ public class TerrainRender : MonoBehaviour
 {
 
     public Component grass;
+    public Material defaultMaterialGrass;
 
     public Material red;
     public Material blue;
+
 
     public void MakeRed()
     {
@@ -18,15 +20,8 @@ public class TerrainRender : MonoBehaviour
         grass.GetComponent<Renderer>().material = blue;
     }
 
-    // Use this for initialization
-    void Start()
+    public void Revert()
     {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
+        grass.GetComponent<Renderer>().material = defaultMaterialGrass;
     }
 }

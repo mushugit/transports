@@ -6,6 +6,11 @@ using UnityEngine.SceneManagement;
 
 public class World : MonoBehaviour
 {
+    public static bool gameLoading = true;
+    public static float progressLoading = 0f;
+    public static string itemLoading = "Niveau en préparation";
+    public static float totalLoading = 1f;
+
     public Component cellPrefab;
     public Component cityPrefab;
     public Component roadPrefab;
@@ -27,20 +32,30 @@ public class World : MonoBehaviour
 
     void ReloadLevel()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);
     }
 
     void Update()
     {
+        if (gameLoading)
+            return;
+
         if (Input.GetButton("Reload"))
             ReloadLevel();
     }
 
+    void InitLoader()
+    {
+        float nbCells = width * height;
+        float nbLinks = City.Quantity((int)width, (int)height);
+        totalLoading = nbCells + nbLinks;
+    }
+
     void Start()
     {
+        InitLoader();
         CenterCam();
-        Generate();
-        StartCoroutine("Simulation");
+        StartCoroutine(Generate());
     }
 
     void CenterCam()
@@ -48,7 +63,7 @@ public class World : MonoBehaviour
         Camera.main.SendMessage("Center", Center());
     }
 
-    void Generate()
+    IEnumerator Generate()
     {
         var w = (int)width;
         var h = (int)height;
@@ -58,34 +73,46 @@ public class World : MonoBehaviour
 
         Cities(w, h);
 
+        int countCells = 0;
+        itemLoading = "Chargement du terrain";
         for (float x = 0f; x < width; x++)
         {
             for (float y = 0f; y < height; y++)
             {
                 Terrains[(int)x, (int)y] = Terrain(x, y);
+                countCells++;
+                progressLoading++;
+                if (countCells % 10000 == 0)
+                    yield return null;
             }
         }
 
-
+        itemLoading = "Chargement des villes";
         foreach (City c in cities)
         {
             var closedCity = ClosestCity(c);
-            Link(c, closedCity);
+            yield return StartCoroutine(Link(c, closedCity));
+            progressLoading++;
         }
 
+        itemLoading = "Chargement terminé";
+        gameLoading = false;
+        yield return StartCoroutine(Simulation());
     }
 
-    void Link(City a, City b)
+    IEnumerator Link(City a, City b)
     {
         if (!a.IsLinkedTo(b))
         {
+            itemLoading = "Relie " + a.Name + " à " + b.Name;
             var parameters = new SearchParameter(a.Point, b.Point, 0, 0, false, null);
-            var path = SearchPath(parameters);
-            if (path != null)
+            yield return StartCoroutine(SearchPath(parameters));
+
+            if (parameters.Path != null)
             {
-                //Debug.Log("Path from " + a.Name + " to " + b.Name);
-                Roads(path);
-                UpdateLink();
+                Debug.Log("Path from " + a.Name + " to " + b.Name);
+                yield return StartCoroutine(Roads(parameters.Path));
+                yield return StartCoroutine(UpdateLink());
             }
             else
             {
@@ -94,7 +121,7 @@ public class World : MonoBehaviour
         }
     }
 
-    void UpdateLink()
+    IEnumerator UpdateLink()
     {
         foreach (City a in cities)
         {
@@ -103,10 +130,10 @@ public class World : MonoBehaviour
                 if (a != b && !a.IsLinkedTo(b))
                 {
                     var parameters = new SearchParameter(a.Point, b.Point, 0, 0, false, null, true);
-                    var path = SearchPath(parameters);
-                    if (path != null)
+                    yield return StartCoroutine(SearchPath(parameters));
+                    if (parameters.Path != null)
                     {
-                        //Debug.Log(a.Name + " is now linked to " + b.Name);
+                        Debug.Log(a.Name + " is now linked to " + b.Name);
                         a.AddLinkTo(b);
                         b.AddLinkTo(a);
                     }
@@ -193,7 +220,7 @@ public class World : MonoBehaviour
         r.UpdateConnexions(northLink, eastLink, southLink, westLink);
     }
 
-    void Roads(List<Point> path)
+    IEnumerator Roads(List<Point> path)
     {
         //Debug.Log("Road from " + path.First() + " to " + path.Last());
 
@@ -204,6 +231,7 @@ public class World : MonoBehaviour
                 Road r = new Road(p, roadPrefab);
                 Constructions[p.X, p.Y] = r;
             }
+            yield return null;
         }
         var neighborsRoads = new List<Road>();
         foreach (Point p in path)
@@ -225,7 +253,9 @@ public class World : MonoBehaviour
                     UpdateRoad(neighborsRoad);
                 }
             }
+            yield return null;
         }
+        yield return null;
     }
 
     public int CountNeighbors(Construction c)
@@ -326,8 +356,9 @@ public class World : MonoBehaviour
         public float WaitAtTheEnd { get; }
         public bool AvoidCities { get; }
         public bool OnlyRoads { get; }
+        public bool VisualSearch { get; }
 
-        public SearchParameter(Point start, Point target, float speed, float waitAtTheEnd, bool avoidCities, List<Point> path, bool onlyRoads = false)
+        public SearchParameter(Point start, Point target, float speed, float waitAtTheEnd, bool avoidCities, List<Point> path, bool onlyRoads = false, bool visualSearch = false)
         {
             Start = start;
             Target = target;
@@ -336,12 +367,24 @@ public class World : MonoBehaviour
             WaitAtTheEnd = waitAtTheEnd;
             AvoidCities = avoidCities;
             OnlyRoads = onlyRoads;
+            VisualSearch = visualSearch;
         }
     }
 
-    IEnumerator SearchPathYield(SearchParameter parameters)
+    void CleanGrassColor(List<Node> opened, List<Node> closed)
     {
-        visualSearchInProgress = true;
+        foreach(Node n in opened)
+        {
+            Terrains[n.Point.X, n.Point.Y].SendMessage("Revert");
+        }
+
+    }
+
+    IEnumerator SearchPath(SearchParameter parameters)
+    {
+        //Debug.Log("Search path from " + parameters.Start + " to " + parameters.Target);
+        if(parameters.VisualSearch)
+            visualSearchInProgress = true;
 
         var start = parameters.Start;
         var target = parameters.Target;
@@ -359,25 +402,37 @@ public class World : MonoBehaviour
 
         while (opened.Count > 0)
         {
-
-            opened.ForEach(o => Terrains[o.Point.X, o.Point.Y].SendMessage("MakeBlue"));
-            closed.ForEach(o => Terrains[o.Point.X, o.Point.Y].SendMessage("MakeRed")); ;
+            if (parameters.VisualSearch)
+            {
+                opened.ForEach(o => Terrains[o.Point.X, o.Point.Y].SendMessage("MakeBlue"));
+                closed.ForEach(o => Terrains[o.Point.X, o.Point.Y].SendMessage("MakeRed")); ;
+            }
 
             opened.Sort();
             Node n = opened.First();
             if (n.Point.ManhattanDistance(target) <= 0)
             {
                 cameFrom[target.X, target.Y] = n.Point;
-                Terrains[n.Point.X, n.Point.Y].SendMessage("MakeRed");
+                if (parameters.VisualSearch)
+                    Terrains[n.Point.X, n.Point.Y].SendMessage("MakeRed");
                 parameters.Path = TraceBackPath(cameFrom, n);
                 if (parameters.WaitAtTheEnd > 0f)
                 {
                     yield return new WaitForSeconds(parameters.WaitAtTheEnd);
-                    visualSearchInProgress = false;
+                    if (parameters.VisualSearch)
+                    {
+                        CleanGrassColor(opened,closed);
+                        visualSearchInProgress = false;
+                    }
+                    yield break;
                 }
                 else
                 {
-                    visualSearchInProgress = false;
+                    if (parameters.VisualSearch)
+                    {
+                        CleanGrassColor(opened, closed);
+                        visualSearchInProgress = false;
+                    }
                     yield break;
                 }
 
@@ -404,67 +459,12 @@ public class World : MonoBehaviour
             else
                 yield return null;
         }
-        visualSearchInProgress = false;
-        yield return null;
-    }
-
-    List<Point> SearchPath(SearchParameter parameters)
-    {
-        var start = parameters.Start;
-        var target = parameters.Target;
-
-        var startNode = new Node(this, start, 0f, 0);
-        var targetNode = new Node(this, target, 0f, target.ManhattanDistance(start));
-
-
-        var closed = new List<Node>();
-        var opened = new List<Node>
+        if (parameters.VisualSearch)
         {
-            startNode
-        };
-        var cameFrom = new Point[(int)width, (int)height];
-
-        while (opened.Count > 0)
-        {
-            opened.Sort();
-            Node n = opened.First();
-            if (n.Point.ManhattanDistance(target) <= 0)
-            {
-                cameFrom[target.X, target.Y] = n.Point;
-                parameters.Path = TraceBackPath(cameFrom, n);
-                return parameters.Path;
-            }
-
-            opened.Remove(n);
-            closed.Add(n);
-
-            var neighbors = n.Neighbors(parameters.AvoidCities, parameters.OnlyRoads);
-            foreach (Node neighbor in neighbors)
-            {
-                if (closed.Contains(neighbor))
-                    continue;
-                opened.Add(neighbor);
-                float tentative = n.Cost + n.Point.ManhattanDistance(neighbor.Point);
-                if (tentative >= neighbor.Cost)
-                    continue;
-                cameFrom[neighbor.Point.X, neighbor.Point.Y] = n.Point;
-                neighbor.Score(tentative);
-                neighbor.Distance((int)Mathf.Round(neighbor.Cost) + neighbor.Point.ManhattanDistance(target));
-            }
+            CleanGrassColor(opened, closed);
+            visualSearchInProgress = false;
         }
-        parameters.Path = null;
-        return null;
-    }
-
-    void VisualSearchPath()
-    {
-        var firstCity = cities.First();
-        var targetCity = FarestCity(firstCity);
-        //Debug.Log("Path between " + firstCity.Name + " and " + targetCity.Name);
-        var path = new List<Point>();
-        var searchParameter = new SearchParameter(firstCity.Point, targetCity.Point, 0.2f, 5f, false, path);
-
-        StartCoroutine("SearchPathYield", searchParameter);
+        yield return null;
     }
 
 

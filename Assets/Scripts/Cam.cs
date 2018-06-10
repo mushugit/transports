@@ -32,6 +32,9 @@ public class Cam : MonoBehaviour
 
     void Update()
     {
+        /*if (World.gameLoading)
+            return;*/
+
         var r = transform.rotation;
         transform.rotation = new Quaternion(0f, 0f, 0f, 0f);
 

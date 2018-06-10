@@ -9,6 +9,9 @@ public class PauseMenu : MonoBehaviour {
 
     private void Update()
     {
+        if (World.gameLoading)
+            return;
+
         if (Input.GetButtonDown("Pause"))
         {
             if (GameIsPaused)
