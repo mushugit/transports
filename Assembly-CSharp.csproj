@@ -58,17 +58,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Cam.cs" />
-    <Compile Include="Assets\City.cs" />
-    <Compile Include="Assets\CityRender.cs" />
-    <Compile Include="Assets\Construction.cs" />
-    <Compile Include="Assets\Fps.cs" />
-    <Compile Include="Assets\Node.cs" />
-    <Compile Include="Assets\Point.cs" />
-    <Compile Include="Assets\Road.cs" />
-    <Compile Include="Assets\RoadRender.cs" />
-    <Compile Include="Assets\TerrainRender.cs" />
-    <Compile Include="Assets\World.cs" />
+    <Compile Include="Assets\Scripts\Cam.cs" />
+    <Compile Include="Assets\Scripts\City.cs" />
+    <Compile Include="Assets\Scripts\CityRender.cs" />
+    <Compile Include="Assets\Scripts\Construction.cs" />
+    <Compile Include="Assets\Scripts\Fps.cs" />
+    <Compile Include="Assets\Scripts\Node.cs" />
+    <Compile Include="Assets\Scripts\Point.cs" />
+    <Compile Include="Assets\Scripts\Road.cs" />
+    <Compile Include="Assets\Scripts\RoadRender.cs" />
+    <Compile Include="Assets\Scripts\TerrainRender.cs" />
+    <Compile Include="Assets\Scripts\World.cs" />
     <None Include="Assets\Resources\Text\CityNames\françaises.txt" />
     <Reference Include="UnityEditor.StandardEvents">
       <HintPath>R:/UnityProject/Transports/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
