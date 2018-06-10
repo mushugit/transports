@@ -32,11 +32,6 @@ public class Cam : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetButton("Cancel"))
-        {
-            Application.Quit();
-        }
-
         var r = transform.rotation;
         transform.rotation = new Quaternion(0f, 0f, 0f, 0f);
 
