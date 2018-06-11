@@ -101,7 +101,7 @@ public class Node : IComparable<Node>
     public override bool Equals(object obj)
     {
         var n = obj as Node;
-        return Point.X == n?.Point.X && Point.Y == n?.Point.Y;
+        return Point.X == n?.Point?.X && Point.Y == n?.Point?.Y;
     }
 
     public override int GetHashCode()
