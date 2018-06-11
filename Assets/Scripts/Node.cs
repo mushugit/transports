@@ -100,12 +100,8 @@ public class Node : IComparable<Node>
 
     public override bool Equals(object obj)
     {
-        if (obj == null || GetType() != obj.GetType())
-            return false;
-        var n = (Node)obj;
-        if (n.Point == null)
-            return false;
-        return Point.X == n.Point.X && Point.Y == n.Point.Y;
+        var n = obj as Node;
+        return Point.X == n?.Point?.X && Point.Y == n?.Point?.Y;
     }
 
     public override int GetHashCode()
