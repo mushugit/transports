@@ -123,6 +123,14 @@ public class World : MonoBehaviour
 
     IEnumerator UpdateLink()
     {
+        /*
+         * Il faudrait
+            1/ Une fois a et b relié : appeler la mise à jour des liens UNIQUEMENT entre a et b (dans les deux sens)
+            2/ rendre accecible à l'ext. la liste des liens d'une ville
+            3/ la mise à jours des liens prend 3 params : ville a, ville b, liste exclusions).
+            elle ajoute en lien à a tous les liens de b, 
+            puis met à jour tous les liens de a (sauf a qui est exclus) pour ajouter les liens de b 
+        */
         foreach (City a in cities)
         {
             foreach (City b in cities)
@@ -373,7 +381,7 @@ public class World : MonoBehaviour
 
     void CleanGrassColor(List<Node> opened, List<Node> closed)
     {
-        foreach(Node n in opened)
+        foreach (Node n in opened)
         {
             Terrains[n.Point.X, n.Point.Y].SendMessage("Revert");
         }
@@ -383,14 +391,13 @@ public class World : MonoBehaviour
     IEnumerator SearchPath(SearchParameter parameters)
     {
         //Debug.Log("Search path from " + parameters.Start + " to " + parameters.Target);
-        if(parameters.VisualSearch)
+        if (parameters.VisualSearch)
             visualSearchInProgress = true;
 
         var start = parameters.Start;
         var target = parameters.Target;
 
         var startNode = new Node(this, start, 0f, 0);
-        var targetNode = new Node(this, target, 0f, target.ManhattanDistance(start));
 
 
         var closed = new List<Node>();
@@ -421,7 +428,7 @@ public class World : MonoBehaviour
                     yield return new WaitForSeconds(parameters.WaitAtTheEnd);
                     if (parameters.VisualSearch)
                     {
-                        CleanGrassColor(opened,closed);
+                        CleanGrassColor(opened, closed);
                         visualSearchInProgress = false;
                     }
                     yield break;

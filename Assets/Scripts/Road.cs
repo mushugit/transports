@@ -21,9 +21,9 @@ public class Road : Construction
     public void UpdateConnexions(bool north, bool east, bool south, bool west)
     {
         //Debug.Log("N=" + north + " E=" + east + " S=" + south + " E=" + east + " W=" + west);
-        roadRender.SendMessage("SetRoadNorth", north);
-        roadRender.SendMessage("SetRoadEast", east);
-        roadRender.SendMessage("SetRoadSouth", south);
-        roadRender.SendMessage("SetRoadWest", west);
+        roadRender.SendMessage(nameof(RoadRender.SetRoadNorth),	north);
+        roadRender.SendMessage(nameof(RoadRender.SetRoadEast),	east);
+        roadRender.SendMessage(nameof(RoadRender.SetRoadSouth), south);
+        roadRender.SendMessage(nameof(RoadRender.SetRoadWest),	west);
     }
 }
