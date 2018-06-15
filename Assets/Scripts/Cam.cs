@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Cam : MonoBehaviour
 {
@@ -13,9 +11,9 @@ public class Cam : MonoBehaviour
     void Center(Vector2 center)
     {
         var backward = transform.forward / -transform.forward.magnitude;
-        int maxIteration = (int)maxZoom;
-        int iteration = 0;
-        for(iteration=0;iteration<maxIteration; iteration++)
+        var maxIteration = (int)maxZoom;
+        var iteration = 0;
+        for (iteration = 0; iteration < maxIteration; iteration++)
         {
             if (Physics.Raycast(transform.position, Vector3.zero - transform.position))
                 break;
@@ -38,8 +36,8 @@ public class Cam : MonoBehaviour
         var r = transform.rotation;
         transform.rotation = new Quaternion(0f, 0f, 0f, 0f);
 
-        float hMove = Input.GetAxis("Horizontal") + Input.GetAxis("Vertical");
-        float vMove = -Input.GetAxis("Horizontal") + Input.GetAxis("Vertical");
+        var hMove = Input.GetAxis("Horizontal") + Input.GetAxis("Vertical"); //TODO: Ajouter string dans une classe static des constantes
+        var vMove = -Input.GetAxis("Horizontal") + Input.GetAxis("Vertical");
 
         transform.Translate(new Vector3(hMove * moveSpeed * Time.deltaTime, 0, vMove * moveSpeed * Time.deltaTime));
 
