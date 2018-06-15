@@ -44,7 +44,19 @@ public class City : Construction
             LinkedCities.Add(c);
     }
 
-    public bool IsLinkedTo(City c)
+	public void AddLinkTo(List<City> list)
+	{
+		foreach (City c in list)
+		{
+			if (!LinkedCities.Contains(c))
+			{
+				Debug.Log("[CITY] " + Name + " est maintenant lié à " + c.Name);
+				LinkedCities.Add(c);
+			}
+		}
+	}
+
+	public bool IsLinkedTo(City c)
     {
         return LinkedCities.Contains(c);
     }
@@ -73,6 +85,17 @@ public class City : Construction
         }
         return quantity;
     }
+
+	public override bool Equals(object obj)
+	{
+		var n = obj as City;
+		return Point.Equals(n.Point);
+	}
+
+	public override int GetHashCode()
+	{
+		return Point.GetHashCode() ^ Name.GetHashCode();
+	}
 }
 
 

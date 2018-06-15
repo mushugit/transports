@@ -39,7 +39,7 @@ public class LevelLoader : MonoBehaviour
             detailLabel.text = World.itemLoading;
             progress += (World.progressLoading / World.totalLoading)/2f;
             progressBar.value = progress;
-            progressIndicator.text = string.Format("{0} %", Mathf.Round(progress * 100));
+            progressIndicator.text = string.Format("{0} %", Mathf.Floor(progress * 100));
             yield return null;
         }
 
