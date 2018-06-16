@@ -50,7 +50,7 @@ public class City : Construction
 		{
 			if (!LinkedCities.Contains(c))
 			{
-				Debug.Log("[CITY] " + Name + " est maintenant lié à " + c.Name);
+				//Debug.Log("[CITY] " + Name + " est maintenant lié à " + c.Name);
 				LinkedCities.Add(c);
 			}
 		}

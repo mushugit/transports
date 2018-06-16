@@ -17,8 +17,8 @@ public class World : MonoBehaviour
 	public Component cityPrefab;
 	public Component roadPrefab;
 
-	public float width = 20f;
-	public float height = 20f;
+	public static float width = 35f;
+	public static float height = 35f;
 
 
 	public Construction[,] Constructions { get; private set; }
@@ -132,28 +132,10 @@ public class World : MonoBehaviour
 		var allBLink = new List<City>(b.LinkedCities) { b };
 
 		foreach (City c in a.LinkedCities)
-		{
-			foreach (City lb in allBLink)
-			{
-				if (!c.LinkedCities.Contains(lb))
-				{
-					Debug.Log("[CITY] " + lb.Name + " est maintenant lié à " + c.Name);
-				}
-			}
 			c.AddLinkTo(allBLink);
-		}
 		a.AddLinkTo(allBLink);
 		foreach (City c in b.LinkedCities)
-		{
-			foreach (City la in allALink)
-			{
-				if (!c.LinkedCities.Contains(la))
-				{
-					Debug.Log("[CITY] " + la.Name + " est maintenant lié à " + c.Name);
-				}
-			}
 			c.AddLinkTo(allALink);
-		}
 		b.AddLinkTo(allALink);
 		yield return null;
 	}
@@ -242,7 +224,7 @@ public class World : MonoBehaviour
 				Road r = new Road(p, roadPrefab);
 				Constructions[p.X, p.Y] = r;
 			}
-			if(countLoop%searchSpeed==0)
+			if (countLoop % searchSpeed == 0)
 				yield return null;
 		}
 		var neighborsRoads = new List<Road>();
@@ -473,7 +455,7 @@ public class World : MonoBehaviour
 				yield return new WaitForSeconds(parameters.Speed);
 			else
 			{
-				if(countLoop%searchSpeed==0)
+				if (countLoop % searchSpeed == 0)
 					yield return null;
 			}
 		}
@@ -503,10 +485,12 @@ public class World : MonoBehaviour
 
 			}
 		}
-		if(closestCity!=null)
+		/*
+		if (closestCity != null)
 			Debug.Log("[WORLD] " + c.Name + " est proche et non lié de " + closestCity.Name);
 		else
 			Debug.Log("[WORLD] " + c.Name + " est lié à tout");
+			*/
 		return closestCity;
 	}
 
