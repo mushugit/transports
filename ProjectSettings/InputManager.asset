@@ -9,10 +9,10 @@ InputManager:
     m_Name: Horizontal
     descriptiveName: 
     descriptiveNegativeName: 
-    negativeButton: left
-    positiveButton: right
-    altNegativeButton: q
-    altPositiveButton: d
+    negativeButton: q
+    positiveButton: d
+    altNegativeButton: 
+    altPositiveButton: 
     gravity: 3
     dead: 0.001
     sensitivity: 1
@@ -131,5 +131,53 @@ InputManager:
     snap: 0
     invert: 0
     type: 1
+    axis: 2
+    joyNum: 0
+  - serializedVersion: 3
+    m_Name: Rotate
+    descriptiveName: 
+    descriptiveNegativeName: 
+    negativeButton: e
+    positiveButton: a
+    altNegativeButton: 
+    altPositiveButton: 
+    gravity: 3
+    dead: 0.001
+    sensitivity: 80
+    snap: 1
+    invert: 0
+    type: 0
+    axis: 3
+    joyNum: 0
+  - serializedVersion: 3
+    m_Name: Edge scroll
+    descriptiveName: 
+    descriptiveNegativeName: 
+    negativeButton: 
+    positiveButton: left shift
+    altNegativeButton: 
+    altPositiveButton: 
+    gravity: 0
+    dead: 0.001
+    sensitivity: 80
+    snap: 0
+    invert: 0
+    type: 0
+    axis: 2
+    joyNum: 0
+  - serializedVersion: 3
+    m_Name: Screenshot
+    descriptiveName: 
+    descriptiveNegativeName: 
+    negativeButton: 
+    positiveButton: f12
+    altNegativeButton: 
+    altPositiveButton: print screen
+    gravity: 0
+    dead: 0.001
+    sensitivity: 80
+    snap: 0
+    invert: 0
+    type: 0
     axis: 2
     joyNum: 0

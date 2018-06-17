@@ -11,7 +11,7 @@ public class City : Construction
 
     private static List<string> cityNames = null;
 
-    public City(Point position, Component cityPrefab)
+    public City(Coord position, Component cityPrefab)
     {
         Point = position;
         cityRender = CityRender.Build(new Vector3(Point.X, 0f, Point.Y), cityPrefab);
@@ -33,7 +33,7 @@ public class City : Construction
         return Point.ManhattanDistance(city.Point);
     }
 
-    public int ManhattanDistance(Point point)
+    public int ManhattanDistance(Coord point)
     {
         return Point.ManhattanDistance(point);
     }

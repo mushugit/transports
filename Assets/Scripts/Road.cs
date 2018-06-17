@@ -8,11 +8,11 @@ public class Road : Construction
 
     public Road(int x, int y, Component roadPrefab)
     {
-        Point = new Point(x, y);
+        Point = new Coord(x, y);
         roadRender = RoadRender.Build(new Vector3(x, 0f, y), roadPrefab);
     }
 
-    public Road(Point point, Component roadPrefab)
+    public Road(Coord point, Component roadPrefab)
     {
         Point = point;
         roadRender = RoadRender.Build(new Vector3(Point.X, 0f, Point.Y), roadPrefab);

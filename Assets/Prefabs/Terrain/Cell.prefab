@@ -271,6 +271,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   grass: {fileID: 4345719946098694}
-  defaultMaterialGrass: {fileID: 0}
+  defaultMaterialGrass: {fileID: 2100000, guid: fdf2b0246a78cdd43abba2961a6eea3d,
+    type: 2}
   red: {fileID: 2100000, guid: 92f59dcbef04fab43874b5895aafc2d5, type: 2}
   blue: {fileID: 2100000, guid: 6619c15ddd1ddec499d5498f40154124, type: 2}
