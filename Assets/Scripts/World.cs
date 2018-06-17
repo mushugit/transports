@@ -27,13 +27,11 @@ public class World : MonoBehaviour
 	public Component[,] Terrains { get; private set; }
 	private List<City> cities;
 
-	bool visualSearchInProgress; //while not finished
-
 	public readonly static Vector3 Center = new Vector3(width / 2f, 0f, height / 2f);
 
 	void ReloadLevel()
 	{
-		Screenshot.Take(400, 400);
+		//Screenshot.Take(400, 400);
 		SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
 	}
 
@@ -403,8 +401,6 @@ public class World : MonoBehaviour
 	IEnumerator SearchPath(SearchParameter parameters)
 	{
 		//Debug.Log("Search path from " + parameters.Start + " to " + parameters.Target);
-		if (parameters.VisualSearch)
-			visualSearchInProgress = true;
 
 		var start = parameters.Start;
 		var target = parameters.Target;
@@ -449,10 +445,8 @@ public class World : MonoBehaviour
 				if (parameters.WaitAtTheEnd > 0f)
 					yield return new WaitForSeconds(parameters.WaitAtTheEnd);
 				if (parameters.VisualSearch)
-				{
 					CleanGrassColor(opened, closed);
-					visualSearchInProgress = false;
-				}
+
 				yield break;
 			}
 
@@ -492,10 +486,7 @@ public class World : MonoBehaviour
 		}
 
 		if (parameters.VisualSearch)
-		{
 			CleanGrassColor(opened, closed);
-			visualSearchInProgress = false;
-		}
 		yield return null;
 	}
 

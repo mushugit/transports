@@ -22,7 +22,9 @@ public class LevelLoader : MonoBehaviour
     {
         var loadingOperation = SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex + 1, LoadSceneMode.Additive);
         detailLabel.text = "Pré chargement du niveau";
-        while (!loadingOperation.isDone && World.gameLoading)
+
+
+		while (!loadingOperation.isDone && World.gameLoading)
         {
             var progress = loadingOperation.progress;
             progress = Mathf.Clamp01(loadingOperation.progress / 0.9f) / 2f;
@@ -30,10 +32,11 @@ public class LevelLoader : MonoBehaviour
             progressIndicator.text = string.Format("{0} %", Mathf.Round(progress * 100));
             yield return null;
         }
-        DestroyImmediate(oldCamera);
-        DestroyImmediate(oldLight);
 
-        while (World.gameLoading)
+		DestroyImmediate(oldCamera);
+		DestroyImmediate(oldLight);
+
+		while (World.gameLoading)
         {
             var progress = 0.5f;
             detailLabel.text = World.itemLoading;

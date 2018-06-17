@@ -50,7 +50,7 @@ public class Cam : MonoBehaviour
 	void Start()
 	{
 		camRadius = camRadiusRatio * Mathf.Max(World.width, World.height);
-		Debug.Log($"Cam radius {camRadius}");
+		//Debug.Log($"Cam radius {camRadius}");
 		defaultPositionRef = CamReferencePosition.transform.position;
 
 
@@ -99,7 +99,7 @@ public class Cam : MonoBehaviour
 			if (mousePosition.y > Screen.height - edgeScrollSize)
 				scrollVector.z = scrollSpeed * Time.deltaTime;
 
-			if (scrollVector != null)
+			if (scrollVector.magnitude > 0f)
 				t.Translate(scrollVector, t);
 		}
 

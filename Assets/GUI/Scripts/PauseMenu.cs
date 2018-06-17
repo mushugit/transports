@@ -7,7 +7,15 @@ public class PauseMenu : MonoBehaviour {
     public GameObject PauseMenuObject;
     public static bool GameIsPaused = false;
 
-    private void Update()
+	float timeScale;
+
+	private void Start()
+	{
+		timeScale = Time.timeScale;
+		Resume();
+	}
+
+	private void Update()
     {
         if (World.gameLoading)
             return;
@@ -28,13 +36,14 @@ public class PauseMenu : MonoBehaviour {
     public void Resume()
     {
         PauseMenuObject.SetActive(false);
-        Time.timeScale = 1f;
-        GameIsPaused = false;
+		Time.timeScale = timeScale;
+		GameIsPaused = false;
     }
 
     void Pause()
     {
-        PauseMenuObject.SetActive(true);
+		timeScale = Time.timeScale;
+		PauseMenuObject.SetActive(true);
         Time.timeScale = 0f;
         GameIsPaused = true;
 
