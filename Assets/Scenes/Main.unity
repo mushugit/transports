@@ -290,8 +290,8 @@ MonoBehaviour:
   edgeScrollSize: 10
   scrollSpeed: 60
   edgeLimit: 7
-  camRadiusRatio: 0.85
-  rotateSpeed: 25
+  camRadiusRatio: 1.5
+  rotateSpeed: 35
 --- !u!20 &282840813
 Camera:
   m_ObjectHideFlags: 0

@@ -17,8 +17,8 @@ public class World : MonoBehaviour
 	public Component cityPrefab;
 	public Component roadPrefab;
 
-	public static float width = 10f;
-	public static float height = 10f;
+	public static float width = 20f;
+	public static float height = 20f;
 
 	public int minCityDistance = 4;
 
@@ -29,10 +29,7 @@ public class World : MonoBehaviour
 
 	bool visualSearchInProgress; //while not finished
 
-	Vector2 Center()
-	{
-		return new Vector2(width / 2f, height / 2f);
-	}
+	public readonly static Vector3 Center = new Vector3(width / 2f, 0f, height / 2f);
 
 	void ReloadLevel()
 	{
@@ -59,13 +56,7 @@ public class World : MonoBehaviour
 	void Start()
 	{
 		InitLoader();
-		CenterCam();
 		StartCoroutine(Generate());
-	}
-
-	void CenterCam()
-	{
-		Camera.main.SendMessage("Center", Center());
 	}
 
 	IEnumerator Generate()
@@ -130,7 +121,7 @@ public class World : MonoBehaviour
 			//Debug.Log($"Path={parameters.Path}");
 			if (parameters.Path != null && parameters.Path.Count > 1)
 			{
-				Debug.Log("Path from " + a.Name + " to " + b.Name);
+				//Debug.Log("Path from " + a.Name + " to " + b.Name);
 				yield return StartCoroutine(Roads(parameters.Path));
 				yield return StartCoroutine(UpdateLink(a, b));
 			}
@@ -209,7 +200,7 @@ public class World : MonoBehaviour
 					Constructions[x, y] = c;
 					cities.Add(c);
 					n++;
-					Debug.Log($"City {n} at {c.Point}");
+					//Debug.Log($"City {n} at {c.Point}");
 				}
 			}
 		}
@@ -329,11 +320,14 @@ public class World : MonoBehaviour
 		var neighbors = new List<Road>();
 		var directions = r.Point.Directions();
 
-		foreach(Coord p in directions)
+		foreach (Coord p in directions)
 		{
-			var c = Constructions[p.X, p.Y];
-			if (c != null && c is Road)
-				neighbors.Add(c as Road);
+			if (p != null)
+			{
+				var c = Constructions[p.X, p.Y];
+				if (c != null && c is Road)
+					neighbors.Add(c as Road);
+			}
 		}
 
 		return neighbors;
@@ -512,12 +506,12 @@ public class World : MonoBehaviour
 
 		var dividerCost = 1f;
 
-		if(constructionOrigin is Road || constructionOrigin is City)
+		if (constructionOrigin is Road || constructionOrigin is City)
 			dividerCost *= 2f;
 		if (constructionTarget is Road || constructionTarget is City)
 			dividerCost *= 2f;
 
-		return ((float)origin.ManhattanDistance(target))/ dividerCost;
+		return ((float)origin.ManhattanDistance(target)) / dividerCost;
 	}
 
 	float Heurisic(Coord origin, Coord target)

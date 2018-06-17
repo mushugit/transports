@@ -20,10 +20,10 @@ public class Cam : MonoBehaviour
 	public float scrollSpeed = 5f;
 	public float edgeLimit = 7f;
 
-	public float camRadiusRatio = 0.85f;
+	public float camRadiusRatio = 1.5f;
 	float camRadius;
 
-	public float rotateSpeed = 25f;
+	public float rotateSpeed = 35f;
 
 	readonly float defaultCoord = -12f;
 	readonly Vector3 referencePoint = new Vector3(0f, -2f, 0f);
@@ -50,6 +50,7 @@ public class Cam : MonoBehaviour
 	void Start()
 	{
 		camRadius = camRadiusRatio * Mathf.Max(World.width, World.height);
+		Debug.Log($"Cam radius {camRadius}");
 		defaultPositionRef = CamReferencePosition.transform.position;
 
 
@@ -106,15 +107,16 @@ public class Cam : MonoBehaviour
 		t.Translate(Input.GetAxis("Horizontal") * moveFactor, 0f, Input.GetAxis("Vertical") * moveFactor);
 
 		// Rotation
-		t.RotateAround(new Vector3(World.width / 2f, 0f, World.height / 2f), Vector3.up, Input.GetAxis("Rotate") * rotateSpeed * Time.deltaTime);
+		t.RotateAround(World.Center, Vector3.up, Input.GetAxis("Rotate") * rotateSpeed * Time.deltaTime);
 
-		// Clamp
+		// Clamp position
 		t.position = ClampCircle(lastValidPosition, t.position);
 
 		// Zoom
 		var positionBeforeZoom = t.position;
 		transform.Translate(new Vector3(0f, 0f, Input.GetAxis("Zoom") * Time.deltaTime));
 
+		// Clamp camera after zoom
 		if (transform.position.y < minZoom || transform.position.y > maxZoom)
 			transform.position = positionBeforeZoom;
 
