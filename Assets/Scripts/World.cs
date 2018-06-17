@@ -20,6 +20,8 @@ public class World : MonoBehaviour
 	public static float width = 10f;
 	public static float height = 10f;
 
+	public int minCityDistance = 4;
+
 
 	public Construction[,] Constructions { get; private set; }
 	public Component[,] Terrains { get; private set; }
@@ -105,8 +107,8 @@ public class World : MonoBehaviour
 		gameLoading = false;
 
 		//yield return StartCoroutine(Simulation());
-		yield return new WaitForSeconds(1f);
-		ReloadLevel();
+		//yield return new WaitForSeconds(1f);
+		//ReloadLevel();
 	}
 
 	IEnumerator Link(City a, City b)
@@ -195,9 +197,10 @@ public class World : MonoBehaviour
 				var canBuild = true;
 				foreach (City otherCity in cities)
 				{
-					if (otherCity.ManhattanDistance(cityCenter) < 3)
+					if (otherCity.ManhattanDistance(cityCenter) < minCityDistance)
 					{
 						canBuild = false;
+						break;
 					}
 				}
 				if (canBuild)
@@ -206,6 +209,7 @@ public class World : MonoBehaviour
 					Constructions[x, y] = c;
 					cities.Add(c);
 					n++;
+					Debug.Log($"City {n} at {c.Point}");
 				}
 			}
 		}
@@ -323,22 +327,29 @@ public class World : MonoBehaviour
 	public List<Road> Neighbors(Road r)
 	{
 		var neighbors = new List<Road>();
-		//left
-		if (r.Point.X > 0)
-			if (Constructions[r.Point.X - 1, r.Point.Y] != null && Constructions[r.Point.X - 1, r.Point.Y] is Road)
-				neighbors.Add(Constructions[r.Point.X - 1, r.Point.Y] as Road);
-		//right
-		if (r.Point.X < width - 1)
-			if (Constructions[r.Point.X + 1, r.Point.Y] != null && Constructions[r.Point.X + 1, r.Point.Y] is Road)
-				neighbors.Add(Constructions[r.Point.X + 1, r.Point.Y] as Road);
-		//up
-		if (r.Point.Y < height - 1)
-			if (Constructions[r.Point.X, r.Point.Y + 1] != null && Constructions[r.Point.X, r.Point.Y + 1] is Road)
-				neighbors.Add(Constructions[r.Point.X, r.Point.Y + 1] as Road);
-		//down
-		if (r.Point.Y > 0)
-			if (Constructions[r.Point.X, r.Point.Y - 1] != null && Constructions[r.Point.X, r.Point.Y - 1] is Road)
-				neighbors.Add(Constructions[r.Point.X, r.Point.Y - 1] as Road);
+		var directions = r.Point.Directions();
+
+		foreach(Coord p in directions)
+		{
+			var c = Constructions[p.X, p.Y];
+			if (c != null && c is Road)
+				neighbors.Add(c as Road);
+		}
+
+		return neighbors;
+	}
+
+	public List<Road> ExtendedNeighbors(Road r)
+	{
+		var neighbors = new List<Road>();
+		var directions = r.Point.ExtendedDirections();
+
+		foreach (Coord p in directions)
+		{
+			var c = Constructions[p.X, p.Y];
+			if (c != null && c is Road)
+				neighbors.Add(c as Road);
+		}
 
 		return neighbors;
 	}
@@ -475,7 +486,7 @@ public class World : MonoBehaviour
 				cameFrom[neighbor.Point.X, neighbor.Point.Y] = n.Point;
 
 				neighbor.Score(tentativeCost);
-				neighbor.Distance(neighbor.Cost + Heurisic(neighbor.Point, target));
+				neighbor.Distance(tentativeCost + Heurisic(neighbor.Point, target));
 			}
 			if (parameters.Speed > 0f)
 				yield return new WaitForSeconds(parameters.Speed);

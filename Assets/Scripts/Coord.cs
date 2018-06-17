@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -74,10 +75,56 @@ public class Coord
 		else return new Coord(X, Y + 1);
 	}
 
+	public Coord UpLeft()
+	{
+		if (Y + 1 > maxY || X - 1 < minX) return null;
+		else return new Coord(X - 1, Y + 1);
+	}
+
+	public Coord UpRight()
+	{
+		if (Y + 1 > maxY || X + 1 > maxX) return null;
+		else return new Coord(X + 1, Y + 1);
+	}
+
 	public Coord Down()
 	{
 		if (Y - 1 < minY) return null;
 		else return new Coord(X, Y - 1);
+	}
+
+	public Coord DownLeft()
+	{
+		if (Y - 1 < minY || X - 1 < minX) return null;
+		else return new Coord(X - 1, Y - 1);
+	}
+
+	public Coord DownRight()
+	{
+		if (Y - 1 < minY || X + 1 > maxX) return null;
+		else return new Coord(X + 1, Y - 1);
+	}
+
+	public List<Coord> Directions()
+	{
+		return new List<Coord>(4)
+		{
+			Left(),
+			Right(),
+			Up(),
+			Down()
+		};
+	}
+
+	public List<Coord> ExtendedDirections()
+	{
+		var d = Directions();
+		d.Add(UpLeft());
+		d.Add(UpRight());
+		d.Add(DownLeft());
+		d.Add(DownRight());
+
+		return d;
 	}
 }
 
