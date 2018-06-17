@@ -45,12 +45,7 @@ public class Node : IEquatable<Node>, IComparable<Node>
 		var neighbors = new List<Node>();
 		var baseCost = 1f;
 		var roadCoast = baseCost / 5f;
-		var directions = new List<Coord>(4);
-
-		directions.Add(Point.Left());
-		directions.Add(Point.Right());
-		directions.Add(Point.Up());
-		directions.Add(Point.Down());
+		var directions = Point.Directions();
 
 		if (!onlyRoads)
 		{
