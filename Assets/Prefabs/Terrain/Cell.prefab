@@ -21,7 +21,6 @@ GameObject:
   - component: {fileID: 4345719946098694}
   - component: {fileID: 33265683849889920}
   - component: {fileID: 23307174412684052}
-  - component: {fileID: 65062367330296990}
   m_Layer: 0
   m_Name: Grass
   m_TagString: Untagged
@@ -55,7 +54,6 @@ GameObject:
   - component: {fileID: 4446972170105898}
   - component: {fileID: 33810605105978210}
   - component: {fileID: 23242207658710496}
-  - component: {fileID: 65187929931469088}
   m_Layer: 0
   m_Name: Rock
   m_TagString: Untagged
@@ -73,7 +71,6 @@ GameObject:
   - component: {fileID: 4281095986499910}
   - component: {fileID: 33038064840998976}
   - component: {fileID: 23202049456623468}
-  - component: {fileID: 65774647992308072}
   m_Layer: 0
   m_Name: Earth
   m_TagString: Untagged
@@ -262,42 +259,6 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1540079775119482}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!65 &65062367330296990
-BoxCollider:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1049984228249384}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!65 &65187929931469088
-BoxCollider:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1540079775119482}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!65 &65774647992308072
-BoxCollider:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1749188632794694}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &114839713307226922
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -310,5 +271,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   grass: {fileID: 4345719946098694}
+  defaultMaterialGrass: {fileID: 2100000, guid: fdf2b0246a78cdd43abba2961a6eea3d,
+    type: 2}
   red: {fileID: 2100000, guid: 92f59dcbef04fab43874b5895aafc2d5, type: 2}
   blue: {fileID: 2100000, guid: 6619c15ddd1ddec499d5498f40154124, type: 2}
