@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class Cam : MonoBehaviour
 {
+	Vector3 defaultPositionRef;
 	Vector3 defaultPosition;
 	Quaternion defaultRotation;
 
@@ -41,19 +42,21 @@ public class Cam : MonoBehaviour
 			//transform.SetPositionAndRotation(new Vector3(transform.position.x, transform.position.y, transform.position.x), transform.rotation);
 		}*/
 
-		CamReferencePosition.transform.position = defaultPosition;
+		CamReferencePosition.transform.position = defaultPositionRef;
+		transform.position = defaultPosition;
 		transform.rotation = defaultRotation;
 	}
 
 	void Start()
 	{
 		camRadius = camRadiusRatio * Mathf.Max(World.width, World.height);
-		defaultPosition = CamReferencePosition.transform.position;
+		defaultPositionRef = CamReferencePosition.transform.position;
 
-		defaultPosition.x = (World.width / defaultZoomPosition) + defaultCoord;
-		defaultPosition.z = (World.height / defaultZoomPosition) + defaultCoord;
 
-		CamReferencePosition.transform.position = defaultPosition;
+		defaultPositionRef.x = (World.width / defaultZoomPosition) + defaultCoord;
+		defaultPositionRef.z = (World.height / defaultZoomPosition) + defaultCoord;
+
+		CamReferencePosition.transform.position = defaultPositionRef;
 
 		Vector3 mapReferenceScreenPoint;
 		do
@@ -64,7 +67,8 @@ public class Cam : MonoBehaviour
 		} while (mapReferenceScreenPoint.y < 0);
 
 
-		defaultPosition = CamReferencePosition.transform.position;
+		defaultPositionRef = CamReferencePosition.transform.position;
+		defaultPosition = transform.position;
 		defaultRotation = transform.rotation;
 	}
 

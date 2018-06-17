@@ -2,16 +2,16 @@
 
 public abstract class Construction
 {
-    public Point Point { get; protected set; }
+    public Coord Point { get; protected set; }
 
     protected Construction() : this(0, 0) { }
 
     protected Construction(int x, int y)
     {
-        Point = new Point(x, y);
+        Point = new Coord(x, y);
     }
 
-    protected Construction(Point point)
+    protected Construction(Coord point)
     {
         Point = Point;
     }
