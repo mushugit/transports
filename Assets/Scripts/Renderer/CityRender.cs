@@ -8,8 +8,6 @@ public class CityRender : MonoBehaviour
 
 	public Text UILabel;
 
-	string label;
-
 	public void Label(string name)
 	{
 		UILabel.text = " " + name + " ";

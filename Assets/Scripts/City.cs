@@ -15,7 +15,9 @@ public class City : Construction
     {
         Point = position;
         cityRender = CityRender.Build(new Vector3(Point.X, 0f, Point.Y), cityPrefab);
-        Name = RandomName();
+		var objectRenderer = cityRender.GetComponentInChildren<CityObjectRender>();
+		objectRenderer.SendMessage("City", this);
+		Name = RandomName();
         cityRender.SendMessage(nameof(CityRender.Label), Name);
 
         CargoLevel = 0.3f;
@@ -95,6 +97,12 @@ public class City : Construction
 	public override int GetHashCode()
 	{
 		return Point.GetHashCode() ^ Name.GetHashCode();
+	}
+
+	public void ShowInfo()
+	{
+		var screenPosition = Camera.main.WorldToScreenPoint(cityRender.transform.position);
+		var infoWindows = WindowFactory.Build(Name, screenPosition);
 	}
 }
 

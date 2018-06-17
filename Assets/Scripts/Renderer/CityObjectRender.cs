@@ -4,9 +4,12 @@ using UnityEngine;
 
 public class CityObjectRender : MonoBehaviour
 {
+	City city;
 
-
-
+	public void City(City city)
+	{
+		this.city = city;
+	}
 
     void Start()
     {
@@ -14,5 +17,8 @@ public class CityObjectRender : MonoBehaviour
         GetComponent<Renderer>().material.color = c;
     }
 
-
+	void OnMouseDown()
+	{
+		city.ShowInfo();
+	}
 }
