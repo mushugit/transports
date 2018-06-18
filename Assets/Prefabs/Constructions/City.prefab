@@ -44,6 +44,7 @@ GameObject:
   - component: {fileID: 114889447901681552}
   - component: {fileID: 114341599402603186}
   - component: {fileID: 114245670269666418}
+  - component: {fileID: 114229898040411226}
   m_Layer: 5
   m_Name: LabelWithBackground
   m_TagString: Untagged
@@ -213,6 +214,18 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &114229898040411226
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1339311503437262}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e8e3334ae4891449a377a93b971b268, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cityObject: {fileID: 114869915045365514}
 --- !u!114 &114245670269666418
 MonoBehaviour:
   m_ObjectHideFlags: 1

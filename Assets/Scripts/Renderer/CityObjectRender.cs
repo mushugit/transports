@@ -1,14 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class CityObjectRender : MonoBehaviour
 {
-	City city;
+	public City _City{ get; private set; }
 
 	public void City(City city)
 	{
-		this.city = city;
+		_City = city;
 	}
 
     void Start()
@@ -16,9 +17,4 @@ public class CityObjectRender : MonoBehaviour
         var c = Random.ColorHSV();
         GetComponent<Renderer>().material.color = c;
     }
-
-	void OnMouseDown()
-	{
-		city.ShowInfo();
-	}
 }

@@ -7,37 +7,47 @@ using UnityEngine;
 
 class WindowFactory : MonoBehaviour
 {
-	static WindowFactory instance;
+	public GameObject windowTextInfoPrefab;
+	public GameObject parent;
 
-	static int uid = int.MinValue;
-	static Dictionary<int, Window> windows;
+	private static WindowFactory instance;
+	private static List<Window> windows;
 
 	private void Start()
 	{
+		windows = new List<Window>();
 		instance = this;
-		windows = new Dictionary<int, Window>();
 	}
 
-	public static Window Build(string title, Vector3 position)
+	public static Window BuildTextInfo(string title, Vector3 position, string richTextContent)
 	{
-		var w = new Window(position);
-		windows.Add(uid, w);
-		uid++;
+		return instance._BuildTextInfo(title,position, richTextContent);
+	}
+
+	public Window _BuildTextInfo(string title, Vector3 position, string richTextContent)
+	{
+		position.z = 0;
+		var windowCanvasObject = Instantiate(windowTextInfoPrefab, parent.transform);
+
+		var windowObjectRef = windowCanvasObject.GetComponentInChildren<WindowReferencer>();
+		var windowObject = windowObjectRef.window;
+
+		var wtc = windowObject.GetComponent<WindowTextContent>();
+		wtc.ContentText(richTextContent);
+
+		var w = new Window(windowObject, position)
+		{
+			Title = title
+		};
+
+		windows.Add(w);
 
 		return w;
 	}
 
-	void DisplayWindow(int windowUid)
+	public void CloseAll()
 	{
-		//Draw content
-	}
 
-	private void OnGUI()
-	{
-		foreach (KeyValuePair<int,Window> w in windows)
-		{
-			GUI.Window(w.Key, w.Value.Rect(), DisplayWindow, w.Value.Title);
-		}
 	}
 }
 

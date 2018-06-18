@@ -1,27 +1,45 @@
 ﻿using UnityEngine;
 
 
-class Window
+public class Window
 {
-	static readonly Vector2 size = new Vector2(150f, 100f);
+	private string title;
+	public string Title
+	{
+		get { return title; }
+		set
+		{
+			title = value;
+			if (ui != null)
+				ui.Title(title);
+		}
+	}
 
-	public string Title { get; set; }
+	private readonly GameObject windowObject;
+	private readonly WindowUI ui;
 
 	readonly Vector2 startingPosition;
 
-	public Window(Vector3 startingPosition)
+	public Window(GameObject windowObject, Vector3 initialPosition)
 	{
-		this.startingPosition = new Vector2(startingPosition.x, startingPosition.y);
+		this.windowObject = windowObject;
+
+		ui = windowObject.GetComponent<WindowUI>();
+
+		windowObject.transform.position = initialPosition;
 	}
 
-	public Window(Vector2 startingPosition)
+	public void TextContent(string richTextContent)
 	{
-		this.startingPosition = startingPosition;
+		if (windowObject != null)
+		{
+			var wtc = windowObject.GetComponent<WindowTextContent>();
+			if (wtc != null)
+			{
+				wtc.ContentText(richTextContent);
+			}
+		}
 	}
 
-	public Rect Rect()
-	{
-		return new Rect(startingPosition, size);
-	}
 }
 
