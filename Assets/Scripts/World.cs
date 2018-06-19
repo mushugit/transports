@@ -17,8 +17,8 @@ public class World : MonoBehaviour
 	public Component cityPrefab;
 	public Component roadPrefab;
 
-	public static float width = 20f;
-	public static float height = 20f;
+	public static float width = 50f;
+	public static float height = width;
 
 	public int minCityDistance = 4;
 

@@ -122,9 +122,10 @@ public class City : Construction
 		var linkedCities = LinkedCities.OrderBy(c => ManhattanDistance(c));
 		foreach (City c in linkedCities)
 		{
-			sb.Append($"\t{c.Name} ({ManhattanDistance(c)} cases)\n");
+			sb.Append($"\t{c.Name} \r({ManhattanDistance(c)} cases)\n");
 		}
-		return sb.ToString();
+
+		return sb.ToString().Replace("\r","");
 	}
 
 	public void UpdateInfoText()
