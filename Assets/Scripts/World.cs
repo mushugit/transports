@@ -53,6 +53,8 @@ public class World : MonoBehaviour
 
 	void Start()
 	{
+		Application.targetFrameRate = 60;
+
 		InitLoader();
 		StartCoroutine(Generate());
 	}
