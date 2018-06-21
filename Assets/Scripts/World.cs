@@ -17,14 +17,14 @@ public class World : MonoBehaviour
 	public Component cityPrefab;
 	public Component roadPrefab;
 
-	public static float width = 50f;
+	public static float width = 25f;
 	public static float height = width;
 
 	public int minCityDistance = 4;
 
 
 	public Construction[,] Constructions { get; private set; }
-	public Component[,] Terrains { get; private set; }
+	public CellRender[,] Terrains { get; private set; }
 	private List<City> cities;
 
 	public readonly static Vector3 Center = new Vector3(width / 2f, 0f, height / 2f);
@@ -65,9 +65,7 @@ public class World : MonoBehaviour
 		var h = (int)height;
 
 		Constructions = new Construction[w, h];
-		Terrains = new Component[w, h];
-
-		Cities(w, h);
+		Terrains = new CellRender[w, h];
 
 		int countCells = 0;
 		itemLoading = "Chargement du terrain";
@@ -84,6 +82,7 @@ public class World : MonoBehaviour
 		}
 
 		itemLoading = "Chargement des villes";
+		Cities(w, h);
 		foreach (City c in cities)
 		{
 			var closestCity = ClosestCityUnlinked(c);
@@ -168,9 +167,14 @@ public class World : MonoBehaviour
 		}
 	}
 
-	Component Terrain(float x, float y)
+	CellRender Terrain(float x, float y)
 	{
-		return Instantiate(cellPrefab, new Vector3(x, 0f, y), Quaternion.identity);
+		var t= Instantiate(cellPrefab, new Vector3(x, 0f, y), Quaternion.identity);
+
+		var render = t.GetComponentInChildren<CellRender>();
+		render.Initialize(new Coord((int)x, (int)y), null);
+
+		return render;
 	}
 
 	void Cities(int w, int h)
@@ -198,6 +202,7 @@ public class World : MonoBehaviour
 				{
 					var c = new City(cityCenter, cityPrefab);
 					Constructions[x, y] = c;
+					Terrains[x, y].Build(c);
 					cities.Add(c);
 					n++;
 					//Debug.Log($"City {n} at {c.Point}");
@@ -233,6 +238,7 @@ public class World : MonoBehaviour
 				Road r = new Road(p, roadPrefab);
 				constructedRoads.Add(r);
 				Constructions[p.X, p.Y] = r;
+				Terrains[p.X, p.Y].Build(r);
 			}
 			if (countLoop % searchSpeed == 0)
 				yield return null;
