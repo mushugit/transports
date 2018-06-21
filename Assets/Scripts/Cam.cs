@@ -112,16 +112,19 @@ public class Cam : MonoBehaviour
 		// Clamp position
 		t.position = ClampCircle(lastValidPosition, t.position);
 
+		lastValidPosition = t.position;
+
+	}
+
+	private void FixedUpdate()
+	{
 		// Zoom
-		var positionBeforeZoom = t.position;
+		var positionBeforeZoom = transform.position;
 		transform.Translate(new Vector3(0f, 0f, Input.GetAxis("Zoom") * Time.deltaTime));
 
 		// Clamp camera after zoom
 		if (transform.position.y < minZoom || transform.position.y > maxZoom)
 			transform.position = positionBeforeZoom;
-
-		lastValidPosition = t.position;
-
 	}
 
 	Vector3 ClampSquare(Vector3 originalPosition, Vector3 position)
