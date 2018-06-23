@@ -79,6 +79,26 @@ public class CellRender : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
 
 	public void OnPointerClick(PointerEventData eventData)
 	{
-		Debug.Log($"Tentative operation Build={Builder.IsBuilding} Bulldoze={Builder.IsDestroying}");
+		if (Builder.IsBuilding)
+		{
+			if (!IsBuilt())
+			{
+				if (Builder.TypeOfBuild == typeof(Road))
+				{
+					StartCoroutine(World.Instance.Roads(new List<Coord>() { point }));
+				}
+				if (Builder.TypeOfBuild == typeof(City))
+				{
+					World.Instance.BuildCity(point);
+				}
+			}
+		}
+		if (Builder.IsDestroying)
+		{
+			if (IsBuilt())
+			{
+				World.Instance.DestroyConstruction(point);
+			}
+		}
 	}
 }

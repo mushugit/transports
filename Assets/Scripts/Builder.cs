@@ -11,12 +11,17 @@ class Builder
 
 	public static bool IsBuilding { get; private set; }
 	public static bool IsDestroying { get; private set; }
-
-	private Type TypeOfBuild;
+	public static Type TypeOfBuild { get; private set; }
 
 	static Builder()
 	{
 		instance = new Builder();
+	}
+
+	public static void CancelAction()
+	{
+		IsBuilding = false;
+		IsDestroying = false;
 	}
 
 	private void Building()

@@ -29,6 +29,11 @@ public class RoadRender : MonoBehaviour
 	{
 	}
 
+	public void Destroy()
+	{
+		DestroyImmediate(this.gameObject);
+	}
+
 	public void SetRoadNorth(bool isNorth)
 	{
 		NorthNeighbor = isNorth;
@@ -82,6 +87,6 @@ public class RoadRender : MonoBehaviour
 			}
 		}
 
-		roundabout.SetActive(countNeighbors >= 3);
+		roundabout.SetActive(countNeighbors >= 3 || countNeighbors==0);
 	}
 }
