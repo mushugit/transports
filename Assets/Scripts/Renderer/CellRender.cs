@@ -9,6 +9,7 @@ public class CellRender : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
 
 	public Material red;
 	public Material blue;
+	public Material blueArrow;
 
 	private bool isColored = false;
 
@@ -25,6 +26,12 @@ public class CellRender : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
 	{
 		isColored = true;
 		GetComponent<Renderer>().material = blue;
+	}
+
+	public void MakeBlue(int direction)
+	{
+		isColored = true;
+		GetComponent<Renderer>().material = blueArrow;
 	}
 
 	public void Revert()
@@ -72,7 +79,10 @@ public class CellRender : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
 			else
 			{
 				//Possible
-				MakeBlue();
+				if (Builder.CanRotateBuilding)
+					MakeBlue(0);
+				else
+					MakeBlue();
 			}
 		}
 	}

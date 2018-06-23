@@ -10,6 +10,8 @@ class Builder
 	private static Builder instance;
 
 	public static bool IsBuilding { get; private set; }
+	public static bool CanRotateBuilding { get; private set; }
+	public static int RotationDirection { get; private set; } = 0;
 	public static bool IsDestroying { get; private set; }
 	public static Type TypeOfBuild { get; private set; }
 
@@ -24,10 +26,11 @@ class Builder
 		IsDestroying = false;
 	}
 
-	private void Building()
+	private void Building(bool canRotate = false)
 	{
 		IsBuilding = true;
 		IsDestroying = false;
+		CanRotateBuilding = canRotate;
 	}
 
 	private void Destroying()
@@ -42,12 +45,17 @@ class Builder
 		TypeOfBuild = typeof(City);
 	}
 
-
-
 	private void _Road()
 	{
 		Building();
 		TypeOfBuild = typeof(Road);
+	}
+
+	private void _Depot()
+	{
+		Building();
+		CanRotateBuilding = true;
+		TypeOfBuild = typeof(Depot);
 	}
 
 	private void _Bulldoze()
@@ -68,6 +76,11 @@ class Builder
 	public static void Bulldoze()
 	{
 		instance._Bulldoze();
+	}
+
+	public static void Depot()
+	{
+		instance._Depot();
 	}
 }
 

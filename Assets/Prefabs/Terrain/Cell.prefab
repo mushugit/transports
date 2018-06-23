@@ -299,3 +299,4 @@ MonoBehaviour:
     type: 2}
   red: {fileID: 2100000, guid: 92f59dcbef04fab43874b5895aafc2d5, type: 2}
   blue: {fileID: 2100000, guid: 6619c15ddd1ddec499d5498f40154124, type: 2}
+  blueArrow: {fileID: 2100000, guid: f38651ea03246654d84044a16743429b, type: 2}
