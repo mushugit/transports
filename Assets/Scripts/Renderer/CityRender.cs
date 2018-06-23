@@ -17,4 +17,9 @@ public class CityRender : MonoBehaviour
 	{
 		return Instantiate(cityPrefab, position, Quaternion.identity);
 	}
+
+	public void Destroy()
+	{
+		DestroyImmediate(this.gameObject);
+	}
 }

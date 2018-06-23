@@ -26,6 +26,14 @@ public class City : Construction
 		LinkedCities = new List<City>();
 	}
 
+	public void Destroy()
+	{
+		var r = cityRender.GetComponent<CityRender>();
+		r.Destroy();
+
+		//TODO : update links
+	}
+
 	static City()
 	{
 		var allCityNames = Resources.Load("Text/CityNames/françaises") as TextAsset;

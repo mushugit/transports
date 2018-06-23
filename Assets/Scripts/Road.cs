@@ -26,4 +26,10 @@ public class Road : Construction
         roadRender.SendMessage(nameof(RoadRender.SetRoadSouth), south);
         roadRender.SendMessage(nameof(RoadRender.SetRoadWest),	west);
     }
+
+	public void Destroy()
+	{
+		var r = roadRender.GetComponent<RoadRender>();
+		r.Destroy();
+	}
 }

@@ -17,17 +17,19 @@ public class World : MonoBehaviour
 	public Component cityPrefab;
 	public Component roadPrefab;
 
-	public static float width = 50f;
+	public static float width = 25f;
 	public static float height = width;
 
 	public int minCityDistance = 4;
 
 
 	public Construction[,] Constructions { get; private set; }
-	public Component[,] Terrains { get; private set; }
+	public CellRender[,] Terrains { get; private set; }
 	private List<City> cities;
 
 	public readonly static Vector3 Center = new Vector3(width / 2f, 0f, height / 2f);
+
+	public static World Instance { get; private set; }
 
 	void ReloadLevel()
 	{
@@ -53,6 +55,7 @@ public class World : MonoBehaviour
 
 	void Start()
 	{
+		Instance = this;
 		Application.targetFrameRate = 60;
 
 		InitLoader();
@@ -65,9 +68,7 @@ public class World : MonoBehaviour
 		var h = (int)height;
 
 		Constructions = new Construction[w, h];
-		Terrains = new Component[w, h];
-
-		Cities(w, h);
+		Terrains = new CellRender[w, h];
 
 		int countCells = 0;
 		itemLoading = "Chargement du terrain";
@@ -84,6 +85,7 @@ public class World : MonoBehaviour
 		}
 
 		itemLoading = "Chargement des villes";
+		Cities(w, h);
 		foreach (City c in cities)
 		{
 			var closestCity = ClosestCityUnlinked(c);
@@ -168,9 +170,38 @@ public class World : MonoBehaviour
 		}
 	}
 
-	Component Terrain(float x, float y)
+	CellRender Terrain(float x, float y)
 	{
-		return Instantiate(cellPrefab, new Vector3(x, 0f, y), Quaternion.identity);
+		var t = Instantiate(cellPrefab, new Vector3(x, 0f, y), Quaternion.identity);
+
+		var render = t.GetComponentInChildren<CellRender>();
+		render.Initialize(new Coord((int)x, (int)y), null);
+
+		return render;
+	}
+
+	public void DestroyConstruction(Coord p)
+	{
+		var c = Constructions[p.X, p.Y];
+		if (c != null)
+		{
+			if (c is Road)
+				DestroyRoad(p);
+			if (c is City)
+				DestroyCity(p);
+		}
+
+		var neighborsRoads = new List<Road>();
+		foreach (Road neighborsRoad in Neighbors(p))
+		{
+			if (!neighborsRoads.Contains(neighborsRoad))
+				neighborsRoads.Add(neighborsRoad);
+		}
+
+		foreach (Road neighborsRoad in neighborsRoads)
+		{
+			UpdateRoad(neighborsRoad);
+		}
 	}
 
 	void Cities(int w, int h)
@@ -196,9 +227,7 @@ public class World : MonoBehaviour
 				}
 				if (canBuild)
 				{
-					var c = new City(cityCenter, cityPrefab);
-					Constructions[x, y] = c;
-					cities.Add(c);
+					BuildCity(cityCenter);
 					n++;
 					//Debug.Log($"City {n} at {c.Point}");
 				}
@@ -206,7 +235,35 @@ public class World : MonoBehaviour
 		}
 	}
 
-	void UpdateRoad(Road r)
+	public void BuildCity(Coord cityCenter)
+	{
+		var c = new City(cityCenter, cityPrefab);
+
+		Constructions[cityCenter.X, cityCenter.Y] = c;
+		Terrains[cityCenter.X, cityCenter.Y].Build(c);
+		cities.Add(c);
+
+		var neighborsRoads = new List<Road>();
+		foreach (Road neighborsRoad in Neighbors(cityCenter))
+		{
+			if (!neighborsRoads.Contains(neighborsRoad))
+				neighborsRoads.Add(neighborsRoad);
+		}
+
+		foreach (Road neighborsRoad in neighborsRoads)
+		{
+			UpdateRoad(neighborsRoad);
+		}
+	}
+
+	public void DestroyCity(Coord cityCenter)
+	{
+		var c = Constructions[cityCenter.X, cityCenter.Y] as City;
+		c.Destroy();
+		Constructions[cityCenter.X, cityCenter.Y] = null;
+	}
+
+	public void UpdateRoad(Road r)
 	{
 		Construction north = North(r);
 		bool northLink = north != null && (north is Road || north is City);
@@ -220,7 +277,7 @@ public class World : MonoBehaviour
 		r.UpdateConnexions(northLink, eastLink, southLink, westLink);
 	}
 
-	IEnumerator Roads(List<Coord> path)
+	public IEnumerator Roads(List<Coord> path)
 	{
 		//Debug.Log("Road from " + path.First() + " to " + path.Last());
 		var countLoop = 0d;
@@ -233,6 +290,7 @@ public class World : MonoBehaviour
 				Road r = new Road(p, roadPrefab);
 				constructedRoads.Add(r);
 				Constructions[p.X, p.Y] = r;
+				Terrains[p.X, p.Y].Build(r);
 			}
 			if (countLoop % searchSpeed == 0)
 				yield return null;
@@ -244,7 +302,7 @@ public class World : MonoBehaviour
 			countLoop++;
 
 			neighborsRoads.Remove(r);
-			foreach (Road neighborsRoad in Neighbors(r))
+			foreach (Road neighborsRoad in Neighbors(r.Point))
 			{
 				if (!neighborsRoads.Contains(neighborsRoad))
 					neighborsRoads.Add(neighborsRoad);
@@ -260,6 +318,27 @@ public class World : MonoBehaviour
 				yield return null;
 		}
 		yield return null;
+	}
+
+	public void DestroyRoad(Coord pos)
+	{
+		var r = Constructions[pos.X, pos.Y] as Road;
+
+		var neighborsRoads = new List<Road>();
+		foreach (Road neighborsRoad in Neighbors(r.Point))
+		{
+			if (!neighborsRoads.Contains(neighborsRoad))
+				neighborsRoads.Add(neighborsRoad);
+		}
+
+		foreach (Road neighborsRoad in neighborsRoads)
+		{
+			UpdateRoad(neighborsRoad);
+		}
+
+		r.Destroy();
+
+		Constructions[pos.X, pos.Y] = null;
 	}
 
 	public int CountNeighbors(Construction c)
@@ -315,10 +394,10 @@ public class World : MonoBehaviour
 	}
 
 
-	public List<Road> Neighbors(Road r)
+	public List<Road> Neighbors(Coord point)
 	{
 		var neighbors = new List<Road>();
-		var directions = r.Point.Directions();
+		var directions = point.Directions();
 
 		foreach (Coord p in directions)
 		{
