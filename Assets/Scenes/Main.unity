@@ -692,6 +692,7 @@ MonoBehaviour:
   moveSpeed: 30
   minZoom: 2
   maxZoom: 64
+  zoomSpeed: 1.2
   defaultZoomPosition: 4
   edgeScrollSize: 10
   scrollSpeed: 60
