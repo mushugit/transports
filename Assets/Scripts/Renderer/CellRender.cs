@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -9,12 +10,39 @@ public class CellRender : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
 
 	public Material red;
 	public Material blue;
-	public Material blueArrow;
+	public Material blueArrow_N;
+	public Material blueArrow_E;
+	public Material blueArrow_S;
+	public Material blueArrow_W;
+
 
 	private bool isColored = false;
 
 	private Coord point;
 	private Construction construction;
+
+	private static int direction = 0;
+	private bool isInCell;
+
+	private void Update()
+	{
+		if (isInCell)
+		{
+			var left = Input.GetButtonDown("RotateBuild");
+			var right = Input.GetButtonDown("RotateBuildNeg");
+
+			if (left || right)
+			{
+				if (left) direction++;
+				if (right) direction--;
+
+				if (direction > 3) direction = 0;
+				if (direction < 0) direction = 3;
+
+				UpdateCell();
+			}
+		}
+	}
 
 	public void MakeRed()
 	{
@@ -31,7 +59,23 @@ public class CellRender : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
 	public void MakeBlue(int direction)
 	{
 		isColored = true;
-		GetComponent<Renderer>().material = blueArrow;
+		Material b = blue;
+		switch (direction)
+		{
+			case 0:
+				b = blueArrow_N;
+				break;
+			case 1:
+				b = blueArrow_E;
+				break;
+			case 2:
+				b = blueArrow_S;
+				break;
+			case 3:
+				b = blueArrow_W;
+				break;
+		}
+		GetComponent<Renderer>().material = b;
 	}
 
 	public void Revert()
@@ -63,11 +107,18 @@ public class CellRender : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
 
 	public void OnPointerExit(PointerEventData eventData)
 	{
+		isInCell = false;
 		if (isColored)
 			Revert();
 	}
 
 	public void OnPointerEnter(PointerEventData eventData)
+	{
+		isInCell = true;
+		UpdateCell();
+	}
+
+	private void UpdateCell()
 	{
 		if (Builder.IsBuilding || Builder.IsDestroying)
 		{
@@ -80,7 +131,7 @@ public class CellRender : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
 			{
 				//Possible
 				if (Builder.CanRotateBuilding)
-					MakeBlue(0);
+					MakeBlue(direction);
 				else
 					MakeBlue();
 			}
