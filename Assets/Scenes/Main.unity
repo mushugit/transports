@@ -471,8 +471,8 @@ Light:
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
-    m_Bias: 0.05
-    m_NormalBias: 0.4
+    m_Bias: 0.06
+    m_NormalBias: 0
     m_NearPlane: 0.2
   m_Cookie: {fileID: 0}
   m_DrawHalo: 0
@@ -487,7 +487,7 @@ Light:
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_ShadowRadius: 0
-  m_ShadowAngle: 8.6
+  m_ShadowAngle: 17.3
 --- !u!4 &170076735
 Transform:
   m_ObjectHideFlags: 0
@@ -1410,7 +1410,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 490, y: 692}
+  m_AnchoredPosition: {x: -10.700012, y: -11.5}
   m_SizeDelta: {x: 208, y: 208}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &803413242
@@ -1586,6 +1586,34 @@ MonoBehaviour:
   windowTextInfoPrefab: {fileID: 1168899043075636, guid: d1fed285a02bd904985583927be85646,
     type: 2}
   parent: {fileID: 920439081}
+--- !u!1 &1021758934
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 1021758935}
+  m_Layer: 0
+  m_Name: CityNew
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1021758935
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1021758934}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 1, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 11
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1137615718
 GameObject:
   m_ObjectHideFlags: 0
@@ -2865,6 +2893,8 @@ MonoBehaviour:
   cellPrefab: {fileID: 4907302487358432, guid: 82d822260bc8984438345eba8c3e3c7a, type: 2}
   cityPrefab: {fileID: 4810296838302192, guid: 2ae782aba1327bd448b7becce750d4bf, type: 2}
   roadPrefab: {fileID: 4645302532763130, guid: f712999e280ed5847a151a46282ddce3, type: 2}
+  depotPrefab: {fileID: 4953025121230940, guid: ce1094bd4759f3e48b1825419641211a,
+    type: 2}
   minCityDistance: 4
 --- !u!4 &1970645009
 Transform:

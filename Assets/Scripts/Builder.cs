@@ -11,7 +11,7 @@ class Builder
 
 	public static bool IsBuilding { get; private set; }
 	public static bool CanRotateBuilding { get; private set; }
-	public static int RotationDirection { get; private set; } = 0;
+	public static int RotationDirection { get; set; } = 2;
 	public static bool IsDestroying { get; private set; }
 	public static Type TypeOfBuild { get; private set; }
 
@@ -61,6 +61,8 @@ class Builder
 	private void _Bulldoze()
 	{
 		Destroying();
+		CanRotateBuilding = false;
+		TypeOfBuild = null;
 	}
 
 	public static void City()

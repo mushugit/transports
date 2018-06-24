@@ -81,7 +81,8 @@ public class Cam : MonoBehaviour
 		var moveFactor = moveSpeed * Time.deltaTime;
 
 		// Reset
-		if (Input.GetButtonDown("ResetView") && Input.GetButton("Modifier"))
+		Debug.Log($"RotateBuild={Input.GetButton("RotateBuild")} Modifier={Input.GetButton("Modifier")}");
+		if (Input.GetButton("RotateBuild") && Input.GetButton("Modifier"))
 		{
 			Center();
 		}

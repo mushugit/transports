@@ -185,7 +185,7 @@ InputManager:
     m_Name: RotateBuild
     descriptiveName: 
     descriptiveNegativeName: 
-    negativeButton: t
+    negativeButton: 
     positiveButton: r
     altNegativeButton: 
     altPositiveButton: 
@@ -202,9 +202,9 @@ InputManager:
     descriptiveName: 
     descriptiveNegativeName: 
     negativeButton: 
-    positiveButton: left ctrl
+    positiveButton: left shift
     altNegativeButton: 
-    altPositiveButton: 
+    altPositiveButton: right shift
     gravity: 0
     dead: 0.001
     sensitivity: 80
