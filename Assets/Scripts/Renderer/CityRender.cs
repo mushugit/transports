@@ -8,8 +8,6 @@ public class CityRender : MonoBehaviour
 
 	public Text UILabel;
 
-	string label;
-
 	public void Label(string name)
 	{
 		UILabel.text = " " + name + " ";
@@ -18,5 +16,10 @@ public class CityRender : MonoBehaviour
 	public static Component Build(Vector3 position, Component cityPrefab) //TODO:Déplacer dans générique Render
 	{
 		return Instantiate(cityPrefab, position, Quaternion.identity);
+	}
+
+	public void Destroy()
+	{
+		DestroyImmediate(this.gameObject);
 	}
 }

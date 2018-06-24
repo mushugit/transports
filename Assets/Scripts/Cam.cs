@@ -14,6 +14,7 @@ public class Cam : MonoBehaviour
 	public float moveSpeed = 30f;
 	public float minZoom = 2f;
 	public float maxZoom = 64f;
+	public float zoomSpeed = 1.2f;
 	public float defaultZoomPosition = 4f;
 
 	public float edgeScrollSize = 20f;
@@ -76,11 +77,11 @@ public class Cam : MonoBehaviour
 	void Update()
 	{
 		var t = CamReferencePosition.transform;
-		lastValidPosition =  t.position;
+		lastValidPosition = t.position;
 		var moveFactor = moveSpeed * Time.deltaTime;
 
 		// Reset
-		if (Input.GetButtonDown("ResetView"))
+		if (Input.GetButton("RotateBuild") && Input.GetButton("Modifier"))
 		{
 			Center();
 		}
@@ -112,16 +113,19 @@ public class Cam : MonoBehaviour
 		// Clamp position
 		t.position = ClampCircle(lastValidPosition, t.position);
 
+		lastValidPosition = t.position;
+
+	}
+
+	private void FixedUpdate()
+	{
 		// Zoom
-		var positionBeforeZoom = t.position;
-		transform.Translate(new Vector3(0f, 0f, Input.GetAxis("Zoom") * Time.deltaTime));
+		var positionBeforeZoom = transform.position;
+		transform.Translate(new Vector3(0f, 0f, Input.GetAxis("Zoom") * zoomSpeed * Time.deltaTime));
 
 		// Clamp camera after zoom
 		if (transform.position.y < minZoom || transform.position.y > maxZoom)
 			transform.position = positionBeforeZoom;
-
-		lastValidPosition = t.position;
-
 	}
 
 	Vector3 ClampSquare(Vector3 originalPosition, Vector3 position)

@@ -28,7 +28,10 @@ public class PauseMenu : MonoBehaviour {
             }
             else
             {
-                Pause();
+				if (Builder.IsBuilding || Builder.IsDestroying)
+					Builder.CancelAction();
+                else
+					Pause();
             }
         }
     }

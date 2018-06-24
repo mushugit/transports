@@ -21,6 +21,8 @@ GameObject:
   - component: {fileID: 4345719946098694}
   - component: {fileID: 33265683849889920}
   - component: {fileID: 23307174412684052}
+  - component: {fileID: 114977742437321712}
+  - component: {fileID: 65956686454534752}
   m_Layer: 0
   m_Name: Grass
   m_TagString: Untagged
@@ -124,7 +126,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1233579903179798}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.591706, y: -2.1834416, z: 8.789437}
+  m_LocalPosition: {x: 266.66943, y: 116.89444, z: 8.789437}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4281095986499910}
@@ -259,6 +261,18 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1540079775119482}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!65 &65956686454534752
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1049984228249384}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &114839713307226922
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -270,8 +284,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8829d74a12acc946a92f1ecc27666b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  grass: {fileID: 4345719946098694}
+--- !u!114 &114977742437321712
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1049984228249384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a18207f471202a14aad0640684e56feb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   defaultMaterialGrass: {fileID: 2100000, guid: fdf2b0246a78cdd43abba2961a6eea3d,
     type: 2}
   red: {fileID: 2100000, guid: 92f59dcbef04fab43874b5895aafc2d5, type: 2}
   blue: {fileID: 2100000, guid: 6619c15ddd1ddec499d5498f40154124, type: 2}
+  blueArrow_2: {fileID: 2100000, guid: f38651ea03246654d84044a16743429b, type: 2}
+  blueArrow_3: {fileID: 2100000, guid: 586aab8ac5195e143a8ea93bac1b1989, type: 2}
+  blueArrow_0: {fileID: 2100000, guid: d37369a660390354097961f7a669b9b5, type: 2}
+  blueArrow_1: {fileID: 2100000, guid: 3959902a4c2ab8f42a9197ee4dcbd2b7, type: 2}
