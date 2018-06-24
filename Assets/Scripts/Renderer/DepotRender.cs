@@ -9,7 +9,6 @@ public class DepotRender : MonoBehaviour
 {
 	public static Component Build(Vector3 position, Component depotPrefab, int direction)
 	{
-		Debug.Log($"Depot à la position {position}");
 		var d = Instantiate(depotPrefab, position, Quaternion.identity);
 
 		float angle = 180 - direction * -90;

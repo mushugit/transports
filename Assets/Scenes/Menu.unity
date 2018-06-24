@@ -1822,6 +1822,65 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_ShowMaskGraphic: 0
+--- !u!1 &1483582185 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1475977898168486, guid: cb1d9b72fd4b6bb41a7897f920baae75,
+    type: 2}
+  m_PrefabInternal: {fileID: 1874253803}
+--- !u!114 &1483582186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1483582185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3a8a9a991d7b064993dc14911c9432e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sounds:
+  - name: Mining by Moonlight
+    clip: {fileID: 8300000, guid: 5ef3141169e596a4ca225b0e70a66560, type: 3}
+    isMusic: 1
+    volume: 0.077
+    pitch: 1
+    Loop: 0
+    source: {fileID: 0}
+  - name: Bass Vibes
+    clip: {fileID: 8300000, guid: d8331671919b1c74fb9cbc4b8f6f3040, type: 3}
+    isMusic: 1
+    volume: 0.2
+    pitch: 1
+    Loop: 0
+    source: {fileID: 0}
+  - name: Ultralounge
+    clip: {fileID: 8300000, guid: 54cee3e55e93eba42857eda6b9814517, type: 3}
+    isMusic: 1
+    volume: 0.133
+    pitch: 1
+    Loop: 0
+    source: {fileID: 0}
+  - name: buildRoad
+    clip: {fileID: 8300000, guid: 1b9fab97bab4eb44994f74c61d497981, type: 3}
+    isMusic: 0
+    volume: 0.077
+    pitch: 1
+    Loop: 0
+    source: {fileID: 0}
+  - name: buildCity
+    clip: {fileID: 8300000, guid: 21c707f58636f8942a07b67ee0f6ecf4, type: 3}
+    isMusic: 0
+    volume: 0.064
+    pitch: 1
+    Loop: 0
+    source: {fileID: 0}
+  - name: destroy
+    clip: {fileID: 8300000, guid: bbe3f2aa13a6b9446bc51d046f79eaec, type: 3}
+    isMusic: 0
+    volume: 0.064
+    pitch: 1
+    Loop: 0
+    source: {fileID: 0}
 --- !u!1 &1490900034
 GameObject:
   m_ObjectHideFlags: 0
@@ -2713,7 +2772,8 @@ Prefab:
       propertyPath: sounds.Array.data[2].volume
       value: 0.056
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 114436148193252506, guid: cb1d9b72fd4b6bb41a7897f920baae75, type: 2}
   m_ParentPrefab: {fileID: 100100000, guid: cb1d9b72fd4b6bb41a7897f920baae75, type: 2}
   m_IsPrefabParent: 0
 --- !u!1 &1945400546

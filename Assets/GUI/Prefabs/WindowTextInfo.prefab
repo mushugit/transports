@@ -130,7 +130,6 @@ GameObject:
   - component: {fileID: 222527884494675408}
   - component: {fileID: 114133252268657570}
   - component: {fileID: 114035578839055994}
-  - component: {fileID: 114196722886728442}
   m_Layer: 5
   m_Name: TitleBar
   m_TagString: Untagged
@@ -659,19 +658,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc5ae525f816cbd41a2fe30742d726bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &114196722886728442
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1525552866004504}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4b83a4a44dbabfd42baeaa69091add02, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  window: {fileID: 1883073803122960}
-  dragStartPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &114211740108417686
 MonoBehaviour:
   m_ObjectHideFlags: 1

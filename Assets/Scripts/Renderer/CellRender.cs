@@ -137,14 +137,17 @@ public class CellRender : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
 				if (Builder.TypeOfBuild == typeof(Road))
 				{
 					StartCoroutine(World.Instance.Roads(new List<Coord>() { point }));
+					AudioManager.Player.Play("buildRoad");
 				}
 				if (Builder.TypeOfBuild == typeof(City))
 				{
 					World.Instance.BuildCity(point);
+					AudioManager.Player.Play("buildCity");
 				}
 				if (Builder.TypeOfBuild == typeof(Depot))
 				{
 					World.Instance.BuildDepot(point);
+					AudioManager.Player.Play("buildCity");
 				}
 			}
 		}
@@ -153,6 +156,7 @@ public class CellRender : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
 			if (IsBuilt())
 			{
 				World.Instance.DestroyConstruction(point);
+				AudioManager.Player.Play("destroy");
 			}
 		}
 		UpdateCell();

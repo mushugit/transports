@@ -7,16 +7,16 @@ public class AudioManager : MonoBehaviour
 
 	public Sound[] sounds;
 	private Sound[] music;
-	private int currentMusic = 0;
+	private static int currentMusic = 0;
 
-	private static AudioManager instance;
+	public static AudioManager Player { get; private set; }
 
 	private void Awake()
 	{
 		DontDestroyOnLoad(gameObject);
 
-		if (instance == null)
-			instance = this;
+		if (Player == null)
+			Player = this;
 		else
 		{
 			Destroy(gameObject);
@@ -50,7 +50,9 @@ public class AudioManager : MonoBehaviour
 		if (currentMusic >= music.Length)
 			currentMusic = 0;
 
+		var length = music[currentMusic].source.clip.length;
 		Play(music[currentMusic].name);
+		Invoke("NextMusic", length);
 	}
 
 	public void Play(string name)
