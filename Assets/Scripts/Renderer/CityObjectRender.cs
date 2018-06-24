@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class CityObjectRender : MonoBehaviour, IPointerClickHandler
+public class CityObjectRender : MonoBehaviour
 {
 	public City _City{ get; private set; }
 
@@ -12,14 +13,14 @@ public class CityObjectRender : MonoBehaviour, IPointerClickHandler
 		_City = city;
 	}
 
-	public void OnPointerClick(PointerEventData eventData)
-	{
-		Debug.Log($"City {_City.Name} clicked");
-	}
-
 	void Start()
     {
         var c = Random.ColorHSV();
-        GetComponent<Renderer>().material.color = c;
+
+		var renderers = GetComponentsInChildren<Renderer>();
+		foreach(Renderer r in renderers)
+		{
+			r.material.color = c;
+		}
     }
 }

@@ -16,6 +16,7 @@ public class World : MonoBehaviour
 	public Component cellPrefab;
 	public Component cityPrefab;
 	public Component roadPrefab;
+	public Component depotPrefab;
 
 	public static float width = 25f;
 	public static float height = width;
@@ -175,7 +176,7 @@ public class World : MonoBehaviour
 		var t = Instantiate(cellPrefab, new Vector3(x, 0f, y), Quaternion.identity);
 
 		var render = t.GetComponentInChildren<CellRender>();
-		render.Initialize(new Coord((int)x, (int)y), null);
+		render.Initialize(new Coord((int)x, (int)y));
 
 		return render;
 	}
@@ -189,6 +190,8 @@ public class World : MonoBehaviour
 				DestroyRoad(p);
 			if (c is City)
 				DestroyCity(p);
+			if (c is Depot)
+				DestroyDepot(p);
 		}
 
 		var neighborsRoads = new List<Road>();
@@ -235,12 +238,30 @@ public class World : MonoBehaviour
 		}
 	}
 
+	public void BuildDepot(Coord pos)
+	{
+		var c = new Depot(pos, depotPrefab, Builder.RotationDirection);
+
+		Constructions[pos.X, pos.Y] = c;
+
+		var neighborsRoads = new List<Road>();
+		foreach (Road neighborsRoad in Neighbors(pos))
+		{
+			if (!neighborsRoads.Contains(neighborsRoad))
+				neighborsRoads.Add(neighborsRoad);
+		}
+
+		foreach (Road neighborsRoad in neighborsRoads)
+		{
+			UpdateRoad(neighborsRoad);
+		}
+	}
+
 	public void BuildCity(Coord cityCenter)
 	{
 		var c = new City(cityCenter, cityPrefab);
 
 		Constructions[cityCenter.X, cityCenter.Y] = c;
-		Terrains[cityCenter.X, cityCenter.Y].Build(c);
 		cities.Add(c);
 
 		var neighborsRoads = new List<Road>();
@@ -263,18 +284,35 @@ public class World : MonoBehaviour
 		Constructions[cityCenter.X, cityCenter.Y] = null;
 	}
 
+	public void DestroyDepot(Coord pos)
+	{
+		var c = Constructions[pos.X, pos.Y] as City;
+		c.Destroy();
+		Constructions[pos.X, pos.Y] = null;
+	}
+
 	public void UpdateRoad(Road r)
 	{
-		Construction north = North(r);
-		bool northLink = north != null && (north is Road || north is City);
-		Construction east = East(r);
-		bool eastLink = east != null && (east is Road || east is City);
-		Construction south = South(r);
-		bool southLink = south != null && (south is Road || south is City);
-		Construction west = West(r);
-		bool westLink = west != null && (west is Road || west is City);
+		r.UpdateConnexions(IsLinkable(2,North(r)), IsLinkable(3,East(r)), IsLinkable(0,South(r)), IsLinkable(1,West(r)));
+	}
 
-		r.UpdateConnexions(northLink, eastLink, southLink, westLink);
+	public bool IsLinkable(int direction, Construction c)
+	{
+		if (c == null)
+			return false;
+
+		if(c is Construction)
+		{
+			if(c is Depot)
+			{
+				var d = c as Depot;
+				return direction == d.Direction;
+			}
+			else
+				return true;
+		}
+
+		return false;
 	}
 
 	public IEnumerator Roads(List<Coord> path)
@@ -290,7 +328,6 @@ public class World : MonoBehaviour
 				Road r = new Road(p, roadPrefab);
 				constructedRoads.Add(r);
 				Constructions[p.X, p.Y] = r;
-				Terrains[p.X, p.Y].Build(r);
 			}
 			if (countLoop % searchSpeed == 0)
 				yield return null;
@@ -336,9 +373,9 @@ public class World : MonoBehaviour
 			UpdateRoad(neighborsRoad);
 		}
 
-		r.Destroy();
-
 		Constructions[pos.X, pos.Y] = null;
+
+		r.Destroy();		
 	}
 
 	public int CountNeighbors(Construction c)

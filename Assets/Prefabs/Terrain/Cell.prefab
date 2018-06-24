@@ -299,3 +299,7 @@ MonoBehaviour:
     type: 2}
   red: {fileID: 2100000, guid: 92f59dcbef04fab43874b5895aafc2d5, type: 2}
   blue: {fileID: 2100000, guid: 6619c15ddd1ddec499d5498f40154124, type: 2}
+  blueArrow_2: {fileID: 2100000, guid: f38651ea03246654d84044a16743429b, type: 2}
+  blueArrow_3: {fileID: 2100000, guid: 586aab8ac5195e143a8ea93bac1b1989, type: 2}
+  blueArrow_0: {fileID: 2100000, guid: d37369a660390354097961f7a669b9b5, type: 2}
+  blueArrow_1: {fileID: 2100000, guid: 3959902a4c2ab8f42a9197ee4dcbd2b7, type: 2}

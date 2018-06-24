@@ -18,4 +18,9 @@ public class BottomButtons : MonoBehaviour {
 	{
 		Builder.Bulldoze();
 	}
+
+	public void BuildDepot()
+	{
+		Builder.Depot();
+	}
 }

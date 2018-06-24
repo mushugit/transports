@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -9,11 +10,40 @@ public class CellRender : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
 
 	public Material red;
 	public Material blue;
+	public Material blueArrow_2;
+	public Material blueArrow_3;
+	public Material blueArrow_0;
+	public Material blueArrow_1;
+
 
 	private bool isColored = false;
 
 	private Coord point;
-	private Construction construction;
+
+	private static int direction = 2;
+	private bool isInCell;
+
+	private void Update()
+	{
+		if (isInCell)
+		{
+			var left = Input.GetButtonDown("RotateBuild");
+			var right = Input.GetButtonDown("RotateBuildNeg");
+
+			if (left || right)
+			{
+				if (left) direction++;
+				if (right) direction--;
+
+				if (direction > 3) direction = 0;
+				if (direction < 0) direction = 3;
+
+				Builder.RotationDirection = direction;
+
+				UpdateCell();
+			}
+		}
+	}
 
 	public void MakeRed()
 	{
@@ -27,40 +57,58 @@ public class CellRender : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
 		GetComponent<Renderer>().material = blue;
 	}
 
+	public void MakeBlue(int direction)
+	{
+		isColored = true;
+		Material b = blue;
+		switch (direction)
+		{
+			case 0:
+				b = blueArrow_0;
+				break;
+			case 1:
+				b = blueArrow_1;
+				break;
+			case 2:
+				b = blueArrow_2;
+				break;
+			case 3:
+				b = blueArrow_3;
+				break;
+		}
+		GetComponent<Renderer>().material = b;
+	}
+
 	public void Revert()
 	{
 		isColored = false;
 		GetComponent<Renderer>().material = defaultMaterialGrass;
 	}
 
-	public void Initialize(Coord position, Construction building)
+	public void Initialize(Coord position)
 	{
 		point = position;
-		construction = building;
-	}
-
-	public void Build(Construction c)
-	{
-		construction = c;
-	}
-
-	public void Bulldoze()
-	{
-		construction = null;
 	}
 
 	public bool IsBuilt()
 	{
-		return construction != null;
+		return World.Instance.Constructions[point.X, point.Y] != null;
 	}
 
 	public void OnPointerExit(PointerEventData eventData)
 	{
+		isInCell = false;
 		if (isColored)
 			Revert();
 	}
 
 	public void OnPointerEnter(PointerEventData eventData)
+	{
+		isInCell = true;
+		UpdateCell();
+	}
+
+	private void UpdateCell()
 	{
 		if (Builder.IsBuilding || Builder.IsDestroying)
 		{
@@ -72,7 +120,10 @@ public class CellRender : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
 			else
 			{
 				//Possible
-				MakeBlue();
+				if (Builder.CanRotateBuilding)
+					MakeBlue(direction);
+				else
+					MakeBlue();
 			}
 		}
 	}
@@ -91,6 +142,10 @@ public class CellRender : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
 				{
 					World.Instance.BuildCity(point);
 				}
+				if (Builder.TypeOfBuild == typeof(Depot))
+				{
+					World.Instance.BuildDepot(point);
+				}
 			}
 		}
 		if (Builder.IsDestroying)
@@ -100,5 +155,6 @@ public class CellRender : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
 				World.Instance.DestroyConstruction(point);
 			}
 		}
+		UpdateCell();
 	}
 }
