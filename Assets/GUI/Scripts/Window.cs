@@ -15,15 +15,17 @@ public class Window
 		}
 	}
 
+	public City City { get; private set; }
+
 	private readonly GameObject windowObject;
 	private readonly WindowUI ui;
 
 	readonly Vector2 startingPosition;
 
-	public Window(GameObject windowObject, Vector3 initialPosition)
+	public Window(GameObject windowObject, Vector3 initialPosition, City c)
 	{
 		this.windowObject = windowObject;
-
+		City = c;
 		ui = windowObject.GetComponent<WindowUI>();
 
 		windowObject.transform.position = initialPosition;
@@ -39,6 +41,11 @@ public class Window
 				wtc.ContentText(richTextContent);
 			}
 		}
+	}
+
+	public void Close()
+	{
+		City.InfoWindow = null;
 	}
 
 }

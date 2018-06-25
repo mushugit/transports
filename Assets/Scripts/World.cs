@@ -26,7 +26,7 @@ public class World : MonoBehaviour
 
 	public Construction[,] Constructions { get; private set; }
 	public CellRender[,] Terrains { get; private set; }
-	private List<City> cities;
+	public List<City> Cities;
 
 	public readonly static Vector3 Center = new Vector3(width / 2f, 0f, height / 2f);
 
@@ -86,8 +86,8 @@ public class World : MonoBehaviour
 		}
 
 		itemLoading = "Chargement des villes";
-		Cities(w, h);
-		foreach (City c in cities)
+		GenerateCity(w, h);
+		foreach (City c in Cities)
 		{
 			var closestCity = ClosestCityUnlinked(c);
 			if (closestCity != null)
@@ -100,9 +100,7 @@ public class World : MonoBehaviour
 		itemLoading = "Chargement terminé";
 		gameLoading = false;
 
-		//yield return StartCoroutine(Simulation());
-		//yield return new WaitForSeconds(1f);
-		//ReloadLevel();
+		yield return StartCoroutine(Simulation.Run());
 	}
 
 	IEnumerator Link(City a, City b)
@@ -151,24 +149,12 @@ public class World : MonoBehaviour
 
 	bool AllCitiesLinkedToEachOther()
 	{
-		foreach (City a in cities)
+		foreach (City a in Cities)
 		{
-			if (a.LinkedCities.Count != cities.Count)
+			if (a.LinkedCities.Count != Cities.Count)
 				return false;
 		}
 		return true;
-	}
-
-	IEnumerator Simulation()
-	{
-		while (true)
-		{
-			foreach (City c in cities)
-			{
-				c.GenerateCargo();
-			}
-			yield return new WaitForSeconds(0.02f);
-		}
 	}
 
 	CellRender Terrain(float x, float y)
@@ -207,10 +193,10 @@ public class World : MonoBehaviour
 		}
 	}
 
-	void Cities(int w, int h)
+	void GenerateCity(int w, int h)
 	{
 		var quantity = City.Quantity(w, h);
-		cities = new List<City>(quantity);
+		Cities = new List<City>(quantity);
 		var n = 0;
 		while (n < quantity)
 		{
@@ -220,7 +206,7 @@ public class World : MonoBehaviour
 			if (Constructions[x, y] == null)
 			{
 				var canBuild = true;
-				foreach (City otherCity in cities)
+				foreach (City otherCity in Cities)
 				{
 					if (otherCity.ManhattanDistance(cityCenter) < minCityDistance)
 					{
@@ -262,7 +248,7 @@ public class World : MonoBehaviour
 		var c = new City(cityCenter, cityPrefab);
 
 		Constructions[cityCenter.X, cityCenter.Y] = c;
-		cities.Add(c);
+		Cities.Add(c);
 
 		var neighborsRoads = new List<Road>();
 		foreach (Road neighborsRoad in Neighbors(cityCenter))
@@ -633,7 +619,7 @@ public class World : MonoBehaviour
 	{
 		var minDistance = int.MaxValue;
 		City closestCity = null;
-		foreach (City otherCity in cities)
+		foreach (City otherCity in Cities)
 		{
 			if (otherCity != c && !c.LinkedCities.Contains(otherCity))
 			{
@@ -661,7 +647,7 @@ public class World : MonoBehaviour
 	{
 		var minDistance = int.MaxValue;
 		City closestCity = null;
-		foreach (City otherCity in cities)
+		foreach (City otherCity in Cities)
 		{
 			if (otherCity != c)
 			{
@@ -680,7 +666,7 @@ public class World : MonoBehaviour
 	{
 		var maxDistance = 0;
 		City farestCity = null;
-		foreach (City otherCity in cities)
+		foreach (City otherCity in Cities)
 		{
 			if (otherCity != c)
 			{

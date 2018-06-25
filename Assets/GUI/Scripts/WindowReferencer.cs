@@ -4,5 +4,6 @@ using UnityEngine;
 
 public class WindowReferencer : MonoBehaviour {
 
-	public GameObject window;
+	public Window Window;
+	public GameObject GameObjectWindow;
 }

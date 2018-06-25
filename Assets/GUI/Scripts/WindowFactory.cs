@@ -19,26 +19,27 @@ class WindowFactory : MonoBehaviour
 		instance = this;
 	}
 
-	public static Window BuildTextInfo(string title, Vector3 position, string richTextContent)
+	public static Window BuildTextInfo(string title, Vector3 position, City c)
 	{
-		return instance._BuildTextInfo(title,position, richTextContent);
+		return instance._BuildTextInfo(title,position, c);
 	}
 
-	public Window _BuildTextInfo(string title, Vector3 position, string richTextContent)
+	public Window _BuildTextInfo(string title, Vector3 position, City c)
 	{
 		position.z = 0;
 		var windowCanvasObject = Instantiate(windowTextInfoPrefab, parent.transform);
 
 		var windowObjectRef = windowCanvasObject.GetComponentInChildren<WindowReferencer>();
-		var windowObject = windowObjectRef.window;
+		var windowObject = windowObjectRef.GameObjectWindow;
 
 		var wtc = windowObject.GetComponent<WindowTextContent>();
-		wtc.ContentText(richTextContent);
+		wtc.ContentText(c.InfoText());
 
-		var w = new Window(windowObject, position)
+		var w = new Window(windowObject, position, c)
 		{
 			Title = title
 		};
+		windowObjectRef.Window = w;
 
 		windows.Add(w);
 

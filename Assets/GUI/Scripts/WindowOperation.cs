@@ -6,7 +6,8 @@ public class WindowOperation : MonoBehaviour {
 
 	public void Close()
 	{
-		Debug.Log("Closing window");
+		var referencer = GetComponentInParent<WindowReferencer>();
+		referencer.Window.Close();
 		DestroyImmediate(gameObject);
 	}
 }
