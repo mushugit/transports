@@ -40,11 +40,12 @@ public class City : Construction
 	public void UpdateLabel()
 	{
 		var label = $"{Name} [{Cargo}]";
-		cityRender.SendMessage(nameof(CityRender.Label), label);
+		cityRender?.SendMessage(nameof(CityRender.Label), label);
 	}
 
 	public void Destroy()
 	{
+		InfoWindow.Close();
 		var r = cityRender.GetComponent<CityRender>();
 		r.Destroy();
 

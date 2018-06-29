@@ -4,34 +4,86 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class CellRender : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
+public class CellRender : MonoBehaviour, IPointerClickHandler
 {
+	private GameObject highlighter;
+	private Highlight highlight;
+	private RotationalHighlight rotationalHighlight;
 	public Material defaultMaterialGrass;
 
 	public Material red;
 	public Material blue;
-	public Material blueArrow_2;
-	public Material blueArrow_3;
-	public Material blueArrow_0;
-	public Material blueArrow_1;
+	public Material[] blueArrow;
 
+	private Coord currentPoint = null;
 
 	private bool isColored = false;
 
-	private Coord point;
-
 	private static int direction = 2;
-	private bool isInCell;
+
+	private Transform parentTransform;
+
+	public void SetScale(float width, float height)
+	{
+		var r = GetComponent<Renderer>();
+		r.material.mainTextureScale = new Vector2(width, height);
+	}
+
+	private void Awake()
+	{
+		highlighter = GameObject.FindGameObjectWithTag("Hightlighter");
+		highlight = highlighter.GetComponent<Highlight>();
+		rotationalHighlight = highlighter.GetComponentInChildren<RotationalHighlight>(true);
+		parentTransform = GetComponentInParent<Transform>();
+	}
+
+	private void Start()
+	{
+		Revert();
+	}
+
+	bool Highlight()
+	{
+		var c = Camera.main;
+		var r = c.ScreenPointToRay(Input.mousePosition);
+		var h = new RaycastHit();
+		var m = 1 << 31;
+		if (Physics.Raycast(r, out h, 1000, m))
+		{
+			var p = h.point;
+			var d = p;
+			d.x = Mathf.Round(p.x - 0.5f);
+			d.y = 1;
+			d.z = Mathf.Round(p.z - 0.5f);
+			currentPoint = new Coord((int)d.x, (int)d.z);
+
+			highlighter.SetActive(true);
+			highlighter.transform.position = d;
+			return true;
+		}
+		else
+		{
+			currentPoint = null;
+			highlighter.SetActive(false);
+			return false;
+		}
+	}
+
+	private void RotateHighlight(bool positive = true)
+	{
+		rotationalHighlight.Rotate(positive);
+	}
 
 	private void Update()
 	{
-		if (isInCell)
+		if (Highlight())
 		{
 			var left = Input.GetButtonDown("RotateBuild");
 			var right = Input.GetButtonDown("RotateBuildNeg");
 
 			if (left || right)
 			{
+				RotateHighlight(right);
 				if (left) direction++;
 				if (right) direction--;
 
@@ -39,91 +91,56 @@ public class CellRender : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
 				if (direction < 0) direction = 3;
 
 				Builder.RotationDirection = direction;
-
-				UpdateCell();
 			}
+			UpdateCell(currentPoint);
 		}
 	}
 
-	public void MakeRed()
+	private void HighlightRed()
 	{
-		isColored = true;
-		GetComponent<Renderer>().material = red;
+		highlighter.SetActive(true);
+		highlight.KO();
 	}
 
-	public void MakeBlue()
+	private void HighlightBlue(int direction)
 	{
-		isColored = true;
-		GetComponent<Renderer>().material = blue;
+		highlighter.SetActive(true);
+		highlight.OkDirectional();
 	}
 
-	public void MakeBlue(int direction)
+	private void HighlightBlue()
 	{
-		isColored = true;
-		Material b = blue;
-		switch (direction)
-		{
-			case 0:
-				b = blueArrow_0;
-				break;
-			case 1:
-				b = blueArrow_1;
-				break;
-			case 2:
-				b = blueArrow_2;
-				break;
-			case 3:
-				b = blueArrow_3;
-				break;
-		}
-		GetComponent<Renderer>().material = b;
+		highlighter.SetActive(true);
+		highlight.Ok();
 	}
 
 	public void Revert()
 	{
 		isColored = false;
-		GetComponent<Renderer>().material = defaultMaterialGrass;
+		highlighter.SetActive(false);
 	}
 
-	public void Initialize(Coord position)
-	{
-		point = position;
-	}
-
-	public bool IsBuilt()
+	public bool IsBuilt(Coord point)
 	{
 		return World.Instance.Constructions[point.X, point.Y] != null;
 	}
 
-	public void OnPointerExit(PointerEventData eventData)
-	{
-		isInCell = false;
-		if (isColored)
-			Revert();
-	}
-
-	public void OnPointerEnter(PointerEventData eventData)
-	{
-		isInCell = true;
-		UpdateCell();
-	}
-
-	private void UpdateCell()
+	private void UpdateCell(Coord point)
 	{
 		if (Builder.IsBuilding || Builder.IsDestroying)
 		{
-			if ((Builder.IsBuilding && IsBuilt()) || Builder.IsDestroying && !IsBuilt())
+			if ((Builder.IsBuilding && IsBuilt(point)) || Builder.IsDestroying && !IsBuilt(point))
 			{
 				//Impossible
-				MakeRed();
+				HighlightRed();
 			}
 			else
 			{
 				//Possible
 				if (Builder.CanRotateBuilding)
-					MakeBlue(direction);
+					HighlightBlue(direction);
 				else
-					MakeBlue();
+					HighlightBlue();
 			}
 		}
 	}
@@ -132,33 +149,33 @@ public class CellRender : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
 	{
 		if (Builder.IsBuilding)
 		{
-			if (!IsBuilt())
+			if (!IsBuilt(currentPoint))
 			{
 				if (Builder.TypeOfBuild == typeof(Road))
 				{
-					StartCoroutine(World.Instance.Roads(new List<Coord>() { point }));
+					StartCoroutine(World.Instance.Roads(new List<Coord>() { currentPoint }));
 					AudioManager.Player.Play("buildRoad");
 				}
 				if (Builder.TypeOfBuild == typeof(City))
 				{
-					World.Instance.BuildCity(point);
+					World.Instance.BuildCity(currentPoint);
 					AudioManager.Player.Play("buildCity");
 				}
 				if (Builder.TypeOfBuild == typeof(Depot))
 				{
-					World.Instance.BuildDepot(point);
+					World.Instance.BuildDepot(currentPoint);
 					AudioManager.Player.Play("buildCity");
 				}
 			}
 		}
 		if (Builder.IsDestroying)
 		{
-			if (IsBuilt())
+			if (IsBuilt(currentPoint))
 			{
-				World.Instance.DestroyConstruction(point);
+				World.Instance.DestroyConstruction(currentPoint);
 				AudioManager.Player.Play("destroy");
 			}
 		}
-		UpdateCell();
+		UpdateCell(currentPoint);
 	}
 }
