@@ -25,15 +25,26 @@ public class ParamGameMenu : MonoBehaviour {
 	{
 		switch (mapSize.value)
 		{
+			default:
 			case 0:
-				World.width = 10f;
+				World.width = 10;
 				break;
 			case 1:
-				World.width = 15f;
+				World.width = 20;
 				break;
 			case 2:
-				World.width = 20f;
+				World.width = 50;
 				break;
+			case 3:
+				World.width = 100;
+				break;
+			case 4:
+				World.width = 200;
+				break;
+			case 5:
+				World.width = 500;
+				break;
+
 		}
 		World.height = World.width;
 	}

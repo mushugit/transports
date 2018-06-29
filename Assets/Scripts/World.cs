@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class World : MonoBehaviour
 {
@@ -13,19 +14,20 @@ public class World : MonoBehaviour
 
 	public double searchSpeed = 200d;
 
-	public Component cellPrefab;
+	public Component terrainPrefab;
 	public Component cityPrefab;
 	public Component roadPrefab;
 	public Component depotPrefab;
 
-	public static float width = 25f;
+	public Component uiCanvas;
+
+	public static float width = 512;
 	public static float height = width;
 
 	public int minCityDistance = 4;
 
 
 	public Construction[,] Constructions { get; private set; }
-	public CellRender[,] Terrains { get; private set; }
 	public List<City> Cities;
 
 	public readonly static Vector3 Center = new Vector3(width / 2f, 0f, height / 2f);
@@ -49,14 +51,19 @@ public class World : MonoBehaviour
 
 	void InitLoader()
 	{
-		float nbCells = width * height;
 		float nbLinks = City.Quantity((int)width, (int)height);
-		totalLoading = nbCells + nbLinks;
+		totalLoading = 1 + nbLinks;
+	}
+
+	private void Awake()
+	{
+		Constructions = new Construction[(int)width, (int)height];
+		Instance = this;
+
 	}
 
 	void Start()
 	{
-		Instance = this;
 		Application.targetFrameRate = 60;
 
 		InitLoader();
@@ -69,21 +76,10 @@ public class World : MonoBehaviour
 		var h = (int)height;
 
 		Constructions = new Construction[w, h];
-		Terrains = new CellRender[w, h];
 
-		int countCells = 0;
 		itemLoading = "Chargement du terrain";
-		for (float x = 0f; x < width; x++)
-		{
-			for (float y = 0f; y < height; y++)
-			{
-				Terrains[(int)x, (int)y] = Terrain(x, y);
-				countCells++;
-				progressLoading++;
-				if (countCells % 10000 == 0)
-					yield return null;
-			}
-		}
+		Terrain(width, height);
+		progressLoading++;
 
 		itemLoading = "Chargement des villes";
 		GenerateCity(w, h);
@@ -99,6 +95,15 @@ public class World : MonoBehaviour
 
 		itemLoading = "Chargement terminé";
 		gameLoading = false;
+
+		// Activer UI
+		var buttons = uiCanvas.GetComponentsInChildren<Button>();
+		foreach(Button b in buttons)
+		{
+			b.interactable = true;
+		}
+
+
 
 		yield return StartCoroutine(Simulation.Run());
 	}
@@ -157,14 +162,12 @@ public class World : MonoBehaviour
 		return true;
 	}
 
-	CellRender Terrain(float x, float y)
+	void Terrain(float width, float height)
 	{
-		var t = Instantiate(cellPrefab, new Vector3(x, 0f, y), Quaternion.identity);
-
-		var render = t.GetComponentInChildren<CellRender>();
-		render.Initialize(new Coord((int)x, (int)y));
-
-		return render;
+		var t = Instantiate(terrainPrefab, Vector3.zero, Quaternion.identity);
+		t.transform.localScale = new Vector3(width, 1f, height);
+		var c = t.GetComponentInChildren<CellRender>();
+		c?.SetScale(width, height);
 	}
 
 	public void DestroyConstruction(Coord p)
@@ -489,19 +492,6 @@ public class World : MonoBehaviour
 		}
 	}
 
-	void CleanGrassColor(List<Node> opened, List<Node> closed)
-	{
-		foreach (Node n in opened)
-		{
-			Terrains[n.Point.X, n.Point.Y].SendMessage("Revert");
-		}
-		foreach (Node n in closed)
-		{
-			Terrains[n.Point.X, n.Point.Y].SendMessage("Revert");
-		}
-
-	}
-
 	IEnumerator SearchPath(SearchParameter parameters)
 	{
 		//Debug.Log("Search path from " + parameters.Start + " to " + parameters.Target);
@@ -526,8 +516,7 @@ public class World : MonoBehaviour
 			countLoop++;
 			if (parameters.VisualSearch)
 			{
-				opened.ForEach(o => Terrains[o.Point.X, o.Point.Y].SendMessage("MakeBlue"));
-				closed.ForEach(o => Terrains[o.Point.X, o.Point.Y].SendMessage("MakeRed")); ;
+				//TODO : visual A*
 			}
 
 			opened.Sort();
@@ -541,7 +530,9 @@ public class World : MonoBehaviour
 				cameFrom[target.X, target.Y] = n.Point;
 
 				if (parameters.VisualSearch)
-					Terrains[n.Point.X, n.Point.Y].SendMessage("MakeRed");
+				{
+					//TODO : visual A*
+				}
 
 				// Rebuild path
 				parameters.Path = TraceBackPath(cameFrom, target);
@@ -549,7 +540,9 @@ public class World : MonoBehaviour
 				if (parameters.WaitAtTheEnd > 0f)
 					yield return new WaitForSeconds(parameters.WaitAtTheEnd);
 				if (parameters.VisualSearch)
-					CleanGrassColor(opened, closed);
+				{
+					//TODO : visual A*
+				}
 
 				yield break;
 			}
@@ -590,7 +583,9 @@ public class World : MonoBehaviour
 		}
 
 		if (parameters.VisualSearch)
-			CleanGrassColor(opened, closed);
+		{
+			//TODO : visual A*
+		}
 		yield return null;
 	}
 

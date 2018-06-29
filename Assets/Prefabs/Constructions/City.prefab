@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 33796233604690000}
   - component: {fileID: 23056378404372608}
   - component: {fileID: 64647776413639782}
-  m_Layer: 0
+  m_Layer: 28
   m_Name: EastFace
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -40,7 +40,7 @@ GameObject:
   - component: {fileID: 33552824432313822}
   - component: {fileID: 23376812359412160}
   - component: {fileID: 64352616544551974}
-  m_Layer: 0
+  m_Layer: 28
   m_Name: WestFace
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -58,7 +58,7 @@ GameObject:
   - component: {fileID: 33748708733590178}
   - component: {fileID: 23727524994400382}
   - component: {fileID: 64992279866254058}
-  m_Layer: 0
+  m_Layer: 28
   m_Name: SouthFace
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -80,7 +80,7 @@ GameObject:
   - component: {fileID: 114341599402603186}
   - component: {fileID: 114245670269666418}
   - component: {fileID: 114229898040411226}
-  m_Layer: 5
+  m_Layer: 28
   m_Name: LabelWithBackground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -96,7 +96,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4378202776513836}
   - component: {fileID: 114744520290249694}
-  m_Layer: 0
+  m_Layer: 28
   m_Name: CityObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -112,7 +112,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4810296838302192}
   - component: {fileID: 114651176440888596}
-  m_Layer: 0
+  m_Layer: 28
   m_Name: City
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -130,7 +130,7 @@ GameObject:
   - component: {fileID: 33609368944721114}
   - component: {fileID: 23992754631384444}
   - component: {fileID: 64973553559038352}
-  m_Layer: 0
+  m_Layer: 28
   m_Name: Roof
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -148,7 +148,7 @@ GameObject:
   - component: {fileID: 33486174494689156}
   - component: {fileID: 23334319669673830}
   - component: {fileID: 64607490301608188}
-  m_Layer: 0
+  m_Layer: 28
   m_Name: NorthFace
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -166,7 +166,7 @@ GameObject:
   - component: {fileID: 223457597748217164}
   - component: {fileID: 114443892053287294}
   - component: {fileID: 114374637276263530}
-  m_Layer: 0
+  m_Layer: 28
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -181,7 +181,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4550247191258066}
-  m_Layer: 0
+  m_Layer: 28
   m_Name: CityLabelPosition
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -198,7 +198,7 @@ GameObject:
   - component: {fileID: 224420509075877268}
   - component: {fileID: 222036251667534552}
   - component: {fileID: 114562865359710000}
-  m_Layer: 5
+  m_Layer: 28
   m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -295,7 +295,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1419470739133756}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.89305174, y: -4.957034, z: 4.376462}
+  m_LocalPosition: {x: 5, y: 0, z: 4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4378202776513836}

@@ -13,7 +13,7 @@ public class Cam : MonoBehaviour
 
 	public float moveSpeed = 30f;
 	public float minZoom = 2f;
-	public float maxZoom = 64f;
+	public float maxZoom = 4096;
 	public float zoomSpeed = 1.2f;
 	public float defaultZoomPosition = 4f;
 
