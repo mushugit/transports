@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class World : MonoBehaviour
 {
@@ -18,7 +19,9 @@ public class World : MonoBehaviour
 	public Component roadPrefab;
 	public Component depotPrefab;
 
-	public static float width = 25f;
+	public Component uiCanvas;
+
+	public static float width = 512;
 	public static float height = width;
 
 	public int minCityDistance = 4;
@@ -92,6 +95,15 @@ public class World : MonoBehaviour
 
 		itemLoading = "Chargement terminé";
 		gameLoading = false;
+
+		// Activer UI
+		var buttons = uiCanvas.GetComponentsInChildren<Button>();
+		foreach(Button b in buttons)
+		{
+			b.interactable = true;
+		}
+
+
 
 		yield return StartCoroutine(Simulation.Run());
 	}

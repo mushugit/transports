@@ -1825,7 +1825,7 @@ MonoBehaviour:
     m_HighlightedTrigger: Highlighted
     m_PressedTrigger: Pressed
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 1185866216}
   m_OnClick:
     m_PersistentCalls:
@@ -1976,7 +1976,7 @@ MonoBehaviour:
     m_HighlightedTrigger: Highlighted
     m_PressedTrigger: Pressed
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 1387831157}
   m_OnClick:
     m_PersistentCalls:
@@ -2321,7 +2321,7 @@ MonoBehaviour:
     m_HighlightedTrigger: Highlighted
     m_PressedTrigger: Pressed
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 1548590370}
   m_OnClick:
     m_PersistentCalls:
@@ -2481,7 +2481,7 @@ MonoBehaviour:
     m_HighlightedTrigger: Highlighted
     m_PressedTrigger: Pressed
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 1671214134}
   m_OnClick:
     m_PersistentCalls:
@@ -2930,6 +2930,7 @@ MonoBehaviour:
   roadPrefab: {fileID: 4645302532763130, guid: f712999e280ed5847a151a46282ddce3, type: 2}
   depotPrefab: {fileID: 4953025121230940, guid: ce1094bd4759f3e48b1825419641211a,
     type: 2}
+  uiCanvas: {fileID: 2145616395}
   minCityDistance: 4
 --- !u!4 &1970645009
 Transform:
