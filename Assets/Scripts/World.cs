@@ -7,6 +7,8 @@ using UnityEngine.UI;
 
 public class World : MonoBehaviour
 {
+	public static WorldSave loadData = null;
+
 	public static bool gameLoading = true;
 	public static float progressLoading = 0f;
 	public static string itemLoading = "Niveau en préparation";
@@ -34,10 +36,17 @@ public class World : MonoBehaviour
 
 	public static World Instance { get; private set; }
 
-	void ReloadLevel()
+	public static void ReloadLevel()
 	{
-		//Screenshot.Take(400, 400);
+		PauseMenu.ForceResume();
 		SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+	}
+
+	public static void CleanLoader()
+	{
+		var loader = Instance.GetComponentInParent<LevelLoader>();
+		if (loader != null)
+			DestroyImmediate(loader.gameObject);
 	}
 
 	void Update()
@@ -55,6 +64,11 @@ public class World : MonoBehaviour
 		totalLoading = 1 + nbLinks;
 	}
 
+	void InitLoader(int forcedLoadCount)
+	{
+		totalLoading = 1 + forcedLoadCount;
+	}
+
 	private void Awake()
 	{
 		Constructions = new Construction[(int)width, (int)height];
@@ -66,8 +80,78 @@ public class World : MonoBehaviour
 	{
 		Application.targetFrameRate = 60;
 
-		InitLoader();
-		StartCoroutine(Generate());
+		if (loadData == null)
+		{
+			InitLoader();
+			StartCoroutine(Generate());
+		}
+		else
+		{
+			width = loadData.Width;
+			height = loadData.Height;
+			InitLoader(loadData.Constructions.Count + loadData.AllFlux.Count);
+			StartCoroutine(Load());
+		}
+	}
+
+	IEnumerator Load()
+	{
+		var w = (int)width;
+		var h = (int)height;
+
+		Constructions = new Construction[w, h];
+
+		itemLoading = "Chargement du terrain";
+		Terrain(width, height);
+		progressLoading++;
+
+		itemLoading = "Chargement des constructions";
+		Cities = new List<City>();
+		var roads = new List<Coord>();
+		foreach (Construction c in loadData.Constructions)
+		{
+			if (c is City)
+			{
+				BuildCity(c as City);
+			}
+			if (c is Depot)
+			{
+				var d = c as Depot;
+				BuildDepot(d.Point, d.Direction);
+			}
+			if(c is Road)
+			{
+				roads.Add(c.Point);
+			}
+			progressLoading++;
+		}
+		yield return StartCoroutine(BuildRoads(roads));
+
+		itemLoading = "Chargement des flux";
+		foreach(Flux f in loadData.AllFlux)
+		{
+			Simulation.AddFlux(f);
+		}
+		progressLoading++;
+
+		itemLoading = "Chargement terminé";
+		gameLoading = false;
+
+		ActivateUI();
+		CleanLoader();
+		yield return StartCoroutine(Simulation.Run());
+	}
+
+	private void ActivateUI()
+	{
+		PauseMenu.ForceResume();
+		gameLoading = false;
+
+		var buttons = uiCanvas.GetComponentsInChildren<Button>();
+		foreach (Button b in buttons)
+		{
+			b.interactable = true;
+		}
 	}
 
 	IEnumerator Generate()
@@ -96,15 +180,8 @@ public class World : MonoBehaviour
 		itemLoading = "Chargement terminé";
 		gameLoading = false;
 
-		// Activer UI
-		var buttons = uiCanvas.GetComponentsInChildren<Button>();
-		foreach(Button b in buttons)
-		{
-			b.interactable = true;
-		}
-
-
-
+		ActivateUI();
+		CleanLoader();
 		yield return StartCoroutine(Simulation.Run());
 	}
 
@@ -128,7 +205,7 @@ public class World : MonoBehaviour
 			if (parameters.Path != null && parameters.Path.Count > 1)
 			{
 				//Debug.Log("Path from " + a.Name + " to " + b.Name);
-				yield return StartCoroutine(Roads(parameters.Path));
+				yield return StartCoroutine(BuildRoads(parameters.Path));
 				yield return StartCoroutine(UpdateLink(a, b));
 			}
 			else
@@ -221,20 +298,52 @@ public class World : MonoBehaviour
 				{
 					BuildCity(cityCenter);
 					n++;
-					//Debug.Log($"City {n} at {c.Point}");
 				}
 			}
 		}
 	}
 
-	public void BuildDepot(Coord pos)
+	private void _BuildDepot(Coord pos, int direction)
 	{
-		var c = new Depot(pos, depotPrefab, Builder.RotationDirection);
+
+		var c = new Depot(pos, depotPrefab, direction);
 
 		Constructions[pos.X, pos.Y] = c;
 
 		var neighborsRoads = new List<Road>();
 		foreach (Road neighborsRoad in Neighbors(pos))
+		{
+			if (!neighborsRoads.Contains(neighborsRoad))
+				neighborsRoads.Add(neighborsRoad);
+		}
+
+		foreach (Road neighborsRoad in neighborsRoads)
+		{
+			UpdateRoad(neighborsRoad);
+		}
+
+	}
+
+	public void BuildDepot(Coord pos, int direction)
+	{
+		_BuildDepot(pos, direction);
+	}
+
+	public void BuildDepot(Coord pos)
+	{
+		_BuildDepot(pos, Builder.RotationDirection);
+	}
+
+	public void BuildCity(City dummyCity)
+	{
+		var c = new City(dummyCity, cityPrefab);
+		var cityCenter = dummyCity.Point;
+
+		Constructions[cityCenter.X, cityCenter.Y] = c;
+		Cities.Add(c);
+
+		var neighborsRoads = new List<Road>();
+		foreach (Road neighborsRoad in Neighbors(cityCenter))
 		{
 			if (!neighborsRoads.Contains(neighborsRoad))
 				neighborsRoads.Add(neighborsRoad);
@@ -282,7 +391,7 @@ public class World : MonoBehaviour
 
 	public void UpdateRoad(Road r)
 	{
-		r.UpdateConnexions(IsLinkable(2,North(r)), IsLinkable(3,East(r)), IsLinkable(0,South(r)), IsLinkable(1,West(r)));
+		r.UpdateConnexions(IsLinkable(2, North(r)), IsLinkable(3, East(r)), IsLinkable(0, South(r)), IsLinkable(1, West(r)));
 	}
 
 	public bool IsLinkable(int direction, Construction c)
@@ -290,9 +399,9 @@ public class World : MonoBehaviour
 		if (c == null)
 			return false;
 
-		if(c is Construction)
+		if (c is Construction)
 		{
-			if(c is Depot)
+			if (c is Depot)
 			{
 				var d = c as Depot;
 				return direction == d.Direction;
@@ -304,7 +413,7 @@ public class World : MonoBehaviour
 		return false;
 	}
 
-	public IEnumerator Roads(List<Coord> path)
+	public IEnumerator BuildRoads(List<Coord> path)
 	{
 		//Debug.Log("Road from " + path.First() + " to " + path.Last());
 		var countLoop = 0d;
@@ -364,7 +473,7 @@ public class World : MonoBehaviour
 
 		Constructions[pos.X, pos.Y] = null;
 
-		r.Destroy();		
+		r.Destroy();
 	}
 
 	public int CountNeighbors(Construction c)

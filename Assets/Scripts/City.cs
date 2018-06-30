@@ -2,45 +2,80 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
 
+[JsonObject(MemberSerialization.OptIn)]
 public class City : Construction
 {
+
 	public static readonly Vector2 CargoChanceRange = new Vector2(.1f, 1f);
 	public static readonly Vector2 CargoProductionRange = new Vector2(0.002f, 0.02f);
 
 	Component cityRender; //TODO : déplacer dans Construction
-	public string Name { get; } //TODO : variable globale commence par maj
 
-	public float CargoChance { get; }
-	public float CargoProduction { get; }
-	private float _cargo;
+	[JsonProperty]
+	public string Name { get; private set; } //TODO : variable globale commence par maj
+
+	[JsonProperty]
+	public float CargoChance { get; private set; }
+	[JsonProperty]
+	public float CargoProduction { get; private set; }
+	[JsonProperty]
+	public float ExactCargo { get; private set; }
+
 	public int Cargo { get; private set; } = 0;
 
 	private List<Flux> incomingFlux;
 	private List<Flux> outgoingFlux;
 
-	public List<City> LinkedCities { get; }
+	public List<City> LinkedCities { get; private set; }
 	public WindowTextInfo InfoWindow = null;
 
 	private static List<string> cityNames = null;
-	
 
-	public City(Coord position, Component cityPrefab)
+	private void SetupCity(Coord position, Component cityPrefab, string name, float cargoChance, float cargoProduction, float exactCargo)
 	{
 		Point = position;
-		cityRender = CityRender.Build(new Vector3(Point.X, 0f, Point.Y), cityPrefab);
-		var objectRenderer = cityRender.GetComponentInChildren<CityObjectRender>();
-		objectRenderer.City(this);
+		if (cityPrefab != null)
+		{
+			cityRender = CityRender.Build(new Vector3(Point.X, 0f, Point.Y), cityPrefab);
+			var objectRenderer = cityRender.GetComponentInChildren<CityObjectRender>();
+			objectRenderer.City(this);
+		}
 
-		Name = RandomName();
+		Name = name;
 		UpdateLabel();
 
-		Cargo = 0;
-		CargoChance = Random.Range(CargoChanceRange.x, CargoChanceRange.y);
-		CargoProduction = Random.Range(CargoProductionRange.x, CargoProductionRange.y);
+		this.ExactCargo = exactCargo;
+		UpdateCargo();
+		CargoChance = cargoChance;
+		CargoProduction = cargoProduction;
+
 		LinkedCities = new List<City>();
 		incomingFlux = new List<Flux>();
 		outgoingFlux = new List<Flux>();
+	}
+
+	[JsonConstructor]
+	public City(Coord position, Component cityPrefab, string name, float cargoChance, float cargoProduction, float exactCargo)
+	{
+		SetupCity(position, cityPrefab, name, cargoChance, cargoProduction, exactCargo);
+	}
+
+	public City(City dummyCity, Component cityPrefab)
+	{
+		SetupCity(dummyCity.Point, cityPrefab, dummyCity.Name, dummyCity.CargoChance, dummyCity.CargoProduction, dummyCity.ExactCargo);
+	}
+
+	public City(Coord position, Component cityPrefab)
+	{
+		var name = RandomName();
+		var cargo = 0f;
+
+		var cargoChance = Random.Range(CargoChanceRange.x, CargoChanceRange.y);
+		var cargoProduction = Random.Range(CargoProductionRange.x, CargoProductionRange.y);
+
+		SetupCity(position, cityPrefab, name, cargoChance, cargoProduction, cargo);
 	}
 
 	public void UpdateLabel()
@@ -52,8 +87,8 @@ public class City : Construction
 	public void Destroy()
 	{
 		InfoWindow.Close();
-		var r = cityRender.GetComponent<CityRender>();
-		r.Destroy();
+		var r = cityRender?.GetComponent<CityRender>();
+		r?.Destroy();
 
 		//TODO : update links
 	}
@@ -94,8 +129,8 @@ public class City : Construction
 				LinkedCities.Add(c);
 			}
 		}
-		if(addedACity)
-		UpdateInformations();
+		if (addedACity)
+			UpdateInformations();
 	}
 
 	public bool IsLinkedTo(City c)
@@ -121,8 +156,8 @@ public class City : Construction
 	{
 		if (Random.value > CargoChance)
 		{
-			_cargo += CargoProduction;
-			Cargo = Mathf.FloorToInt(_cargo);
+			ExactCargo += CargoProduction;
+			Cargo = Mathf.FloorToInt(ExactCargo);
 			UpdateInformations();
 		}
 	}
@@ -136,12 +171,17 @@ public class City : Construction
 
 	}
 
+	private void UpdateCargo()
+	{
+		Cargo = Mathf.FloorToInt(ExactCargo);
+	}
+
 	public bool DistributeCargo(int quantity)
 	{
-		if (_cargo >= quantity)
+		if (ExactCargo >= quantity)
 		{
-			_cargo -= quantity;
-			Cargo = Mathf.FloorToInt(_cargo);
+			ExactCargo -= quantity;
+			UpdateCargo();
 			UpdateInformations();
 			return true;
 		}
@@ -152,7 +192,7 @@ public class City : Construction
 	public override bool Equals(object obj)
 	{
 		var n = obj as City;
-		return Point.Equals(n.Point);
+		return Point.Equals(n?.Point);
 	}
 
 	public override int GetHashCode()
@@ -173,9 +213,9 @@ public class City : Construction
 	{
 		StringBuilder sb = new StringBuilder();
 
-		sb.Append($"<b>Stock</b>: {Cargo} caisse{((Cargo > 1)?"s":"")} de cargo ({Mathf.Round(100*_cargo)/100})\n");
+		sb.Append($"<b>Stock</b>: {Cargo} caisse{((Cargo > 1) ? "s" : "")} de cargo ({Mathf.Round(100 * ExactCargo) / 100})\n");
 		sb.Append($"<b>Génération de cargo</b>:\n");
-		sb.Append($"\tProbabilité de {(int)(CargoChance*100f)}%\n\tProduction à {Mathf.Round(100*CargoProduction*(1f/Simulation.TickFrequency))/100}/s\n");
+		sb.Append($"\tProbabilité de {(int)(CargoChance * 100f)}%\n\tProduction à {Mathf.Round(100 * CargoProduction * (1f / Simulation.TickFrequency)) / 100}/s\n");
 		sb.Append($"<b>Position</b>: {Point}\n");
 		sb.Append("<b>Production:</b>\n");
 		if (outgoingFlux.Count == 0)
@@ -184,7 +224,7 @@ public class City : Construction
 		{
 			sb.Append("\tExport:\n");
 			foreach (Flux f in outgoingFlux)
-				sb.Append($"\t\t{f.TotalMoved} vers {f.Target} \r({ManhattanDistance(f.Target)} cases)\n");
+				sb.Append($"\t\t{f.TotalCargoMoved} vers {f.Target} \r({ManhattanDistance(f.Target)} cases)\n");
 		}
 		if (outgoingFlux.Count == 0)
 			sb.Append("\tImport: aucun\n");
@@ -192,7 +232,7 @@ public class City : Construction
 		{
 			sb.Append("\tImport:\n");
 			foreach (Flux f in incomingFlux)
-				sb.Append($"\t\t{f.TotalMoved} depuis {f.Source} \r({ManhattanDistance(f.Source)} cases)\n");
+				sb.Append($"\t\t{f.TotalCargoMoved} depuis {f.Source} \r({ManhattanDistance(f.Source)} cases)\n");
 		}
 		sb.Append("<b>Lié aux villes</b>:\n");
 		var linkedCities = LinkedCities.OrderBy(c => ManhattanDistance(c));
@@ -201,7 +241,7 @@ public class City : Construction
 			sb.Append($"\t{c.Name} \r({ManhattanDistance(c)} cases)\n");
 		}
 
-		return sb.ToString().Replace("\r","");
+		return sb.ToString().Replace("\r", "");
 	}
 
 	public void UpdateInformations()

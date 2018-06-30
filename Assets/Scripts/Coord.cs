@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,7 +10,9 @@ public class Coord
 	public static int minY;
 	public static int maxY;
 
+	[JsonProperty]
 	public int X { get; }
+	[JsonProperty]
 	public int Y { get; }
 
 	static Coord()
@@ -19,6 +21,12 @@ public class Coord
 		maxX = (int)World.width - 1;
 		minY = 0;
 		maxY = (int)World.height - 1;
+	}
+
+	private Coord()
+	{
+		X = 0;
+		Y = 0;
 	}
 
 	public Coord(int x, int y)

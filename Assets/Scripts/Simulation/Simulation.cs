@@ -35,5 +35,11 @@ public class Simulation
 		var f = new Flux(source, target);
 		flux.Add(f);
 	}
+
+	public static void AddFlux(Flux dummyFlux)
+	{
+		var f = new Flux(dummyFlux);
+		flux.Add(f);
+	}
 }
 

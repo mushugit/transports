@@ -446,8 +446,9 @@ GameObject:
   - component: {fileID: 367780058}
   - component: {fileID: 367780057}
   - component: {fileID: 367780056}
+  - component: {fileID: 367780060}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: LoadingCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -532,6 +533,23 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &367780060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 367780055}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc30b8bf43534bf4ebae86772b7ce420, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  LoadCanvas: {fileID: 367780055}
+  progressBar: {fileID: 741080684}
+  progressIndicator: {fileID: 1078919848}
+  detailLabel: {fileID: 701381442}
+  oldCamera: {fileID: 780623010}
+  oldLight: {fileID: 269214051}
 --- !u!1 &701381441
 GameObject:
   m_ObjectHideFlags: 0
@@ -641,7 +659,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: -0.0000076293945, y: 29.050003}
+  m_AnchoredPosition: {x: -0.0000076293945, y: 80}
   m_SizeDelta: {x: 864.2, y: 58.100006}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &741080684
@@ -849,7 +867,6 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 1049203600}
-  - component: {fileID: 1049203601}
   m_Layer: 5
   m_Name: LevelLoader
   m_TagString: Untagged
@@ -875,23 +892,6 @@ RectTransform:
   m_AnchoredPosition: {x: -37, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1049203601
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1049203599}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cc30b8bf43534bf4ebae86772b7ce420, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  LoadCanvas: {fileID: 367780055}
-  progressBar: {fileID: 741080684}
-  progressIndicator: {fileID: 1078919848}
-  detailLabel: {fileID: 701381442}
-  oldCamera: {fileID: 780623010}
-  oldLight: {fileID: 269214051}
 --- !u!1 &1078919847
 GameObject:
   m_ObjectHideFlags: 0
