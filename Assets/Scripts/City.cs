@@ -16,10 +16,14 @@ public class City : Construction
 	private float _cargo;
 	public int Cargo { get; private set; } = 0;
 
+	private List<Flux> incomingFlux;
+	private List<Flux> outgoingFlux;
+
 	public List<City> LinkedCities { get; }
-	public Window InfoWindow = null;
+	public WindowTextInfo InfoWindow = null;
 
 	private static List<string> cityNames = null;
+	
 
 	public City(Coord position, Component cityPrefab)
 	{
@@ -35,6 +39,8 @@ public class City : Construction
 		CargoChance = Random.Range(CargoChanceRange.x, CargoChanceRange.y);
 		CargoProduction = Random.Range(CargoProductionRange.x, CargoProductionRange.y);
 		LinkedCities = new List<City>();
+		incomingFlux = new List<Flux>();
+		outgoingFlux = new List<Flux>();
 	}
 
 	public void UpdateLabel()
@@ -121,6 +127,28 @@ public class City : Construction
 		}
 	}
 
+	public void ReferenceFlux(Flux flux, Flux.Direction direction)
+	{
+		if (direction == Flux.Direction.incoming)
+			incomingFlux.Add(flux);
+		else
+			outgoingFlux.Add(flux);
+
+	}
+
+	public bool DistributeCargo(int quantity)
+	{
+		if (_cargo >= quantity)
+		{
+			_cargo -= quantity;
+			Cargo = Mathf.FloorToInt(_cargo);
+			UpdateInformations();
+			return true;
+		}
+		else
+			return false;
+	}
+
 	public override bool Equals(object obj)
 	{
 		var n = obj as City;
@@ -146,10 +174,27 @@ public class City : Construction
 		StringBuilder sb = new StringBuilder();
 
 		sb.Append($"<b>Stock</b>: {Cargo} caisse{((Cargo > 1)?"s":"")} de cargo ({Mathf.Round(100*_cargo)/100})\n");
-		sb.Append($"<b>Génération de cargo:\n");
+		sb.Append($"<b>Génération de cargo</b>:\n");
 		sb.Append($"\tProbabilité de {(int)(CargoChance*100f)}%\n\tProduction à {Mathf.Round(100*CargoProduction*(1f/Simulation.TickFrequency))/100}/s\n");
 		sb.Append($"<b>Position</b>: {Point}\n");
-		sb.Append("<b>Lié aux villes:\n");
+		sb.Append("<b>Production:</b>\n");
+		if (outgoingFlux.Count == 0)
+			sb.Append("\tExport: aucun\n");
+		else
+		{
+			sb.Append("\tExport:\n");
+			foreach (Flux f in outgoingFlux)
+				sb.Append($"\t\t{f.TotalMoved} vers {f.Target} \r({ManhattanDistance(f.Target)} cases)\n");
+		}
+		if (outgoingFlux.Count == 0)
+			sb.Append("\tImport: aucun\n");
+		else
+		{
+			sb.Append("\tImport:\n");
+			foreach (Flux f in incomingFlux)
+				sb.Append($"\t\t{f.TotalMoved} depuis {f.Source} \r({ManhattanDistance(f.Source)} cases)\n");
+		}
+		sb.Append("<b>Lié aux villes</b>:\n");
 		var linkedCities = LinkedCities.OrderBy(c => ManhattanDistance(c));
 		foreach (City c in linkedCities)
 		{
@@ -166,6 +211,11 @@ public class City : Construction
 			InfoWindow.TextContent(InfoText());
 		}
 		UpdateLabel();
+	}
+
+	public override string ToString()
+	{
+		return Name;
 	}
 }
 

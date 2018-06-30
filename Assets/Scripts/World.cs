@@ -21,7 +21,7 @@ public class World : MonoBehaviour
 
 	public Component uiCanvas;
 
-	public static float width = 512;
+	public static float width = 50;
 	public static float height = width;
 
 	public int minCityDistance = 4;
