@@ -9,6 +9,8 @@ public class SaveHandler
 	public static readonly string Extention = ".json";
 	public static readonly string Folder = "saves";
 
+	public static readonly string MinCompatibleVersion = "0.0.4";
+
 	private static string savePath = Application.persistentDataPath + Path.DirectorySeparatorChar + Folder + Path.DirectorySeparatorChar;
 
 	static SaveHandler()
@@ -44,7 +46,7 @@ public class SaveHandler
 		InfoText.Display($"Jeu sauvegardé sous {saveName}");
 	}
 
-	public static void Load(string fileName)
+	public static bool Load(string fileName)
 	{
 		var serializer = GetSerializer();
 		var fullFilePath = savePath + fileName;
@@ -54,8 +56,17 @@ public class SaveHandler
 		var saveData = serializer.Deserialize<WorldSave>(jsonStream);
 		jsonStream.Close();
 
-		World.loadData = saveData;
-		World.ReloadLevel();
+		if (CheckVersionCompatibility(saveData.Version))
+		{
+			World.loadData = saveData;
+			World.ReloadLevel();
+			return true;
+		}
+		else
+		{
+			Message.ShowError("Erreur de chargement de la sauvegarde", $" <b>version incompatible</b>\n{fileName} n'a pas pu être chargée.\n\nDernière version compatible : {MinCompatibleVersion}\nVersion de la sauvegarde : {saveData.Version}");
+			return false;
+		}
 	}
 
 	public static string[] ListSaveGames()
@@ -66,6 +77,15 @@ public class SaveHandler
 			fullItems[i] = Path.GetFileNameWithoutExtension(fullItems[i]);
 		}
 		return fullItems;
+	}
+
+	public static bool CheckVersionCompatibility(string version)
+	{
+		Version minVersion = Version.Parse(MinCompatibleVersion);
+		Version actualVersion = Version.Parse(Application.version);
+		Version saveVersion = Version.Parse(version);
+
+		return saveVersion.CompareTo(actualVersion) <= 0 && saveVersion.CompareTo(minVersion) >= 0;
 	}
 
 }

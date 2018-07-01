@@ -23,7 +23,8 @@ public class WindowTextInfo : Window
 
 	override public void Close()
 	{
-		City.InfoWindow = null;
+		if(City!=null)
+			City.InfoWindow = null;
 	}
 }
 

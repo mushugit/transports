@@ -17,6 +17,12 @@ public class SaveGameItem : MonoBehaviour {
 
 	public void Load()
 	{
-		SaveHandler.Load(fullName);
+		if (!SaveHandler.Load(fullName))
+		{
+			var loadMenu = GetComponentInParent<LoadMenu>();
+			loadMenu.Back();
+			var pauseMenu = GetComponentInParent<PauseMenu>();
+			pauseMenu.Resume();
+		}
 	}
 }
