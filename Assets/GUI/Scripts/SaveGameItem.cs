@@ -17,12 +17,14 @@ public class SaveGameItem : MonoBehaviour {
 
 	public void Load()
 	{
-		if (!SaveHandler.Load(fullName))
+		string errorMessage;
+		if (!SaveHandler.Load(fullName, out errorMessage))
 		{
 			var loadMenu = GetComponentInParent<LoadMenu>();
 			loadMenu.Back();
 			var pauseMenu = GetComponentInParent<PauseMenu>();
 			pauseMenu.Resume();
+			Message.ShowError("Erreur de chargement de la sauvegarde", errorMessage);
 		}
 	}
 }

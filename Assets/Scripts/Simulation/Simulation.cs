@@ -41,5 +41,22 @@ public class Simulation
 		var f = new Flux(dummyFlux);
 		flux.Add(f);
 	}
+
+	public static void RemoveFlux(Flux f)
+	{
+		flux.Remove(f);
+	}
+
+	public static void CityDestroyed(City c)
+	{
+		foreach(Flux f in flux)
+		{
+			if(f.Source == c || f.Target == c)
+			{
+				RemoveFlux(f);
+				Flux.RemoveFlux(f);
+			}
+		}
+	}
 }
 

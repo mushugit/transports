@@ -28,6 +28,8 @@ public class World : MonoBehaviour
 
 	public int minCityDistance = 4;
 
+	public static readonly int worldLoadSceneIndex = 1;
+
 
 	public Construction[,] Constructions { get; private set; }
 	public List<City> Cities;
@@ -39,7 +41,7 @@ public class World : MonoBehaviour
 	public static void ReloadLevel()
 	{
 		PauseMenu.ForceResume();
-		SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+		SceneManager.LoadScene(worldLoadSceneIndex);
 	}
 
 	public static void CleanLoader()
@@ -378,6 +380,7 @@ public class World : MonoBehaviour
 	public void DestroyCity(Coord cityCenter)
 	{
 		var c = Constructions[cityCenter.X, cityCenter.Y] as City;
+		Cities.Remove(c);
 		c.Destroy();
 		Constructions[cityCenter.X, cityCenter.Y] = null;
 	}

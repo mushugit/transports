@@ -1671,7 +1671,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 466025871}
         m_MethodName: Resume
         m_Mode: 1
         m_Arguments:
@@ -2881,6 +2881,7 @@ MonoBehaviour:
   savegameList: {fileID: 1337595063}
   saveGameItemPrefab: {fileID: 1816715446857018, guid: cb644a8a0aec36d40a4bf51ed5e41478,
     type: 2}
+  isMainMenu: 0
 --- !u!1 &1453811832
 GameObject:
   m_ObjectHideFlags: 0

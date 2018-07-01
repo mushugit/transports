@@ -13,9 +13,9 @@ public class WorldSave
 	[JsonProperty]
 	public float Height;
 
-	public List<Construction> Constructions;
+	public List<Construction> Constructions = new List<Construction>();
 
-	public List<Flux> AllFlux;
+	public List<Flux> AllFlux = new List<Flux>();
 
 	private WorldSave() { }
 
@@ -30,7 +30,7 @@ public class WorldSave
 			Version = Application.version,
 			Build = Application.buildGUID,
 			AllFlux = Flux.AllFlux
-	};
+		};
 
 		var c = w.Constructions;
 		var width = c.GetLength(0);

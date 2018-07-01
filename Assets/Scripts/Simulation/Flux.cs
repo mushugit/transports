@@ -106,5 +106,10 @@ public class Flux
 			}
 		}
 	}
+
+	public static void RemoveFlux(Flux f)
+	{
+		AllFlux.Remove(f);
+	}
 }
 

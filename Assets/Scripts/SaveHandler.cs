@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using UnityEngine;
 
 public class SaveHandler
@@ -46,7 +47,7 @@ public class SaveHandler
 		InfoText.Display($"Jeu sauvegardé sous {saveName}");
 	}
 
-	public static bool Load(string fileName)
+	public static bool Load(string fileName, out string errorMessage)
 	{
 		var serializer = GetSerializer();
 		var fullFilePath = savePath + fileName;
@@ -60,11 +61,17 @@ public class SaveHandler
 		{
 			World.loadData = saveData;
 			World.ReloadLevel();
+			errorMessage = "";
 			return true;
 		}
 		else
 		{
-			Message.ShowError("Erreur de chargement de la sauvegarde", $" <b>version incompatible</b>\n{fileName} n'a pas pu être chargée.\n\nDernière version compatible : {MinCompatibleVersion}\nVersion de la sauvegarde : {saveData.Version}");
+			var sb = new StringBuilder();
+			sb.Append("<b>Version incompatible</b>");
+			sb.Append($"\n{fileName} n'a pas pu être chargée.\n");
+			sb.Append($"\nDernière version compatible : {MinCompatibleVersion}");
+			sb.Append($"\nVersion de la sauvegarde : {saveData.Version}");
+			errorMessage = sb.ToString();
 			return false;
 		}
 	}
