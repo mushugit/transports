@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Newtonsoft.Json;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,16 +7,22 @@ public class Road : Construction
 {
     readonly Component roadRender;
 
+	private Road() { }
+
     public Road(int x, int y, Component roadPrefab)
     {
         Point = new Coord(x, y);
         roadRender = RoadRender.Build(new Vector3(x, 0f, y), roadPrefab);
     }
 
-    public Road(Coord point, Component roadPrefab)
+	[JsonConstructor]
+	public Road(Coord point, Component roadPrefab)
     {
         Point = point;
-        roadRender = RoadRender.Build(new Vector3(Point.X, 0f, Point.Y), roadPrefab);
+		if (roadPrefab != null)
+		{
+			roadRender = RoadRender.Build(new Vector3(Point.X, 0f, Point.Y), roadPrefab);
+		}
     }
 
     public void UpdateConnexions(bool north, bool east, bool south, bool west)

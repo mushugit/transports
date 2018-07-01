@@ -44,22 +44,31 @@ public class CellRender : MonoBehaviour, IPointerClickHandler
 
 	bool Highlight()
 	{
-		var c = Camera.main;
-		var r = c.ScreenPointToRay(Input.mousePosition);
-		var h = new RaycastHit();
-		var m = 1 << 31;
-		if (Physics.Raycast(r, out h, 1000, m))
+		if (Builder.IsBuilding || Builder.IsDestroying)
 		{
-			var p = h.point;
-			var d = p;
-			d.x = Mathf.Round(p.x - 0.5f);
-			d.y = 1;
-			d.z = Mathf.Round(p.z - 0.5f);
-			currentPoint = new Coord((int)d.x, (int)d.z);
+			var c = Camera.main;
+			var r = c.ScreenPointToRay(Input.mousePosition);
+			var h = new RaycastHit();
+			var m = 1 << 31;
+			if (Physics.Raycast(r, out h, 1000, m))
+			{
+				var p = h.point;
+				var d = p;
+				d.x = Mathf.Round(p.x - 0.5f);
+				d.y = 1;
+				d.z = Mathf.Round(p.z - 0.5f);
+				currentPoint = new Coord((int)d.x, (int)d.z);
 
-			highlighter.SetActive(true);
-			highlighter.transform.position = d;
-			return true;
+				highlighter.SetActive(true);
+				highlighter.transform.position = d;
+				return true;
+			}
+			else
+			{
+				currentPoint = null;
+				highlighter.SetActive(false);
+				return false;
+			}
 		}
 		else
 		{
@@ -153,7 +162,7 @@ public class CellRender : MonoBehaviour, IPointerClickHandler
 			{
 				if (Builder.TypeOfBuild == typeof(Road))
 				{
-					StartCoroutine(World.Instance.Roads(new List<Coord>() { currentPoint }));
+					StartCoroutine(World.Instance.BuildRoads(new List<Coord>() { currentPoint }));
 					AudioManager.Player.Play("buildRoad");
 				}
 				if (Builder.TypeOfBuild == typeof(City))

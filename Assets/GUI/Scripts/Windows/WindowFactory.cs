@@ -26,6 +26,11 @@ class WindowFactory : MonoBehaviour
 		return instance._BuildTextInfo(title,position, c);
 	}
 
+	public static WindowTextInfo BuildTextInfo(string title, Vector3 position, string message, Color tint)
+	{
+		return instance._BuildTextInfo(title, position, message,tint);
+	}
+
 	public static WindowFluxSetup BuildFluxSetup(string title, Vector3 position)
 	{
 		return instance._BuildFluxSetup(title, position);
@@ -74,6 +79,32 @@ class WindowFactory : MonoBehaviour
 		wtc.ContentText(c.InfoText());
 
 		var w = new WindowTextInfo(windowObject, position, c)
+		{
+			Title = title
+		};
+		windowObjectRef.Window = w;
+
+		windows.Add(w);
+
+		return w;
+	}
+
+	public WindowTextInfo _BuildTextInfo(string title, Vector3 position, string message, Color tint)
+	{
+		position.z = 0;
+		var windowCanvasObject = Instantiate(windowTextInfoPrefab, parent.transform);
+
+		var windowObjectRef = windowCanvasObject.GetComponentInChildren<WindowReferencer>();
+		var windowObject = windowObjectRef.GameObjectWindow;
+
+		var tintObject = GetComponentInChildren<Tint>(true);
+		tintObject.SetColor(tint);
+		tintObject.SetActive(true);
+
+		var wtc = windowObject.GetComponent<WindowTextContent>();
+		wtc.ContentText(message);
+
+		var w = new WindowTextInfo(windowObject, position, null)
 		{
 			Title = title
 		};

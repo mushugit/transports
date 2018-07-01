@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using Newtonsoft.Json;
 
 public abstract class Construction
 {
-    public Coord Point { get; protected set; }
+	[JsonProperty]
+	public Coord Point { get; protected set; }
 
     protected Construction() : this(0, 0) { }
 

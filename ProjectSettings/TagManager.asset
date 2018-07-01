@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Hightlighter
+  - Tint
   layers:
   - Default
   - TransparentFX
