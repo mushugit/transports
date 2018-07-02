@@ -42,7 +42,7 @@ public class Coord
 		return d;
 	}
 
-	public float Distance(Coord c)
+	public float FlyDistance(Coord c)
 	{
 		float d = Mathf.Sqrt((c.X - X) * (c.X - X) + (c.Y - Y) * (c.Y - Y));
 		//Debug.Log("Distance entre " + ToString() + " et " + c.ToString() + " = " + d);

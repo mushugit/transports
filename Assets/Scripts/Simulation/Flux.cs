@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -64,7 +65,6 @@ public class Flux
 
 	private bool Consume()
 	{
-		Debug.Log($"[Flux] {Source}=>{Target}, CONSUME");
 		return Source.DistributeCargo(1);
 	}
 
@@ -74,7 +74,11 @@ public class Flux
 		var delivered = true;
 		if (delivered)
 		{
-			Debug.Log($"[Flux] {Source}=>{Target}, DISTRIBUTE");
+			var flyDistance = Source.FlyDistance(Target);
+			var optimumGain = World.LocalEconomy.GetGain("flux_deliver_optimum_percell");
+			var obtainedGain = World.LocalEconomy.GetGain("flux_deliver_percell");
+			var gain = (int) Math.Round(optimumGain * flyDistance - obtainedGain * distance);
+			World.LocalEconomy.Credit(gain);
 			TotalCargoMoved++;
 			Position = 0;
 		}
@@ -83,6 +87,8 @@ public class Flux
 
 	public void Move()
 	{
+		int cost;
+		World.LocalEconomy.ForcedCost("flux_running", out cost);
 		IsWaitingForInput = false;
 		IsWaitingForDelivery = false;
 

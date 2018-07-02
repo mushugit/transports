@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -27,8 +28,10 @@ public class World : MonoBehaviour
 	public static float height = width;
 
 	public int minCityDistance = 4;
+	public static Economy LocalEconomy { get; private set; }
 
 	public static readonly int worldLoadSceneIndex = 1;
+	public static readonly int looseSceneIndex = 3;
 
 
 	public Construction[,] Constructions { get; private set; }
@@ -44,6 +47,11 @@ public class World : MonoBehaviour
 		SceneManager.LoadScene(worldLoadSceneIndex);
 	}
 
+	public static void Loose()
+	{
+		SceneManager.LoadScene(looseSceneIndex);
+	}
+
 	public static void CleanLoader()
 	{
 		var loader = Instance.GetComponentInParent<LevelLoader>();
@@ -55,6 +63,9 @@ public class World : MonoBehaviour
 	{
 		if (gameLoading)
 			return;
+
+		if (LocalEconomy.Balance < LocalEconomy.GetGain("loose"))
+			Loose();
 
 		if (Input.GetButton("Reload"))
 			ReloadLevel();
@@ -73,6 +84,7 @@ public class World : MonoBehaviour
 
 	private void Awake()
 	{
+		LocalEconomy = new Economy(EconomyTemplate.Difficulty.Free);
 		Constructions = new Construction[(int)width, (int)height];
 		Instance = this;
 
@@ -139,6 +151,7 @@ public class World : MonoBehaviour
 		itemLoading = "Chargement terminé";
 		gameLoading = false;
 
+		LocalEconomy = new Economy(EconomyTemplate.Difficulty.Normal);
 		ActivateUI();
 		CleanLoader();
 		yield return StartCoroutine(Simulation.Run());
@@ -182,6 +195,7 @@ public class World : MonoBehaviour
 		itemLoading = "Chargement terminé";
 		gameLoading = false;
 
+		LocalEconomy = new Economy(EconomyTemplate.Difficulty.Normal);
 		ActivateUI();
 		CleanLoader();
 		yield return StartCoroutine(Simulation.Run());
@@ -282,8 +296,8 @@ public class World : MonoBehaviour
 		var n = 0;
 		while (n < quantity)
 		{
-			int x = Random.Range(0, w);
-			int y = Random.Range(0, h);
+			int x = UnityEngine.Random.Range(0, w);
+			int y = UnityEngine.Random.Range(0, h);
 			var cityCenter = new Coord(x, y);
 			if (Constructions[x, y] == null)
 			{
@@ -305,9 +319,25 @@ public class World : MonoBehaviour
 		}
 	}
 
+	public static bool CheckCost(string operationName,string messageOperation, out int cost)
+	{
+		if (!LocalEconomy.DoCost(operationName, out cost))
+		{
+			Message.ShowError("Pas assez d'argent",
+				$"Vous ne pouvez pas {messageOperation} celà coûte {cost} et vous avez {LocalEconomy.Balance}");
+			return false;
+		}
+		else
+			return true;
+	}
+
 	private void _BuildDepot(Coord pos, int direction)
 	{
+		int cost;
+		if (!CheckCost("build_depot","construire un dépôt",out cost))
+			return;
 
+		AudioManager.Player.Play("buildCity");
 		var c = new Depot(pos, depotPrefab, direction);
 
 		Constructions[pos.X, pos.Y] = c;
@@ -338,6 +368,10 @@ public class World : MonoBehaviour
 
 	public void BuildCity(City dummyCity)
 	{
+		int cost;
+		if (!CheckCost("build_city", "bâtir une nouvelle ville", out cost))
+			return;
+
 		var c = new City(dummyCity, cityPrefab);
 		var cityCenter = dummyCity.Point;
 
@@ -359,6 +393,11 @@ public class World : MonoBehaviour
 
 	public void BuildCity(Coord cityCenter)
 	{
+		int cost;
+		if (!CheckCost("build_city", "bâtir une nouvelle ville", out cost))
+			return;
+
+		AudioManager.Player.Play("buildCity");
 		var c = new City(cityCenter, cityPrefab);
 
 		Constructions[cityCenter.X, cityCenter.Y] = c;
@@ -379,6 +418,10 @@ public class World : MonoBehaviour
 
 	public void DestroyCity(Coord cityCenter)
 	{
+		int cost;
+		if (!CheckCost("destroy_city", "raser une ville", out cost))
+			return;
+
 		var c = Constructions[cityCenter.X, cityCenter.Y] as City;
 		Cities.Remove(c);
 		c.Destroy();
@@ -387,6 +430,10 @@ public class World : MonoBehaviour
 
 	public void DestroyDepot(Coord pos)
 	{
+		int cost;
+		if (!CheckCost("destroy_depot", "détruire un dépôt", out cost))
+			return;
+
 		var c = Constructions[pos.X, pos.Y] as City;
 		c.Destroy();
 		Constructions[pos.X, pos.Y] = null;
@@ -414,6 +461,21 @@ public class World : MonoBehaviour
 		}
 
 		return false;
+	}
+
+	public void BuildRoad(Coord pos)
+	{
+		int cost;
+		if (!CheckCost("build_road", "construire une route", out cost))
+			return;
+
+		AudioManager.Player.Play("buildRoad");
+		Road road = new Road(pos, roadPrefab);
+		UpdateRoad(road);
+		Constructions[pos.X, pos.Y] = road;
+		var neighbors = Neighbors(pos);
+		foreach (Road r in neighbors)
+			UpdateRoad(r);
 	}
 
 	public IEnumerator BuildRoads(List<Coord> path)
@@ -460,6 +522,10 @@ public class World : MonoBehaviour
 
 	public void DestroyRoad(Coord pos)
 	{
+		int cost;
+		if (!CheckCost("destroy_road", "détruire une route", out cost))
+			return;
+
 		var r = Constructions[pos.X, pos.Y] as Road;
 
 		var neighborsRoads = new List<Road>();

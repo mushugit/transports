@@ -109,6 +109,16 @@ public class City : Construction
 		return Point.ManhattanDistance(point);
 	}
 
+	public float FlyDistance(City city)
+	{
+		return Point.FlyDistance(city.Point);
+	}
+
+	public float FlyDistance(Coord point)
+	{
+		return Point.FlyDistance(point);
+	}
+
 	public void AddLinkTo(City c)
 	{
 		if (!LinkedCities.Contains(c))

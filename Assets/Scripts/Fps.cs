@@ -27,7 +27,7 @@ public class Fps : MonoBehaviour
 
     void OnGUI()
     {
-        GUI.Label(new Rect(5, 5, 100, 25), fps);
+        GUI.Label(new Rect(Screen.width - 80,Screen.height - 30, 75, 25), fps);
     }
 
 }

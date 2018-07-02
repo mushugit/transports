@@ -32,12 +32,20 @@ public class Simulation
 
 	public static void AddFlux(City source, City target)
 	{
+		int cost;
+		if (!World.CheckCost("flux_create", "ajouter un flux", out cost))
+			return;
+
 		var f = new Flux(source, target);
 		flux.Add(f);
 	}
 
 	public static void AddFlux(Flux dummyFlux)
 	{
+		int cost;
+		if (!World.CheckCost("flux_create", "ajouter un flux", out cost))
+			return;
+
 		var f = new Flux(dummyFlux);
 		flux.Add(f);
 	}
