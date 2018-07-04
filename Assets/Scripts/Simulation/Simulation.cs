@@ -37,6 +37,15 @@ public class Simulation
 			return;
 
 		var f = new Flux(source, target);
+
+		if(f.Distance <= 0)
+		{
+			Message.ShowError("Flux impossible",
+				$"Impossible de trouver un flux de {source} vers {target} par la route.");
+			World.LocalEconomy.Credit(cost);
+			return;
+		}
+
 		flux.Add(f);
 	}
 
@@ -47,6 +56,15 @@ public class Simulation
 			return;
 
 		var f = new Flux(dummyFlux);
+
+		if (f.Distance <= 0)
+		{
+			Message.ShowError("Flux impossible",
+				$"Impossible de trouver un flux de {f.Source} vers {f.Target} par la route.");
+			World.LocalEconomy.Credit(cost);
+			return;
+		}
+
 		flux.Add(f);
 	}
 

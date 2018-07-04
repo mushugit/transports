@@ -69,8 +69,8 @@ public class EconomyTemplate
 			{ "start",                              (int)Math.Round(10000 * mGain) },
 			{ "loose",								(int)Math.Round(-10000 * mGain) },
 
-			{ "flux_deliver_percell",				(int)Math.Round(5 * mGain) },
-			{ "flux_deliver_optimum_percell",		(int)Math.Round(10 * mGain) }
+			{ "flux_deliver_percell",				(int)Math.Round(20 * mGain) },
+			{ "flux_deliver_optimum_percell",		(int)Math.Round(80 * mGain) }
 		};
 
 		operationsCosts = new Dictionary<string, int>
@@ -84,7 +84,7 @@ public class EconomyTemplate
 			{ "build_depot",                        (int)Math.Round(250 * mCost) },
 			{ "destroy_depot",                      (int)Math.Round(125 * mCost) },
 
-			{ "flux_create",                        (int)Math.Round(200 * mCost) },
+			{ "flux_create",                        (int)Math.Round(150 * mCost) },
 			{ "flux_running",                        (int)Math.Round(1 * mCost) }
 		};
 

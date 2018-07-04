@@ -643,10 +643,11 @@ public class World : MonoBehaviour
 			//Debug.Log($"Je suis à {p} et je venais de {cameFrom[p.X, p.Y]}");
 			path.Add(p);
 		}
+		Debug.Log($"Trouvé chemin de longeur {path.Count}");
 		return path;
 	}
 
-	internal class SearchParameter
+	public class SearchParameter
 	{
 		public Coord Start { get; }
 		public Coord Target { get; }
@@ -670,7 +671,7 @@ public class World : MonoBehaviour
 		}
 	}
 
-	IEnumerator SearchPath(SearchParameter parameters)
+	public IEnumerator SearchPath(SearchParameter parameters)
 	{
 		//Debug.Log("Search path from " + parameters.Start + " to " + parameters.Target);
 
@@ -700,10 +701,9 @@ public class World : MonoBehaviour
 			opened.Sort();
 			Node n = opened.First();
 			//Debug.Log($"Chosen = {n.Point} H={n.Heuristic} c={n.Cost}");
-			if (n.Point.ManhattanDistance(target) <= 1)
+			if (n.Point.ManhattanDistance(target) <= 0)
 			{
 				// Target found
-				//Debug.Log("Found path !");
 				// Add last point
 				cameFrom[target.X, target.Y] = n.Point;
 
@@ -711,6 +711,8 @@ public class World : MonoBehaviour
 				{
 					//TODO : visual A*
 				}
+
+				//Debug.Log($"Found path from {start} to {target}");
 
 				// Rebuild path
 				parameters.Path = TraceBackPath(cameFrom, target);
