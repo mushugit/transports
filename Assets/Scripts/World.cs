@@ -24,7 +24,7 @@ public class World : MonoBehaviour
 
 	public Component uiCanvas;
 
-	public static float width = 50;
+	public static float width = 1000;
 	public static float height = width;
 
 	public int minCityDistance = 4;
@@ -441,7 +441,16 @@ public class World : MonoBehaviour
 
 	public void UpdateRoad(Road r)
 	{
-		r.UpdateConnexions(IsLinkable(2, North(r)), IsLinkable(3, East(r)), IsLinkable(0, South(r)), IsLinkable(1, West(r)));
+		var north = North(r);
+		var east = East(r);
+		var south = South(r);
+		var west = West(r);
+		var isLinkNorth = IsLinkable(2, north);
+		var isLinkEast = IsLinkable(3, east);
+		var isLinkSouth = IsLinkable(0, south);
+		var isLinkWest = IsLinkable(1, west);
+		//Debug.Log($"Update de {r.Point} : n={isLinkNorth} e={isLinkEast} s={isLinkSouth} w={isLinkWest}");
+		r.UpdateConnexions(isLinkNorth, isLinkEast, isLinkSouth, isLinkWest);
 	}
 
 	public bool IsLinkable(int direction, Construction c)
@@ -471,8 +480,8 @@ public class World : MonoBehaviour
 
 		AudioManager.Player.Play("buildRoad");
 		Road road = new Road(pos, roadPrefab);
-		UpdateRoad(road);
 		Constructions[pos.X, pos.Y] = road;
+		UpdateRoad(road);
 		var neighbors = Neighbors(pos);
 		foreach (Road r in neighbors)
 			UpdateRoad(r);
@@ -501,7 +510,6 @@ public class World : MonoBehaviour
 		{
 			countLoop++;
 
-			neighborsRoads.Remove(r);
 			foreach (Road neighborsRoad in Neighbors(r.Point))
 			{
 				if (!neighborsRoads.Contains(neighborsRoad))
@@ -643,7 +651,7 @@ public class World : MonoBehaviour
 			//Debug.Log($"Je suis à {p} et je venais de {cameFrom[p.X, p.Y]}");
 			path.Add(p);
 		}
-		Debug.Log($"Trouvé chemin de longeur {path.Count}");
+		//Debug.Log($"Trouvé chemin de longeur {path.Count}");
 		return path;
 	}
 
