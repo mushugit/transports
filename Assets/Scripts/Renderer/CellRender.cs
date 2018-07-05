@@ -162,18 +162,15 @@ public class CellRender : MonoBehaviour, IPointerClickHandler
 			{
 				if (Builder.TypeOfBuild == typeof(Road))
 				{
-					StartCoroutine(World.Instance.BuildRoads(new List<Coord>() { currentPoint }));
-					AudioManager.Player.Play("buildRoad");
+					World.Instance.BuildRoad(currentPoint);
 				}
 				if (Builder.TypeOfBuild == typeof(City))
 				{
 					World.Instance.BuildCity(currentPoint);
-					AudioManager.Player.Play("buildCity");
 				}
 				if (Builder.TypeOfBuild == typeof(Depot))
 				{
 					World.Instance.BuildDepot(currentPoint);
-					AudioManager.Player.Play("buildCity");
 				}
 			}
 		}

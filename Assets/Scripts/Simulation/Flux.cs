@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,7 +17,7 @@ public class Flux
 	private readonly float speed;
 	[JsonProperty]
 	public float Position { get; private set; }
-	private readonly float distance;
+	public readonly float Distance;
 
 	[JsonProperty]
 	public int TotalCargoMoved { get; private set; }
@@ -34,7 +35,7 @@ public class Flux
 	{
 		Source = source;
 		Target = target;
-		distance = Source.ManhattanDistance(Target);
+		Distance = RoadDistance(Source.Point, Target.Point);
 		speed = Simulation.TickFrequency * 2;
 		Position = 0;
 		TotalCargoMoved = 0;
@@ -45,13 +46,21 @@ public class Flux
 		AllFlux.Add(this);
 	}
 
+	private float RoadDistance(Coord a, Coord b)
+	{
+		var path = new List<Coord>();
+		var searchParameters = new World.SearchParameter(a, b, 0, 0, false, path, true, false);
+		World.Instance.StartCoroutine(World.Instance.SearchPath(searchParameters));
+		return searchParameters.Path.Count - 2;
+	}
+
 	public Flux(Flux dummyFlux)
 	{
 		var trueSource = World.Instance.Constructions[dummyFlux.Source.Point.X, dummyFlux.Source.Point.Y] as City;
 		var trueTarget = World.Instance.Constructions[dummyFlux.Target.Point.X, dummyFlux.Target.Point.Y] as City;
 		Source = trueSource;
 		Target = trueTarget;
-		distance = Source.ManhattanDistance(Target);
+		Distance = RoadDistance(Source.Point, Target.Point);
 		speed = Simulation.TickFrequency * 2;
 		Position = dummyFlux.Position;
 		TotalCargoMoved = dummyFlux.TotalCargoMoved;
@@ -64,17 +73,20 @@ public class Flux
 
 	private bool Consume()
 	{
-		Debug.Log($"[Flux] {Source}=>{Target}, CONSUME");
 		return Source.DistributeCargo(1);
 	}
 
 	private bool Distribute()
 	{
-		Position = distance;
+		Position = Distance;
 		var delivered = true;
 		if (delivered)
 		{
-			Debug.Log($"[Flux] {Source}=>{Target}, DISTRIBUTE");
+			var flyDistance = Source.FlyDistance(Target);
+			var optimumGain = World.LocalEconomy.GetGain("flux_deliver_optimum_percell");
+			var obtainedGain = World.LocalEconomy.GetGain("flux_deliver_percell");
+			var gain = (int) Math.Round(optimumGain * flyDistance - obtainedGain * Distance);
+			World.LocalEconomy.Credit(gain);
 			TotalCargoMoved++;
 			Position = 0;
 		}
@@ -83,6 +95,8 @@ public class Flux
 
 	public void Move()
 	{
+		int cost;
+		World.LocalEconomy.ForcedCost("flux_running", out cost);
 		IsWaitingForInput = false;
 		IsWaitingForDelivery = false;
 
@@ -97,7 +111,7 @@ public class Flux
 
 		Position += speed;
 
-		if (Position > distance)
+		if (Position > Distance)
 		{
 			if (!Distribute())
 			{

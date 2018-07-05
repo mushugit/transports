@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
+using UnityEngine;
 
 public class Node : IEquatable<Node>, IComparable<Node>
 {
@@ -66,22 +68,20 @@ public class Node : IEquatable<Node>, IComparable<Node>
 		}
 		else
 		{
-			//left
-			if (Point.X > 0)
-				if (World.Constructions[Point.X - 1, Point.Y] != null && (World.Constructions[Point.X - 1, Point.Y] is Road || World.Constructions[Point.X - 1, Point.Y] is City))
-					neighbors.Add(new Node(World, new Coord(Point.X - 1, Point.Y), float.MaxValue, 0));
-			//right
-			if (Point.X < World.width - 1)
-				if (World.Constructions[Point.X + 1, Point.Y] != null && (World.Constructions[Point.X + 1, Point.Y] is Road || World.Constructions[Point.X + 1, Point.Y] is City))
-					neighbors.Add(new Node(World, new Coord(Point.X + 1, Point.Y), float.MaxValue, 0));
-			//up
-			if (Point.Y < World.height - 1)
-				if (World.Constructions[Point.X, Point.Y + 1] != null && (World.Constructions[Point.X, Point.Y + 1] is Road || World.Constructions[Point.X, Point.Y + 1] is City))
-					neighbors.Add(new Node(World, new Coord(Point.X, Point.Y + 1), float.MaxValue, 0));
-			//down
-			if (Point.Y > 0)
-				if (World.Constructions[Point.X, Point.Y - 1] != null && (World.Constructions[Point.X, Point.Y - 1] is Road || World.Constructions[Point.X, Point.Y - 1] is City))
-					neighbors.Add(new Node(World, new Coord(Point.X, Point.Y - 1), float.MaxValue, 0));
+			var sb = new StringBuilder();
+			foreach(Coord p in directions)
+			{
+				if (p != null)
+				{
+					var c = World.Constructions[p.X, p.Y];
+					if (c is Road || c is City)
+					{
+						neighbors.Add(new Node(World, p, float.MaxValue, 0));
+						sb.Append($"{p.ToString()} ");
+					}
+				}
+			}
+			Debug.Log($"Road neightbors of {Point} are {sb.ToString()}");
 		}
 		return neighbors;
 	}

@@ -37,12 +37,12 @@ public class Coord
 
 	public int ManhattanDistance(Coord c)
 	{
-		int d = Mathf.Abs(c.X - X) + Mathf.Abs(c.Y - Y);
+		int d = Mathf.Abs(c.X - X) + Mathf.Abs(c.Y - Y) - 1;
 		//Debug.Log("ManhattanDistance entre " + ToString() + " et " + c.ToString() + " = " + d);
 		return d;
 	}
 
-	public float Distance(Coord c)
+	public float FlyDistance(Coord c)
 	{
 		float d = Mathf.Sqrt((c.X - X) * (c.X - X) + (c.Y - Y) * (c.Y - Y));
 		//Debug.Log("Distance entre " + ToString() + " et " + c.ToString() + " = " + d);

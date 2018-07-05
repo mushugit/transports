@@ -12,7 +12,7 @@ public class SaveHandler
 
 	public static readonly string MinCompatibleVersion = "0.0.4";
 
-	private static string savePath = Application.persistentDataPath + Path.DirectorySeparatorChar + Folder + Path.DirectorySeparatorChar;
+	private static readonly string savePath = Application.persistentDataPath + Path.DirectorySeparatorChar + Folder + Path.DirectorySeparatorChar;
 
 	static SaveHandler()
 	{

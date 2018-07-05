@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
+using System;
 
 [JsonObject(MemberSerialization.OptIn)]
 public class City : Construction
@@ -72,8 +73,8 @@ public class City : Construction
 		var name = RandomName();
 		var cargo = 0f;
 
-		var cargoChance = Random.Range(CargoChanceRange.x, CargoChanceRange.y);
-		var cargoProduction = Random.Range(CargoProductionRange.x, CargoProductionRange.y);
+		var cargoChance = UnityEngine.Random.Range(CargoChanceRange.x, CargoChanceRange.y);
+		var cargoProduction = UnityEngine.Random.Range(CargoProductionRange.x, CargoProductionRange.y);
 
 		SetupCity(position, cityPrefab, name, cargoChance, cargoProduction, cargo);
 	}
@@ -109,6 +110,16 @@ public class City : Construction
 		return Point.ManhattanDistance(point);
 	}
 
+	public float FlyDistance(City city)
+	{
+		return Point.FlyDistance(city.Point);
+	}
+
+	public float FlyDistance(Coord point)
+	{
+		return Point.FlyDistance(point);
+	}
+
 	public void AddLinkTo(City c)
 	{
 		if (!LinkedCities.Contains(c))
@@ -140,7 +151,7 @@ public class City : Construction
 
 	public static string RandomName()
 	{
-		var r = Random.Range(0, cityNames.Count - 1);
+		var r = UnityEngine.Random.Range(0, cityNames.Count - 1);
 		var name = cityNames[r];
 		cityNames.RemoveAt(r);
 		return name;
@@ -154,7 +165,7 @@ public class City : Construction
 
 	public void GenerateCargo()
 	{
-		if (Random.value > CargoChance)
+		if (UnityEngine.Random.value <= CargoChance)
 		{
 			ExactCargo += CargoProduction;
 			Cargo = Mathf.FloorToInt(ExactCargo);
@@ -224,7 +235,7 @@ public class City : Construction
 		{
 			sb.Append("\tExport:\n");
 			foreach (Flux f in outgoingFlux)
-				sb.Append($"\t\t{f.TotalCargoMoved} vers {f.Target} \r({ManhattanDistance(f.Target)} cases)\n");
+				sb.Append($"\t\t{f.TotalCargoMoved} vers {f.Target} \r(D:V={Math.Round(FlyDistance(f.Target),2)} I={ManhattanDistance(f.Target)} R={f.Distance})\n");
 		}
 		if (outgoingFlux.Count == 0)
 			sb.Append("\tImport: aucun\n");
