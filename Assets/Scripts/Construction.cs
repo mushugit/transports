@@ -16,4 +16,6 @@ public abstract class Construction
     {
         Point = Point;
     }
+
+	public abstract void Destroy();
 }

@@ -9,7 +9,7 @@ public class RotationalHighlight : MonoBehaviour {
 		var p = transform.position;
 		//p.x += 0.5f;
 		//p.z += 0.5f;
-		Debug.Log(p);
+		//Debug.Log(p);
 		var angle = -90;
 		if (!clockwise)
 			angle = -angle;

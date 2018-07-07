@@ -85,7 +85,7 @@ public class City : Construction
 		cityRender?.SendMessage(nameof(CityRender.Label), label);
 	}
 
-	public void Destroy()
+	public override void Destroy()
 	{
 		InfoWindow.Close();
 		var r = cityRender?.GetComponent<CityRender>();

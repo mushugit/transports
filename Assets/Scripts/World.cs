@@ -24,7 +24,7 @@ public class World : MonoBehaviour
 
 	public Component uiCanvas;
 
-	public static float width = 1000;
+	public static float width = 50;
 	public static float height = width;
 
 	public int minCityDistance = 4;
@@ -434,8 +434,8 @@ public class World : MonoBehaviour
 		if (!CheckCost("destroy_depot", "détruire un dépôt", out cost))
 			return;
 
-		var c = Constructions[pos.X, pos.Y] as City;
-		c.Destroy();
+		var d = Constructions[pos.X, pos.Y] as Depot;
+		d.Destroy();
 		Constructions[pos.X, pos.Y] = null;
 	}
 

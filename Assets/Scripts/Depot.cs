@@ -22,5 +22,11 @@ public class Depot : Construction
 				
 		Direction = direction;
 	}
+
+	public override void Destroy()
+	{
+		var r = depotRender?.GetComponentInChildren<DepotRender>();
+		r?.Destroy();
+	}
 }
 

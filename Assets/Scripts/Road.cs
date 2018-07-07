@@ -38,7 +38,7 @@ public class Road : Construction
 		roadRender.UpdateRender();
     }
 
-	public void Destroy()
+	public override void Destroy()
 	{
 		var r = roadRender.GetComponent<RoadRender>();
 		r.Destroy();
