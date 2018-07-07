@@ -39,7 +39,9 @@ public class AudioManager : MonoBehaviour
 		if(music.Length > 0)
 		{
 			var length = music[currentMusic].source.clip.length;
-			Play(music[currentMusic].name);
+			var name = music[currentMusic].name;
+			Play(name);
+			MusicInfo.DisplayName(name);
 			Invoke("NextMusic", length);
 		}
 	}
@@ -51,7 +53,9 @@ public class AudioManager : MonoBehaviour
 			currentMusic = 0;
 
 		var length = music[currentMusic].source.clip.length;
-		Play(music[currentMusic].name);
+		var name = music[currentMusic].name;
+		Play(name);
+		MusicInfo.DisplayName(name);
 		Invoke("NextMusic", length);
 	}
 
