@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -90,6 +93,59 @@ public class World : MonoBehaviour
 
 	}
 
+	private void RecalculateLinks()
+	{
+		var sw = new Stopwatch();
+		sw.Start();
+
+
+		foreach (City c in Cities)
+		{
+			c.ClearLinks();
+		}
+
+		foreach (City c in Cities)
+		{
+			foreach (City otherCity in Cities)
+			{
+				if (c != otherCity && !c.IsLinkedTo(otherCity) && !c.IsUnreachable(otherCity))
+				{
+					var p = new SearchParameter(c.Point, otherCity.Point, 0, 0, false, null, true);
+					StartCoroutine(SearchPath(p));
+					var path = p.Path;
+					if (path?.Count > 0)
+					{
+						//UnityEngine.Debug.Log($"Found path of {path.Count} steps from {c} to {otherCity}");
+						StartCoroutine(UpdateLink(c, otherCity));
+						c.UpdateFlux(path.Count, otherCity);
+					}
+					else
+					{
+						//UnityEngine.Debug.Log($"No path from {c} to {otherCity}");
+						UpdateUnreachable(c, otherCity);
+					}
+				}
+			}
+		}
+
+		sw.Stop();
+		DisplayTimeSpan("RecalculateLinks", sw.Elapsed, 1);
+	}
+
+	IEnumerator UpdateUnreachable(City a, City b)
+	{
+		var allAUnreachable = new List<City>(a.UnreachableCities) { a };
+		var allBUnreachable = new List<City>(b.UnreachableCities) { b };
+
+		foreach (City c in a.UnreachableCities)
+			c.AddUnreachable(allBUnreachable);
+		a.AddUnreachable(allBUnreachable);
+		foreach (City c in b.UnreachableCities)
+			c.AddUnreachable(allAUnreachable);
+		b.AddUnreachable(allAUnreachable);
+		yield return null;
+	}
+
 	void Start()
 	{
 		Application.targetFrameRate = 60;
@@ -133,7 +189,7 @@ public class World : MonoBehaviour
 				var d = c as Depot;
 				BuildDepot(d.Point, d.Direction);
 			}
-			if(c is Road)
+			if (c is Road)
 			{
 				roads.Add(c.Point);
 			}
@@ -142,7 +198,7 @@ public class World : MonoBehaviour
 		yield return StartCoroutine(BuildRoads(roads));
 
 		itemLoading = "Chargement des flux";
-		foreach(Flux f in loadData.AllFlux)
+		foreach (Flux f in loadData.AllFlux)
 		{
 			Simulation.AddFlux(f);
 		}
@@ -269,9 +325,15 @@ public class World : MonoBehaviour
 		if (c != null)
 		{
 			if (c is Road)
+			{
 				DestroyRoad(p);
+				RecalculateLinks();
+			}
 			if (c is City)
+			{
 				DestroyCity(p);
+				RecalculateLinks();
+			}
 			if (c is Depot)
 				DestroyDepot(p);
 		}
@@ -319,7 +381,7 @@ public class World : MonoBehaviour
 		}
 	}
 
-	public static bool CheckCost(string operationName,string messageOperation, out int cost)
+	public static bool CheckCost(string operationName, string messageOperation, out int cost)
 	{
 		if (!LocalEconomy.DoCost(operationName, out cost))
 		{
@@ -334,7 +396,7 @@ public class World : MonoBehaviour
 	private void _BuildDepot(Coord pos, int direction)
 	{
 		int cost;
-		if (!CheckCost("build_depot","construire un dépôt",out cost))
+		if (!CheckCost("build_depot", "construire un dépôt", out cost))
 			return;
 
 		AudioManager.Player.Play("buildCity");
@@ -482,6 +544,7 @@ public class World : MonoBehaviour
 		Road road = new Road(pos, roadPrefab);
 		Constructions[pos.X, pos.Y] = road;
 		UpdateRoad(road);
+		RecalculateLinks();
 		var neighbors = Neighbors(pos);
 		foreach (Road r in neighbors)
 			UpdateRoad(r);
@@ -679,8 +742,16 @@ public class World : MonoBehaviour
 		}
 	}
 
+	private void DisplayTimeSpan(string label, TimeSpan ts, int divisor)
+	{
+		var t = (long)ts.TotalMilliseconds * 10 * 1000 / divisor;
+		//UnityEngine.Debug.Log($"{label}:{new TimeSpan(t)} ({ts}/{divisor})");
+	}
+
 	public IEnumerator SearchPath(SearchParameter parameters)
 	{
+		var stopwatch = new Stopwatch();
+		stopwatch.Start();
 		//Debug.Log("Search path from " + parameters.Start + " to " + parameters.Target);
 
 		var start = parameters.Start;
@@ -731,6 +802,8 @@ public class World : MonoBehaviour
 				{
 					//TODO : visual A*
 				}
+				stopwatch.Stop();
+				//DisplayTimeSpan($"A*({start.ManhattanDistance(target)})", stopwatch.Elapsed);
 
 				yield break;
 			}

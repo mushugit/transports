@@ -81,7 +81,7 @@ public class Node : IEquatable<Node>, IComparable<Node>
 					}
 				}
 			}
-			Debug.Log($"Road neightbors of {Point} are {sb.ToString()}");
+			//Debug.Log($"Road neightbors of {Point} are {sb.ToString()}");
 		}
 		return neighbors;
 	}

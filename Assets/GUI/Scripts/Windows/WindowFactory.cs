@@ -97,7 +97,7 @@ class WindowFactory : MonoBehaviour
 		var windowObjectRef = windowCanvasObject.GetComponentInChildren<WindowReferencer>();
 		var windowObject = windowObjectRef.GameObjectWindow;
 
-		var tintObject = GetComponentInChildren<Tint>(true);
+		var tintObject = windowCanvasObject.GetComponentInChildren<Tint>(true);
 		tintObject.SetColor(tint);
 		tintObject.SetActive(true);
 

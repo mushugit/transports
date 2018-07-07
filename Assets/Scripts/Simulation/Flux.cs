@@ -13,11 +13,12 @@ public class Flux
 
 	public bool IsWaitingForInput { get; private set; } = false;
 	public bool IsWaitingForDelivery { get; private set; } = false;
+	public bool IsWaitingForPath { get; private set; } = false;
 
 	private readonly float speed;
 	[JsonProperty]
 	public float Position { get; private set; }
-	public readonly float Distance;
+	public float Distance { get; private set; }
 
 	[JsonProperty]
 	public int TotalCargoMoved { get; private set; }
@@ -71,6 +72,11 @@ public class Flux
 		AllFlux.Add(this);
 	}
 
+	public void ResetDistance(float distance)
+	{
+		Distance = distance;
+	}
+
 	private bool Consume()
 	{
 		return Source.DistributeCargo(1);
@@ -85,7 +91,7 @@ public class Flux
 			var flyDistance = Source.FlyDistance(Target);
 			var optimumGain = World.LocalEconomy.GetGain("flux_deliver_optimum_percell");
 			var obtainedGain = World.LocalEconomy.GetGain("flux_deliver_percell");
-			var gain = (int) Math.Round(optimumGain * flyDistance - obtainedGain * Distance);
+			var gain = (int)Math.Round(optimumGain * flyDistance - obtainedGain * Distance);
 			World.LocalEconomy.Credit(gain);
 			TotalCargoMoved++;
 			Position = 0;
@@ -99,6 +105,13 @@ public class Flux
 		World.LocalEconomy.ForcedCost("flux_running", out cost);
 		IsWaitingForInput = false;
 		IsWaitingForDelivery = false;
+		IsWaitingForPath = false;
+
+		if (!Source.IsLinkedTo(Target))
+		{
+			IsWaitingForPath = true;
+			return;
+		}
 
 		if (Position == 0)
 		{

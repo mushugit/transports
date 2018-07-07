@@ -81,6 +81,10 @@ public class Simulation
 			{
 				RemoveFlux(f);
 				Flux.RemoveFlux(f);
+				if (f.Source == c)
+					f.Target.RemoveFlux(f);
+				else
+					f.Source.RemoveFlux(f);
 			}
 		}
 	}

@@ -30,6 +30,7 @@ public class City : Construction
 	private List<Flux> outgoingFlux;
 
 	public List<City> LinkedCities { get; private set; }
+	public List<City> UnreachableCities { get; private set; }
 	public WindowTextInfo InfoWindow = null;
 
 	private static List<string> cityNames = null;
@@ -53,6 +54,7 @@ public class City : Construction
 		CargoProduction = cargoProduction;
 
 		LinkedCities = new List<City>();
+		UnreachableCities = new List<City>();
 		incomingFlux = new List<Flux>();
 		outgoingFlux = new List<Flux>();
 	}
@@ -120,6 +122,36 @@ public class City : Construction
 		return Point.FlyDistance(point);
 	}
 
+	public void ClearLinks()
+	{
+		LinkedCities.Clear();
+		UnreachableCities.Clear();
+	}
+
+	public void AddUnreachable(City c)
+	{
+		if (!UnreachableCities.Contains(c))
+		{
+			UnreachableCities.Add(c);
+			UpdateInformations();
+		}
+	}
+
+	public void AddUnreachable(List<City> list)
+	{
+		var addedACity = false;
+		foreach (City c in list)
+		{
+			if (!UnreachableCities.Contains(c))
+			{
+				addedACity = true;
+				UnreachableCities.Add(c);
+			}
+		}
+		if (addedACity)
+			UpdateInformations();
+	}
+
 	public void AddLinkTo(City c)
 	{
 		if (!LinkedCities.Contains(c))
@@ -142,6 +174,11 @@ public class City : Construction
 		}
 		if (addedACity)
 			UpdateInformations();
+	}
+
+	public bool IsUnreachable(City c)
+	{
+		return UnreachableCities.Contains(c);
 	}
 
 	public bool IsLinkedTo(City c)
@@ -220,6 +257,26 @@ public class City : Construction
 		}
 	}
 
+	public void RemoveFlux(Flux f)
+	{
+		outgoingFlux.Remove(f);
+		incomingFlux.Remove(f);
+	}
+	
+	public void UpdateFlux(float distance, City c)
+	{
+		foreach(Flux f in outgoingFlux)
+		{
+			if(f.Target == c)
+				f.ResetDistance(distance);
+		}
+		foreach (Flux f in incomingFlux)
+		{
+			if(f.Source == c)
+				f.ResetDistance(distance);
+		}
+	}
+
 	public string InfoText()
 	{
 		StringBuilder sb = new StringBuilder();
@@ -235,7 +292,16 @@ public class City : Construction
 		{
 			sb.Append("\tExport:\n");
 			foreach (Flux f in outgoingFlux)
-				sb.Append($"\t\t{f.TotalCargoMoved} vers {f.Target} \r(D:V={Math.Round(FlyDistance(f.Target),2)} I={ManhattanDistance(f.Target)} R={f.Distance})\n");
+			{
+				sb.Append($"\t\t{f.TotalCargoMoved} vers {f.Target} \r");
+				if (f.IsWaitingForDelivery)
+					sb.Append($"\n\t\t\t<color=\"red\">Attente d'espace pour livrer</color>\n\t\t\t");
+				if (f.IsWaitingForInput)
+					sb.Append($"\n\t\t\t<color=\"red\">Attente de marchandise à livrer</color>\n\t\t\t");
+				if (f.IsWaitingForPath)
+					sb.Append($"\n\t\t\t<color=\"red\">Pas de chemin !</color>\n\t\t\t");
+				sb.Append($"(D:V={Math.Round(FlyDistance(f.Target), 2)} I={ManhattanDistance(f.Target)} R={f.Distance})\n");
+			}
 		}
 		if (outgoingFlux.Count == 0)
 			sb.Append("\tImport: aucun\n");
