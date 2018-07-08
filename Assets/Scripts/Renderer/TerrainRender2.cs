@@ -9,7 +9,7 @@ public class TerrainRender2 : MonoBehaviour, IPointerDownHandler
 
 	public void OnPointerDown(PointerEventData eventData)
 	{
-		Debug.Log("Clic");
+		//Debug.Log("Clic");
 	}
 
 	private void Update()

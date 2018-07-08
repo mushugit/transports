@@ -27,7 +27,7 @@ public class World : MonoBehaviour
 
 	public Component uiCanvas;
 
-	public static float width = 50;
+	public static float width = 25;
 	public static float height = width;
 
 	public int minCityDistance = 4;
@@ -90,7 +90,6 @@ public class World : MonoBehaviour
 		LocalEconomy = new Economy(EconomyTemplate.Difficulty.Free);
 		Constructions = new Construction[(int)width, (int)height];
 		Instance = this;
-
 	}
 
 	private void RecalculateLinks()
@@ -110,14 +109,14 @@ public class World : MonoBehaviour
 			{
 				if (c != otherCity && !c.IsLinkedTo(otherCity) && !c.IsUnreachable(otherCity))
 				{
-					var p = new SearchParameter(c.Point, otherCity.Point, 0, 0, false, null, true);
-					StartCoroutine(SearchPath(p));
-					var path = p.Path;
-					if (path?.Count > 0)
+					var pf = new Pathfinder<Cell>(0, 0, new List<Type>(2) { typeof(Road), typeof(City) });
+					StartCoroutine(pf.RoutineFindPath(c.Point, otherCity.Point));
+					var path = pf.Path;
+					if (path?.TotalCost > 0)
 					{
-						//UnityEngine.Debug.Log($"Found path of {path.Count} steps from {c} to {otherCity}");
+						//UnityEngine.Debug.Log($"Found path of {path.TotalCost} steps from {c} to {otherCity}");
 						StartCoroutine(UpdateLink(c, otherCity));
-						c.UpdateFlux(path.Count, otherCity);
+						c.UpdateFlux(path.TotalCost, otherCity);
 					}
 					else
 					{
@@ -177,7 +176,7 @@ public class World : MonoBehaviour
 
 		itemLoading = "Chargement des constructions";
 		Cities = new List<City>();
-		var roads = new List<Coord>();
+		var roads = new List<Cell>();
 		foreach (Construction c in loadData.Constructions)
 		{
 			if (c is City)
@@ -261,28 +260,37 @@ public class World : MonoBehaviour
 	{
 		if (!a.IsLinkedTo(b))
 		{
-			if (a.LinkedCities == null)
+			if ((a.LinkedCities == null && b.LinkedCities == null) || (a.LinkedCities != null && b.LinkedCities != null))
 			{
-				var c = a;
-				a = b;
-				b = c;
+				if (a.RoadInDirection(b.Point) < b.RoadInDirection(a.Point))
+				{
+					var c = a;
+					a = b;
+					b = c;
+				}
+			}
+			else
+			{
+				if (a.LinkedCities == null)
+				{
+					var c = a;
+					a = b;
+					b = c;
+				}
 			}
 
-			itemLoading = "Relie " + a.Name + " à " + b.Name;
-			//Debug
-			//var parameters = new SearchParameter(a.Point, b.Point, 1f, 3f, false, null, false, true);
-			var parameters = new SearchParameter(a.Point, b.Point, 0, 0, false, null);
-			yield return StartCoroutine(SearchPath(parameters));
-			//Debug.Log($"Path={parameters.Path}");
-			if (parameters.Path != null && parameters.Path.Count > 1)
+			itemLoading = "Relie " + a.Name + " vers " + b.Name;
+			var pf = new Pathfinder<Cell>(0, 0, null);
+			yield return StartCoroutine(pf.RoutineFindPath(a.Point, b.Point));
+			if (pf.Path != null && pf.Path.TotalCost > 0)
 			{
-				//Debug.Log("Path from " + a.Name + " to " + b.Name);
-				yield return StartCoroutine(BuildRoads(parameters.Path));
+				//UnityEngine.Debug.Log($"Path from {a.Name} to {b.Name}");
+				yield return StartCoroutine(BuildRoads(pf.Path));
 				yield return StartCoroutine(UpdateLink(a, b));
 			}
 			else
 			{
-				//Debug.Log("No path from " + a.Name + " to " + b.Name);
+				//UnityEngine.Debug.Log($"NO PATH from {a.Name} to {b.Name} ({pf.Path})");
 			}
 		}
 	}
@@ -319,7 +327,7 @@ public class World : MonoBehaviour
 		c?.SetScale(width, height);
 	}
 
-	public void DestroyConstruction(Coord p)
+	public void DestroyConstruction(Cell p)
 	{
 		var c = Constructions[p.X, p.Y];
 		if (c != null)
@@ -360,7 +368,7 @@ public class World : MonoBehaviour
 		{
 			int x = UnityEngine.Random.Range(0, w);
 			int y = UnityEngine.Random.Range(0, h);
-			var cityCenter = new Coord(x, y);
+			var cityCenter = new Cell(x, y, null);
 			if (Constructions[x, y] == null)
 			{
 				var canBuild = true;
@@ -393,7 +401,7 @@ public class World : MonoBehaviour
 			return true;
 	}
 
-	private void _BuildDepot(Coord pos, int direction)
+	private void _BuildDepot(Cell pos, int direction)
 	{
 		int cost;
 		if (!CheckCost("build_depot", "construire un dépôt", out cost))
@@ -418,12 +426,12 @@ public class World : MonoBehaviour
 
 	}
 
-	public void BuildDepot(Coord pos, int direction)
+	public void BuildDepot(Cell pos, int direction)
 	{
 		_BuildDepot(pos, direction);
 	}
 
-	public void BuildDepot(Coord pos)
+	public void BuildDepot(Cell pos)
 	{
 		_BuildDepot(pos, Builder.RotationDirection);
 	}
@@ -453,7 +461,7 @@ public class World : MonoBehaviour
 		}
 	}
 
-	public void BuildCity(Coord cityCenter)
+	public void BuildCity(Cell cityCenter)
 	{
 		int cost;
 		if (!CheckCost("build_city", "bâtir une nouvelle ville", out cost))
@@ -478,7 +486,7 @@ public class World : MonoBehaviour
 		}
 	}
 
-	public void DestroyCity(Coord cityCenter)
+	public void DestroyCity(Cell cityCenter)
 	{
 		int cost;
 		if (!CheckCost("destroy_city", "raser une ville", out cost))
@@ -490,7 +498,7 @@ public class World : MonoBehaviour
 		Constructions[cityCenter.X, cityCenter.Y] = null;
 	}
 
-	public void DestroyDepot(Coord pos)
+	public void DestroyDepot(Cell pos)
 	{
 		int cost;
 		if (!CheckCost("destroy_depot", "détruire un dépôt", out cost))
@@ -511,7 +519,7 @@ public class World : MonoBehaviour
 		var isLinkEast = IsLinkable(3, east);
 		var isLinkSouth = IsLinkable(0, south);
 		var isLinkWest = IsLinkable(1, west);
-		//Debug.Log($"Update de {r.Point} : n={isLinkNorth} e={isLinkEast} s={isLinkSouth} w={isLinkWest}");
+		//UnityEngine.Debug.Log($"Update de {r.Point} : n={isLinkNorth} e={isLinkEast} s={isLinkSouth} w={isLinkWest}");
 		r.UpdateConnexions(isLinkNorth, isLinkEast, isLinkSouth, isLinkWest);
 	}
 
@@ -534,7 +542,7 @@ public class World : MonoBehaviour
 		return false;
 	}
 
-	public void BuildRoad(Coord pos)
+	public void BuildRoad(Cell pos)
 	{
 		int cost;
 		if (!CheckCost("build_road", "construire une route", out cost))
@@ -550,12 +558,12 @@ public class World : MonoBehaviour
 			UpdateRoad(r);
 	}
 
-	public IEnumerator BuildRoads(List<Coord> path)
+	public IEnumerator BuildRoads(Path<Cell> path)
 	{
-		//Debug.Log("Road from " + path.First() + " to " + path.Last());
+		//UnityEngine.Debug.Log("Road from " + path.First() + " to " + path.Last());
 		var countLoop = 0d;
 		var constructedRoads = new List<Road>();
-		foreach (Coord p in path)
+		foreach (Cell p in path)
 		{
 			countLoop++;
 			if (Constructions[p.X, p.Y] == null)
@@ -591,7 +599,48 @@ public class World : MonoBehaviour
 		yield return null;
 	}
 
-	public void DestroyRoad(Coord pos)
+	public IEnumerator BuildRoads(List<Cell> path)
+	{
+		//UnityEngine.Debug.Log("Road from " + path.First() + " to " + path.Last());
+		var countLoop = 0d;
+		var constructedRoads = new List<Road>();
+		foreach (Cell p in path)
+		{
+			countLoop++;
+			if (Constructions[p.X, p.Y] == null)
+			{
+				Road r = new Road(p, roadPrefab);
+				constructedRoads.Add(r);
+				Constructions[p.X, p.Y] = r;
+			}
+			if (countLoop % searchSpeed == 0)
+				yield return null;
+		}
+
+		var neighborsRoads = new List<Road>();
+		foreach (Road r in constructedRoads)
+		{
+			countLoop++;
+
+			foreach (Road neighborsRoad in Neighbors(r.Point))
+			{
+				if (!neighborsRoads.Contains(neighborsRoad))
+					neighborsRoads.Add(neighborsRoad);
+			}
+
+			UpdateRoad(r);
+			foreach (Road neighborsRoad in neighborsRoads)
+			{
+				UpdateRoad(neighborsRoad);
+			}
+
+			if (countLoop % searchSpeed == 0)
+				yield return null;
+		}
+		yield return null;
+	}
+
+	public void DestroyRoad(Cell pos)
 	{
 		int cost;
 		if (!CheckCost("destroy_road", "détruire une route", out cost))
@@ -669,12 +718,12 @@ public class World : MonoBehaviour
 	}
 
 
-	public List<Road> Neighbors(Coord point)
+	public List<Road> Neighbors(Cell point)
 	{
 		var neighbors = new List<Road>();
 		var directions = point.Directions();
 
-		foreach (Coord p in directions)
+		foreach (Cell p in directions)
 		{
 			if (p != null)
 			{
@@ -692,7 +741,7 @@ public class World : MonoBehaviour
 		var neighbors = new List<Road>();
 		var directions = r.Point.ExtendedDirections();
 
-		foreach (Coord p in directions)
+		foreach (Cell p in directions)
 		{
 			var c = Constructions[p.X, p.Y];
 			if (c != null && c is Road)
@@ -702,34 +751,34 @@ public class World : MonoBehaviour
 		return neighbors;
 	}
 
-	List<Coord> TraceBackPath(Coord[,] cameFrom, Coord current)
+	List<Cell> TraceBackPath(Cell[,] cameFrom, Cell current)
 	{
-		var path = new List<Coord>();
+		var path = new List<Cell>();
 		var p = current;
-		//Debug.Log($"Je suis à {p} et je venais de {cameFrom[p.X, p.Y]}");
+		UnityEngine.Debug.Log($"Je suis à {p} et je venais de {cameFrom[p.X, p.Y]}");
 		path.Add(p);
 		while (cameFrom[p.X, p.Y] != null)
 		{
 			p = cameFrom[p.X, p.Y];
-			//Debug.Log($"Je suis à {p} et je venais de {cameFrom[p.X, p.Y]}");
+			UnityEngine.Debug.Log($"Je suis à {p} et je venais de {cameFrom[p.X, p.Y]}");
 			path.Add(p);
 		}
-		//Debug.Log($"Trouvé chemin de longeur {path.Count}");
+		UnityEngine.Debug.Log($"Trouvé chemin de longeur {path.Count}");
 		return path;
 	}
 
 	public class SearchParameter
 	{
-		public Coord Start { get; }
-		public Coord Target { get; }
-		public List<Coord> Path { get; set; }
+		public Cell Start { get; }
+		public Cell Target { get; }
+		public List<Cell> Path { get; set; }
 		public float Speed { get; }
 		public float WaitAtTheEnd { get; }
 		public bool AvoidCities { get; }
 		public bool OnlyRoads { get; }
 		public bool VisualSearch { get; }
 
-		public SearchParameter(Coord start, Coord target, float speed, float waitAtTheEnd, bool avoidCities, List<Coord> path, bool onlyRoads = false, bool visualSearch = false)
+		public SearchParameter(Cell start, Cell target, float speed, float waitAtTheEnd, bool avoidCities, List<Cell> path, bool onlyRoads = false, bool visualSearch = false)
 		{
 			Start = start;
 			Target = target;
@@ -742,134 +791,12 @@ public class World : MonoBehaviour
 		}
 	}
 
-	private void DisplayTimeSpan(string label, TimeSpan ts, int divisor)
+	public static void DisplayTimeSpan(string label, TimeSpan ts, int divisor)
 	{
 		var t = (long)ts.TotalMilliseconds * 10 * 1000 / divisor;
-		//UnityEngine.Debug.Log($"{label}:{new TimeSpan(t)} ({ts}/{divisor})");
+		UnityEngine.Debug.Log($"{label}:{new TimeSpan(t)} ({ts}/{divisor})");
 	}
 
-	public IEnumerator SearchPath(SearchParameter parameters)
-	{
-		var stopwatch = new Stopwatch();
-		stopwatch.Start();
-		//Debug.Log("Search path from " + parameters.Start + " to " + parameters.Target);
-
-		var start = parameters.Start;
-		var target = parameters.Target;
-
-		var startNode = new Node(this, start, 0f, start.ManhattanDistance(target));
-
-
-		var closed = new List<Node>();
-		var opened = new List<Node>
-		{
-			startNode
-		};
-		var cameFrom = new Coord[(int)width, (int)height];
-
-		double countLoop = 0;
-		//Debug.Log("===========START SEARCH=================");
-		while (opened.Count > 0)
-		{
-			countLoop++;
-			if (parameters.VisualSearch)
-			{
-				//TODO : visual A*
-			}
-
-			opened.Sort();
-			Node n = opened.First();
-			//Debug.Log($"Chosen = {n.Point} H={n.Heuristic} c={n.Cost}");
-			if (n.Point.ManhattanDistance(target) <= 0)
-			{
-				// Target found
-				// Add last point
-				cameFrom[target.X, target.Y] = n.Point;
-
-				if (parameters.VisualSearch)
-				{
-					//TODO : visual A*
-				}
-
-				//Debug.Log($"Found path from {start} to {target}");
-
-				// Rebuild path
-				parameters.Path = TraceBackPath(cameFrom, target);
-
-				if (parameters.WaitAtTheEnd > 0f)
-					yield return new WaitForSeconds(parameters.WaitAtTheEnd);
-				if (parameters.VisualSearch)
-				{
-					//TODO : visual A*
-				}
-				stopwatch.Stop();
-				//DisplayTimeSpan($"A*({start.ManhattanDistance(target)})", stopwatch.Elapsed);
-
-				yield break;
-			}
-
-			opened.Remove(n);
-			closed.Add(n);
-
-			var neighbors = n.Neighbors(parameters.AvoidCities, parameters.OnlyRoads, target);
-			foreach (Node neighbor in neighbors)
-			{
-				//Debug.Log($"Neighbor of ({n}) is ({neighbor})");
-				if (closed.Contains(neighbor))
-				{
-					//Debug.Log("Déjà testé");
-					continue;
-				}
-
-				if (!opened.Contains(neighbor))
-					opened.Add(neighbor);
-				float tentativeCost = n.Cost + TrueDistance(n.Point, neighbor.Point);
-				//Debug.Log($"Tentative={tentativeCost}");
-				if (tentativeCost >= neighbor.Cost)
-					continue;
-
-				//Debug.Log($"J'ajoute de {n.Point} à {neighbor.Point}");
-				cameFrom[neighbor.Point.X, neighbor.Point.Y] = n.Point;
-
-				neighbor.Score(tentativeCost);
-				neighbor.Distance(tentativeCost + Heurisic(neighbor.Point, target));
-			}
-			if (parameters.Speed > 0f)
-				yield return new WaitForSeconds(parameters.Speed);
-			else
-			{
-				if (countLoop % searchSpeed == 0)
-					yield return null;
-			}
-		}
-
-		if (parameters.VisualSearch)
-		{
-			//TODO : visual A*
-		}
-		yield return null;
-	}
-
-	float TrueDistance(Coord origin, Coord target)
-	{
-		var constructionOrigin = Constructions[origin.X, origin.Y];
-		var constructionTarget = Constructions[target.X, target.Y];
-
-		var dividerCost = 1f;
-
-		if (constructionOrigin is Road || constructionOrigin is City)
-			dividerCost *= 2f;
-		if (constructionTarget is Road || constructionTarget is City)
-			dividerCost *= 2f;
-
-		return ((float)origin.ManhattanDistance(target)) / dividerCost;
-	}
-
-	float Heurisic(Coord origin, Coord target)
-	{
-		return origin.ManhattanDistance(target);
-		//return origin.Distance(target);
-	}
 
 	City ClosestCityUnlinked(City c)
 	{
@@ -891,9 +818,9 @@ public class World : MonoBehaviour
 
 		/*//Debug
 		if (closestCity != null)
-			Debug.Log("[WORLD] " + c.Name + " est proche et non lié de " + closestCity.Name);
+			UnityEngine.Debug.Log("[WORLD] " + c.Name + " est proche et non lié de " + closestCity.Name);
 		else
-			Debug.Log("[WORLD] " + c.Name + " est lié à tout");
+			UnityEngine.Debug.Log("[WORLD] " + c.Name + " est lié à tout");
 		*/
 
 		return closestCity;

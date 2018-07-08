@@ -15,7 +15,7 @@ public class CellRender : MonoBehaviour, IPointerClickHandler
 	public Material blue;
 	public Material[] blueArrow;
 
-	private Coord currentPoint = null;
+	private Cell currentPoint = null;
 
 	private bool isColored = false;
 
@@ -54,10 +54,17 @@ public class CellRender : MonoBehaviour, IPointerClickHandler
 			{
 				var p = h.point;
 				var d = p;
+				
 				d.x = Mathf.Round(p.x - 0.5f);
 				d.y = 1;
 				d.z = Mathf.Round(p.z - 0.5f);
-				currentPoint = new Coord((int)d.x, (int)d.z);
+
+				var x = (int) d.x;
+				var y = (int) d.z;
+
+				var constr = World.Instance.Constructions[x, y];
+				currentPoint = new Cell(x, y, constr);
+				//Debug.Log($"Highlighting {currentPoint}");
 
 				highlighter.SetActive(true);
 				highlighter.transform.position = d;
@@ -129,12 +136,12 @@ public class CellRender : MonoBehaviour, IPointerClickHandler
 		highlighter.SetActive(false);
 	}
 
-	public bool IsBuilt(Coord point)
+	public bool IsBuilt(Cell point)
 	{
 		return World.Instance.Constructions[point.X, point.Y] != null;
 	}
 
-	private void UpdateCell(Coord point)
+	private void UpdateCell(Cell point)
 	{
 		if (Builder.IsBuilding || Builder.IsDestroying)
 		{

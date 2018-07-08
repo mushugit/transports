@@ -35,7 +35,7 @@ public class City : Construction
 
 	private static List<string> cityNames = null;
 
-	private void SetupCity(Coord position, Component cityPrefab, string name, float cargoChance, float cargoProduction, float exactCargo)
+	private void SetupCity(Cell position, Component cityPrefab, string name, float cargoChance, float cargoProduction, float exactCargo)
 	{
 		Point = position;
 		if (cityPrefab != null)
@@ -60,7 +60,7 @@ public class City : Construction
 	}
 
 	[JsonConstructor]
-	public City(Coord position, Component cityPrefab, string name, float cargoChance, float cargoProduction, float exactCargo)
+	public City(Cell position, Component cityPrefab, string name, float cargoChance, float cargoProduction, float exactCargo)
 	{
 		SetupCity(position, cityPrefab, name, cargoChance, cargoProduction, exactCargo);
 	}
@@ -70,7 +70,7 @@ public class City : Construction
 		SetupCity(dummyCity.Point, cityPrefab, dummyCity.Name, dummyCity.CargoChance, dummyCity.CargoProduction, dummyCity.ExactCargo);
 	}
 
-	public City(Coord position, Component cityPrefab)
+	public City(Cell position, Component cityPrefab)
 	{
 		var name = RandomName();
 		var cargo = 0f;
@@ -107,17 +107,17 @@ public class City : Construction
 		return Point.ManhattanDistance(city.Point);
 	}
 
-	public int ManhattanDistance(Coord point)
+	public int ManhattanDistance(Cell point)
 	{
 		return Point.ManhattanDistance(point);
 	}
 
-	public float FlyDistance(City city)
+	public double FlyDistance(City city)
 	{
 		return Point.FlyDistance(city.Point);
 	}
 
-	public float FlyDistance(Coord point)
+	public double FlyDistance(Cell point)
 	{
 		return Point.FlyDistance(point);
 	}
@@ -263,7 +263,7 @@ public class City : Construction
 		incomingFlux.Remove(f);
 	}
 	
-	public void UpdateFlux(float distance, City c)
+	public void UpdateFlux(double distance, City c)
 	{
 		foreach(Flux f in outgoingFlux)
 		{
@@ -275,6 +275,73 @@ public class City : Construction
 			if(f.Source == c)
 				f.ResetDistance(distance);
 		}
+	}
+
+	public int RoadInDirection(Cell target)
+	{
+
+		var values = new int[9, 9];
+		var multiplier = new int[9, 9];
+
+
+		if (target.X > Point.X)
+		{
+			for (int y = 0; y < 3; y++)
+			{
+				values[1, y] += 1;
+				values[2, y] += 2;
+			}
+		}
+		if(Point.X < target.X)
+		{
+			for (int y = 0; y < 3; y++)
+			{
+				values[1, y] += 1;
+				values[0, y] += 2;
+			}
+		}
+		if(target.X==Point.X)
+		{
+			for (int y = 0; y < 3; y++)
+			{
+				multiplier[1, y] = 2;
+			}
+		}
+
+		if (target.Y > Point.Y)
+		{
+			for (int x = 0; x < 3; x++)
+			{
+				values[x, 1] += 1;
+				values[x, 2] += 2;
+			}
+		}
+		if (Point.Y < target.Y)
+		{
+			for (int x = 0; x < 3; x++)
+			{
+				values[x,1] += 1;
+				values[x,0] += 2;
+			}
+		}
+		if (target.Y == Point.Y)
+		{
+			for (int x = 0; x < 3; x++)
+			{
+				multiplier[x,1] = 2;
+			}
+		}
+
+		var g = 0;
+		values[1, 1] = 0;
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				g += values[i, j] * ((multiplier[i,j]!=0)? multiplier[i, j]:1);
+			}
+		}
+		return g;
 	}
 
 	public string InfoText()
