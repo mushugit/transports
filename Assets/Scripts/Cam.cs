@@ -13,9 +13,9 @@ public class Cam : MonoBehaviour
 
 	public float moveSpeed = 30f;
 	public float minZoom = 2f;
-	public float maxZoom = 4096;
+	public float maxZoom = 16384;
 	public float zoomSpeed = 1.2f;
-	public float defaultZoomPosition = 4f;
+	public float defaultZoomPosition = 10f;
 
 	public float edgeScrollSize = 20f;
 	public float scrollSpeed = 5f;
@@ -26,23 +26,50 @@ public class Cam : MonoBehaviour
 
 	public float rotateSpeed = 35f;
 
-	readonly float defaultCoord = -12f;
+	readonly float defaultCoord = -7f;
 	readonly Vector3 referencePoint = new Vector3(0f, -2f, 0f);
 
 
-	void Center()
+	public void Center()
 	{
-		/*var backward = transform.forward / -transform.forward.magnitude;
-		var maxIteration = (int)maxZoom;
-		var iteration = 0;
-		for (iteration = 0; iteration < maxIteration; iteration++)
+		camRadius = camRadiusRatio * Mathf.Max(World.width, World.height);
+		//Debug.Log($"Cam radius {camRadius}");
+		var defaultPositionRef = new Vector3(
+			(World.width / 2) + defaultCoord,
+			defaultZoomPosition,
+			(World.height / 2) + defaultCoord
+		);
+
+		CamReferencePosition.transform.position = defaultPositionRef;
+
+		var idealZoom = Mathf.Max(World.width, World.height);
+		var zoom = 1f;
+		do
 		{
-			if (Physics.Raycast(transform.position, Vector3.zero - transform.position))
-				break;
-			//transform.Translate(backward);
-			//transform.SetPositionAndRotation(new Vector3(transform.position.x, transform.position.y, transform.position.x), transform.rotation);
+			transform.Translate(Vector3.back);
+			zoom++;
+		} while (zoom < idealZoom && transform.position.y + 1 < maxZoom);
+
+		/*
+		var c = Camera.main;
+		var r = c.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2));
+		var h = new RaycastHit();
+		
+		var m = 1 << 31;
+
+		if (Physics.Raycast(r, out h, 1000, m))
+		{
+			var tan = (Mathf.Sqrt(World.width * World.width + World.height * World.height) / 2) / h.distance;
+			c.fieldOfView = Mathf.Clamp(Mathf.Atan(tan) * Mathf.Rad2Deg, 1, 90);
 		}*/
 
+		defaultPositionRef = CamReferencePosition.transform.position;
+		defaultPosition = transform.position;
+		defaultRotation = transform.rotation;
+	}
+
+	private void ResetView()
+	{
 		CamReferencePosition.transform.position = defaultPositionRef;
 		transform.position = defaultPosition;
 		transform.rotation = defaultRotation;
@@ -50,28 +77,7 @@ public class Cam : MonoBehaviour
 
 	void Start()
 	{
-		camRadius = camRadiusRatio * Mathf.Max(World.width, World.height);
-		//Debug.Log($"Cam radius {camRadius}");
-		defaultPositionRef = CamReferencePosition.transform.position;
-
-
-		defaultPositionRef.x = (World.width / defaultZoomPosition) + defaultCoord;
-		defaultPositionRef.z = (World.height / defaultZoomPosition) + defaultCoord;
-
-		CamReferencePosition.transform.position = defaultPositionRef;
-
-		Vector3 mapReferenceScreenPoint;
-		do
-		{
-			mapReferenceScreenPoint = Camera.main.WorldToScreenPoint(referencePoint);
-			//Debug.Log(mapReferenceScreenPoint);
-			transform.Translate(Vector3.back);
-		} while (mapReferenceScreenPoint.y < 0);
-
-
-		defaultPositionRef = CamReferencePosition.transform.position;
-		defaultPosition = transform.position;
-		defaultRotation = transform.rotation;
+		Center();
 	}
 
 	void Update()
@@ -83,7 +89,7 @@ public class Cam : MonoBehaviour
 		// Reset
 		if (Input.GetButton("RotateBuild") && Input.GetButton("Modifier"))
 		{
-			Center();
+			ResetView();
 		}
 
 		// Edge scrolling
@@ -108,6 +114,7 @@ public class Cam : MonoBehaviour
 		t.Translate(Input.GetAxis("Horizontal") * moveFactor, 0f, Input.GetAxis("Vertical") * moveFactor);
 
 		// Rotation
+		//Debug.Log($"Center={World.Center}");
 		t.RotateAround(World.Center, Vector3.up, Input.GetAxis("Rotate") * rotateSpeed * Time.deltaTime);
 
 		// Clamp position

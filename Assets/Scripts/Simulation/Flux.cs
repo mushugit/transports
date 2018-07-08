@@ -92,10 +92,9 @@ public class Flux
 		var delivered = true;
 		if (delivered)
 		{
-			var flyDistance = Source.FlyDistance(Target);
-			var optimumGain = World.LocalEconomy.GetGain("flux_deliver_optimum_percell");
+			var walkingDistance = Source.ManhattanDistance(Target) * Pathfinder<Cell>.WalkingSpeed;
 			var obtainedGain = World.LocalEconomy.GetGain("flux_deliver_percell");
-			var gain = (int)Math.Round(optimumGain * flyDistance - obtainedGain * Distance);
+			var gain = (int)Math.Round((walkingDistance - Distance) * obtainedGain);
 			World.LocalEconomy.Credit(gain);
 			TotalCargoMoved++;
 			Position = 0;

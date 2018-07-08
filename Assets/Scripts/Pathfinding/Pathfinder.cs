@@ -10,6 +10,8 @@ class Pathfinder<Node> where Node : IHasNeighbours<Node>, IHasConstruction, IHas
 	public readonly float Speed;
 	public readonly float WaitAtTheEnd;
 
+	public static readonly float WalkingSpeed = 2.42f;
+
 	public readonly List<Type> Passable;
 
 	private readonly double searchSpeed = 200d;
@@ -112,7 +114,7 @@ class Pathfinder<Node> where Node : IHasNeighbours<Node>, IHasConstruction, IHas
 		var constructionOrigin = World.Instance.Constructions[origin.X, origin.Y];
 		var constructionTarget = World.Instance.Constructions[target.X, target.Y];
 
-		var multiplierCost = 2.42f;
+		var multiplierCost = WalkingSpeed;
 
 		/*if (constructionOrigin is Road || constructionOrigin is City)
 			multiplierCost = 2f;*/

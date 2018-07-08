@@ -40,7 +40,7 @@ public class World : MonoBehaviour
 	public Construction[,] Constructions { get; private set; }
 	public List<City> Cities;
 
-	public readonly static Vector3 Center = new Vector3(width / 2f, 0f, height / 2f);
+	public static Vector3 Center { get; private set; } = new Vector3(width / 2f, 0f, height / 2f);
 
 	public static World Instance { get; private set; }
 
@@ -69,9 +69,6 @@ public class World : MonoBehaviour
 
 		if (LocalEconomy.Balance < LocalEconomy.GetGain("loose"))
 			Loose();
-
-		if (Input.GetButton("Reload"))
-			ReloadLevel();
 	}
 
 	void InitLoader()
@@ -87,9 +84,10 @@ public class World : MonoBehaviour
 
 	private void Awake()
 	{
+		Instance = this;
+
 		LocalEconomy = new Economy(EconomyTemplate.Difficulty.Free);
 		Constructions = new Construction[(int)width, (int)height];
-		Instance = this;
 	}
 
 	private void RecalculateLinks()
@@ -151,6 +149,7 @@ public class World : MonoBehaviour
 
 		if (loadData == null)
 		{
+			UpdateWorldSize();
 			InitLoader();
 			StartCoroutine(Generate());
 		}
@@ -158,17 +157,31 @@ public class World : MonoBehaviour
 		{
 			width = loadData.Width;
 			height = loadData.Height;
+			UpdateWorldSize();
 			InitLoader(loadData.Constructions.Count + loadData.AllFlux.Count);
 			StartCoroutine(Load());
 		}
+	}
+
+	public void UpdateWorldSize()
+	{
+		Center = new Vector3(width / 2f, 0f, height / 2f);
+		Constructions = new Construction[(int)width, (int)height];
+
+		Cell.ResetCellSystem();
+		MiniMapCamera.UpdateRender();
+
+		var cam = Camera.main.GetComponent<Cam>();
+		cam?.Center();
 	}
 
 	IEnumerator Load()
 	{
 		var w = (int)width;
 		var h = (int)height;
-
 		Constructions = new Construction[w, h];
+
+		Cell.ResetCellSystem();
 
 		itemLoading = "Chargement du terrain";
 		Terrain(width, height);
@@ -207,9 +220,20 @@ public class World : MonoBehaviour
 		gameLoading = false;
 
 		LocalEconomy = new Economy(EconomyTemplate.Difficulty.Normal);
+		CompleteLoading();
+		yield return StartCoroutine(Simulation.Run());
+	}
+
+	private void CompleteLoading()
+	{
 		ActivateUI();
 		CleanLoader();
-		yield return StartCoroutine(Simulation.Run());
+
+		Cell.ResetCellSystem();
+		MiniMapCamera.UpdateRender();
+
+		var cam = Camera.main.GetComponent<Cam>();
+		cam?.Center();
 	}
 
 	private void ActivateUI()
@@ -251,8 +275,7 @@ public class World : MonoBehaviour
 		gameLoading = false;
 
 		LocalEconomy = new Economy(EconomyTemplate.Difficulty.Normal);
-		ActivateUI();
-		CleanLoader();
+		CompleteLoading();
 		yield return StartCoroutine(Simulation.Run());
 	}
 
@@ -551,11 +574,13 @@ public class World : MonoBehaviour
 		AudioManager.Player.Play("buildRoad");
 		Road road = new Road(pos, roadPrefab);
 		Constructions[pos.X, pos.Y] = road;
+
 		UpdateRoad(road);
-		RecalculateLinks();
 		var neighbors = Neighbors(pos);
 		foreach (Road r in neighbors)
 			UpdateRoad(r);
+
+		RecalculateLinks();
 	}
 
 	public IEnumerator BuildRoads(Path<Cell> path)

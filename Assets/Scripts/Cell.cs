@@ -26,7 +26,7 @@ public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasConstruction, I
 		var correcNeighbours = new List<Cell>(4);
 		foreach (Cell c in allNeighbours)
 		{
-			if (c != null && (passable==null || passable.Contains(c.Type)))
+			if (c != null && (passable == null || passable.Contains(c.Type)))
 				correcNeighbours.Add(c);
 		}
 		/*
@@ -42,6 +42,11 @@ public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasConstruction, I
 	}
 
 	static Cell()
+	{
+		ResetCellSystem();
+	}
+
+	public static void ResetCellSystem()
 	{
 		minX = 0;
 		maxX = (int)World.width - 1;
@@ -68,10 +73,8 @@ public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasConstruction, I
 	{
 		var diffX = Mathf.Abs(c.X - X);
 		var diffY = Mathf.Abs(c.Y - Y);
-		var delta = 0;
-		if (diffX > 0 && diffY > 0)
-			delta = 1;
-		var d = diffX + diffY - delta;
+
+		var d = diffX + diffY;
 		//Debug.Log("ManhattanDistance entre " + ToString() + " et " + c.ToString() + " = " + d);
 		return d;
 	}
@@ -96,7 +99,7 @@ public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasConstruction, I
 
 	public override string ToString()
 	{
-		return $"[{X},{Y}]{{{Type}}}";
+		return Type != null ? $"[{X},{Y}]" : $"[{X},{Y}] {{{Type}}}";
 	}
 
 	public Cell Left()
@@ -104,7 +107,9 @@ public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasConstruction, I
 		if (X - 1 < minX) return null;
 		else
 		{
-			var c = World.Instance.Constructions[X - 1, Y];
+			var c = World.Instance?.Constructions[X - 1, Y];
+			//Debug.Log($"Point={ToString()} [{minX}-{maxX},{minY}-{maxY}] World[{World.width},{World.height}]");
+			
 			return new Cell(X - 1, Y, c);
 		}
 	}
@@ -114,7 +119,7 @@ public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasConstruction, I
 		if (X + 1 > maxX) return null;
 		else
 		{
-			var c = World.Instance.Constructions[X + 1, Y];
+			var c = World.Instance?.Constructions[X + 1, Y];
 			return new Cell(X + 1, Y, c);
 		}
 	}
@@ -124,7 +129,7 @@ public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasConstruction, I
 		if (Y + 1 > maxY) return null;
 		else
 		{
-			var c = World.Instance.Constructions[X, Y + 1];
+			var c = World.Instance?.Constructions[X, Y + 1];
 			return new Cell(X, Y + 1, c);
 		}
 	}
@@ -134,7 +139,7 @@ public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasConstruction, I
 		if (Y + 1 > maxY || X - 1 < minX) return null;
 		else
 		{
-			var c = World.Instance.Constructions[X - 1, Y + 1];
+			var c = World.Instance?.Constructions[X - 1, Y + 1];
 			return new Cell(X - 1, Y + 1, c);
 		}
 	}
@@ -144,7 +149,7 @@ public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasConstruction, I
 		if (Y + 1 > maxY || X + 1 > maxX) return null;
 		else
 		{
-			var c = World.Instance.Constructions[X + 1, Y + 1];
+			var c = World.Instance?.Constructions[X + 1, Y + 1];
 			return new Cell(X + 1, Y + 1, c);
 		}
 	}
@@ -154,7 +159,7 @@ public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasConstruction, I
 		if (Y - 1 < minY) return null;
 		else
 		{
-			var c = World.Instance.Constructions[X, Y - 1];
+			var c = World.Instance?.Constructions[X, Y - 1];
 			return new Cell(X, Y - 1, c);
 		}
 	}
@@ -164,7 +169,7 @@ public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasConstruction, I
 		if (Y - 1 < minY || X - 1 < minX) return null;
 		else
 		{
-			var c = World.Instance.Constructions[X - 1, Y - 1];
+			var c = World.Instance?.Constructions[X - 1, Y - 1];
 			return new Cell(X - 1, Y - 1, c);
 		}
 	}
@@ -174,7 +179,7 @@ public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasConstruction, I
 		if (Y - 1 < minY || X + 1 > maxX) return null;
 		else
 		{
-			var c = World.Instance.Constructions[X + 1, Y - 1];
+			var c = World.Instance?.Constructions[X + 1, Y - 1];
 			return new Cell(X + 1, Y - 1, c);
 		}
 	}
