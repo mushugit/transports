@@ -368,7 +368,7 @@ public class City : Construction
 					sb.Append($"\n\t\t\t<color=\"red\">Attente de marchandise à livrer</color>\n\t\t\t");
 				if (f.IsWaitingForPath)
 					sb.Append($"\n\t\t\t<color=\"red\">Pas de chemin !</color>\n\t\t\t");
-				sb.Append($"(D:V={Math.Round(FlyDistance(f.Target), 2)} I={ManhattanDistance(f.Target)} R={f.Distance})\n");
+				sb.Append($"(D:W={Math.Round(ManhattanDistance(f.Target)*Pathfinder<Cell>.WalkingSpeed,2)} R={f.Distance})\n");
 			}
 		}
 
@@ -386,7 +386,7 @@ public class City : Construction
 					sb.Append($"\n\t\t\t<color=\"red\">Attente de marchandise à livrer</color>\n\t\t\t");
 				if (f.IsWaitingForPath)
 					sb.Append($"\n\t\t\t<color=\"red\">Pas de chemin !</color>\n\t\t\t");
-				sb.Append($"(D:V={Math.Round(FlyDistance(f.Target), 2)} I={ManhattanDistance(f.Target)} R={f.Distance})\n");
+				sb.Append($"(D:W={Math.Round(ManhattanDistance(f.Source) * Pathfinder<Cell>.WalkingSpeed, 2)} R={f.Distance})\n");
 			}
 		}
 		sb.Append("<b>Lié aux villes</b>:\n");
