@@ -84,9 +84,10 @@ public class World : MonoBehaviour
 
 	private void Awake()
 	{
+		Instance = this;
+
 		LocalEconomy = new Economy(EconomyTemplate.Difficulty.Free);
 		Constructions = new Construction[(int)width, (int)height];
-		Instance = this;
 	}
 
 	private void RecalculateLinks()
@@ -155,17 +156,31 @@ public class World : MonoBehaviour
 		{
 			width = loadData.Width;
 			height = loadData.Height;
+			UpdateWorldSize();
 			InitLoader(loadData.Constructions.Count + loadData.AllFlux.Count);
 			StartCoroutine(Load());
 		}
+	}
+
+	public void UpdateWorldSize()
+	{
+		Center = new Vector3(width / 2f, 0f, height / 2f);
+		Constructions = new Construction[(int)width, (int)height];
+
+		Cell.ResetCellSystem();
+		MiniMapCamera.UpdateRender();
+
+		var cam = Camera.main.GetComponent<Cam>();
+		cam?.Center();
 	}
 
 	IEnumerator Load()
 	{
 		var w = (int)width;
 		var h = (int)height;
-
 		Constructions = new Construction[w, h];
+
+		Cell.ResetCellSystem();
 
 		itemLoading = "Chargement du terrain";
 		Terrain(width, height);
@@ -212,10 +227,12 @@ public class World : MonoBehaviour
 	{
 		ActivateUI();
 		CleanLoader();
+
+		Cell.ResetCellSystem();
 		MiniMapCamera.UpdateRender();
+
 		var cam = Camera.main.GetComponent<Cam>();
-		Center = new Vector3(width / 2f, 0f, height / 2f);
-		cam.Center();
+		cam?.Center();
 	}
 
 	private void ActivateUI()
@@ -556,11 +573,13 @@ public class World : MonoBehaviour
 		AudioManager.Player.Play("buildRoad");
 		Road road = new Road(pos, roadPrefab);
 		Constructions[pos.X, pos.Y] = road;
+		
 		UpdateRoad(road);
-		RecalculateLinks();
 		var neighbors = Neighbors(pos);
 		foreach (Road r in neighbors)
 			UpdateRoad(r);
+
+		RecalculateLinks();
 	}
 
 	public IEnumerator BuildRoads(Path<Cell> path)
