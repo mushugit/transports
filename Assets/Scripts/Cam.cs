@@ -114,6 +114,7 @@ public class Cam : MonoBehaviour
 		t.Translate(Input.GetAxis("Horizontal") * moveFactor, 0f, Input.GetAxis("Vertical") * moveFactor);
 
 		// Rotation
+		//Debug.Log($"Center={World.Center}");
 		t.RotateAround(World.Center, Vector3.up, Input.GetAxis("Rotate") * rotateSpeed * Time.deltaTime);
 
 		// Clamp position

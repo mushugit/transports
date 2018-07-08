@@ -149,6 +149,7 @@ public class World : MonoBehaviour
 
 		if (loadData == null)
 		{
+			UpdateWorldSize();
 			InitLoader();
 			StartCoroutine(Generate());
 		}
@@ -573,7 +574,7 @@ public class World : MonoBehaviour
 		AudioManager.Player.Play("buildRoad");
 		Road road = new Road(pos, roadPrefab);
 		Constructions[pos.X, pos.Y] = road;
-		
+
 		UpdateRoad(road);
 		var neighbors = Neighbors(pos);
 		foreach (Road r in neighbors)
