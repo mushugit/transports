@@ -40,7 +40,7 @@ public class World : MonoBehaviour
 	public Construction[,] Constructions { get; private set; }
 	public List<City> Cities;
 
-	public readonly static Vector3 Center = new Vector3(width / 2f, 0f, height / 2f);
+	public static Vector3 Center { get; private set; } = new Vector3(width / 2f, 0f, height / 2f);
 
 	public static World Instance { get; private set; }
 
@@ -214,6 +214,7 @@ public class World : MonoBehaviour
 		CleanLoader();
 		MiniMapCamera.UpdateRender();
 		var cam = Camera.main.GetComponent<Cam>();
+		Center = new Vector3(width / 2f, 0f, height / 2f);
 		cam.Center();
 	}
 
