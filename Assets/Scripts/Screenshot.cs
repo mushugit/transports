@@ -1,11 +1,18 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
-public class Screenshot : MonoBehaviour {
+public class Screenshot : MonoBehaviour
+{
 
 	private static Screenshot instance;
+
+	public static readonly string Extention = ".png";
+	public static readonly string Folder = "screenshots";
+
+	private static string screenshotPath;
 
 	private Camera cam;
 	private bool takeScreenshotOnNextFrame;
@@ -13,6 +20,8 @@ public class Screenshot : MonoBehaviour {
 	private void Awake()
 	{
 		instance = this;
+		screenshotPath = Application.persistentDataPath + Path.DirectorySeparatorChar + Folder + Path.DirectorySeparatorChar;
+		Directory.CreateDirectory(screenshotPath);
 		cam = gameObject.GetComponent<Camera>();
 	}
 
@@ -29,7 +38,11 @@ public class Screenshot : MonoBehaviour {
 
 			var screenshotData = renderResult.EncodeToPNG();
 			var now = DateTime.Now;
-			System.IO.File.WriteAllBytes(Application.dataPath + $"/screenshot_{now.ToString("yyy-MM-dd")}_{now.ToString("HH-mm-ss-ffff")}.png", screenshotData);
+			var fileName = $"screenshot_{now.ToString("yyy-MM-dd")}_{now.ToString("HH-mm-ss-ffff")}";
+			var screenshotFullFilePath = screenshotPath + fileName + Extention;
+			//Debug.Log($"Screenshot sauvegardé dans {screenshotFullFilePath}");
+			File.WriteAllBytes(screenshotFullFilePath, screenshotData);
+			InfoText.Display($"Screenshot sauvegardé sous {fileName}");
 		}
 	}
 

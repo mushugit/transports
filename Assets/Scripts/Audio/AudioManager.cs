@@ -26,7 +26,7 @@ public class AudioManager : MonoBehaviour
 		foreach (Sound s in sounds)
 		{
 			s.source = gameObject.AddComponent<AudioSource>();
-
+			s.source.playOnAwake = false;
 			s.source.clip = s.clip;
 			s.source.volume = s.volume;
 			s.source.pitch = s.pitch;
@@ -39,7 +39,9 @@ public class AudioManager : MonoBehaviour
 		if(music.Length > 0)
 		{
 			var length = music[currentMusic].source.clip.length;
-			Play(music[currentMusic].name);
+			var name = music[currentMusic].name;
+			Play(name);
+			MusicInfo.DisplayName(name);
 			Invoke("NextMusic", length);
 		}
 	}
@@ -51,7 +53,9 @@ public class AudioManager : MonoBehaviour
 			currentMusic = 0;
 
 		var length = music[currentMusic].source.clip.length;
-		Play(music[currentMusic].name);
+		var name = music[currentMusic].name;
+		Play(name);
+		MusicInfo.DisplayName(name);
 		Invoke("NextMusic", length);
 	}
 

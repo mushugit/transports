@@ -1,18 +1,21 @@
-﻿using UnityEngine;
+﻿using Newtonsoft.Json;
 
 public abstract class Construction
 {
-    public Coord Point { get; protected set; }
+	[JsonProperty]
+	public Cell Point { get; protected set; }
 
     protected Construction() : this(0, 0) { }
 
     protected Construction(int x, int y)
     {
-        Point = new Coord(x, y);
+        Point = new Cell(x, y,this);
     }
 
-    protected Construction(Coord point)
+    protected Construction(Cell point)
     {
         Point = Point;
     }
+
+	public abstract void Destroy();
 }

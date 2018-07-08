@@ -41,6 +41,7 @@ public class RoadRender : MonoBehaviour
 
 	public void SetRoadEast(bool isEast)
 	{
+		//Debug.Log($"Set east to {isEast}");
 		EastNeighbor = isEast;
 	}
 
@@ -54,7 +55,7 @@ public class RoadRender : MonoBehaviour
 		WestNeighbor = isWest;
 	}
 
-	void Update()
+	public void UpdateRender()
 	{
 		road_N.SetActive(NorthNeighbor);
 		road_E.SetActive(EastNeighbor);
@@ -87,6 +88,11 @@ public class RoadRender : MonoBehaviour
 			}
 		}
 
-		roundabout.SetActive(countNeighbors >= 3 || countNeighbors==0);
+		roundabout.SetActive(countNeighbors >= 3 || countNeighbors == 0);
+	}
+
+	void Update()
+	{
+		
 	}
 }

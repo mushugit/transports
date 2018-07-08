@@ -23,7 +23,7 @@ GameObject:
   - component: {fileID: 23307174412684052}
   - component: {fileID: 114977742437321712}
   - component: {fileID: 65956686454534752}
-  m_Layer: 0
+  m_Layer: 31
   m_Name: Grass
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -39,7 +39,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4907302487358432}
   - component: {fileID: 114839713307226922}
-  m_Layer: 0
+  m_Layer: 31
   m_Name: Cell
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -56,7 +56,7 @@ GameObject:
   - component: {fileID: 4446972170105898}
   - component: {fileID: 33810605105978210}
   - component: {fileID: 23242207658710496}
-  m_Layer: 0
+  m_Layer: 31
   m_Name: Rock
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -73,7 +73,7 @@ GameObject:
   - component: {fileID: 4281095986499910}
   - component: {fileID: 33038064840998976}
   - component: {fileID: 23202049456623468}
-  m_Layer: 0
+  m_Layer: 31
   m_Name: Earth
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1233579903179798}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 266.66943, y: 116.89444, z: 8.789437}
+  m_LocalPosition: {x: -8.485035, y: -1.7233238, z: 2.0624962}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4281095986499910}
@@ -299,7 +299,8 @@ MonoBehaviour:
     type: 2}
   red: {fileID: 2100000, guid: 92f59dcbef04fab43874b5895aafc2d5, type: 2}
   blue: {fileID: 2100000, guid: 6619c15ddd1ddec499d5498f40154124, type: 2}
-  blueArrow_2: {fileID: 2100000, guid: f38651ea03246654d84044a16743429b, type: 2}
-  blueArrow_3: {fileID: 2100000, guid: 586aab8ac5195e143a8ea93bac1b1989, type: 2}
-  blueArrow_0: {fileID: 2100000, guid: d37369a660390354097961f7a669b9b5, type: 2}
-  blueArrow_1: {fileID: 2100000, guid: 3959902a4c2ab8f42a9197ee4dcbd2b7, type: 2}
+  blueArrow:
+  - {fileID: 2100000, guid: f38651ea03246654d84044a16743429b, type: 2}
+  - {fileID: 2100000, guid: 586aab8ac5195e143a8ea93bac1b1989, type: 2}
+  - {fileID: 2100000, guid: d37369a660390354097961f7a669b9b5, type: 2}
+  - {fileID: 2100000, guid: 3959902a4c2ab8f42a9197ee4dcbd2b7, type: 2}
