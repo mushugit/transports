@@ -42,7 +42,8 @@ class Pathfinder<Node> where Node : IHasNeighbours<Node>, IHasConstruction, IHas
 			if (path.LastStep.Equals(destination))
 			{
 				//Debug.Log($"\tFound of {path.TotalCost} ({start} to {destination})");
-				return path;
+				Path = path;
+				return Path;
 			}
 			closed.Add(path.LastStep);
 			foreach (Node n in path.LastStep.Neighbours(Passable))
@@ -53,7 +54,8 @@ class Pathfinder<Node> where Node : IHasNeighbours<Node>, IHasConstruction, IHas
 			}
 		}
 		//Debug.Log("\tNOT found ({start} to {destination})");
-		return null;
+		Path = null;
+		return Path;
 	}
 
 	public IEnumerator RoutineFindPath(Node start, Node destination)

@@ -29,9 +29,15 @@ public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasConstruction, I
 			if (c != null && (passable==null || passable.Contains(c.Type)))
 				correcNeighbours.Add(c);
 		}
+		/*
 		string sp = "";
-		passable?.ForEach(c => sp += (c==null)?"": c.ToString());
-		//Debug.Log($"Voisin de {this} avec {sp}: {allNeighbours}, corrects: {correcNeighbours}");
+		passable?.ForEach(c => sp += (c==null)?"": $" {c.ToString()}");
+		string sAN = "";
+		allNeighbours?.ForEach(c => sAN += (c == null) ? "" : $" {c.ToString()}");
+		string sCN = "";
+		correcNeighbours?.ForEach(c => sCN += (c == null) ? "" : $" {c.ToString()}");
+
+		Debug.Log($"Voisin de {this} avec {sp}: {sAN}, corrects: {sCN}");*/
 		return correcNeighbours;
 	}
 
