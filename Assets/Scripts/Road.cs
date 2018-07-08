@@ -11,13 +11,13 @@ public class Road : Construction
 
     public Road(int x, int y, Component roadPrefab)
     {
-        Point = new Coord(x, y);
+        Point = new Cell(x, y, this);
         var r = RoadRender.Build(new Vector3(x, 0f, y), roadPrefab);
 		roadRender = r.GetComponent<RoadRender>();
     }
 
 	[JsonConstructor]
-	public Road(Coord point, Component roadPrefab)
+	public Road(Cell point, Component roadPrefab)
     {
         Point = point;
 		if (roadPrefab != null)

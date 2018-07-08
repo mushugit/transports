@@ -10,7 +10,7 @@ public class Depot : Construction
 
 	private Depot() { }
 
-	public Depot(Coord position, Component depotPrefab, int direction)
+	public Depot(Cell position, Component depotPrefab, int direction)
 	{
 		Point = position;
 		if (depotPrefab != null)

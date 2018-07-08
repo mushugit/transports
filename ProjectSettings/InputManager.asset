@@ -245,3 +245,19 @@ InputManager:
     type: 0
     axis: 2
     joyNum: 0
+  - serializedVersion: 3
+    m_Name: StressTest
+    descriptiveName: 
+    descriptiveNegativeName: 
+    negativeButton: 
+    positiveButton: k
+    altNegativeButton: 
+    altPositiveButton: 
+    gravity: 0
+    dead: 0.001
+    sensitivity: 80
+    snap: 0
+    invert: 0
+    type: 0
+    axis: 2
+    joyNum: 0

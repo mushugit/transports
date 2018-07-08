@@ -13,11 +13,12 @@ public class Flux
 
 	public bool IsWaitingForInput { get; private set; } = false;
 	public bool IsWaitingForDelivery { get; private set; } = false;
+	public bool IsWaitingForPath { get; private set; } = false;
 
 	private readonly float speed;
 	[JsonProperty]
-	public float Position { get; private set; }
-	public readonly float Distance;
+	public double Position { get; private set; }
+	public double Distance { get; private set; }
 
 	[JsonProperty]
 	public int TotalCargoMoved { get; private set; }
@@ -35,7 +36,7 @@ public class Flux
 	{
 		Source = source;
 		Target = target;
-		Distance = RoadDistance(Source.Point, Target.Point);
+		Distance = (float) RoadDistance(Source.Point, Target.Point);
 		speed = Simulation.TickFrequency * 2;
 		Position = 0;
 		TotalCargoMoved = 0;
@@ -46,12 +47,16 @@ public class Flux
 		AllFlux.Add(this);
 	}
 
-	private float RoadDistance(Coord a, Coord b)
+	private double RoadDistance(Cell a, Cell b)
 	{
-		var path = new List<Coord>();
-		var searchParameters = new World.SearchParameter(a, b, 0, 0, false, path, true, false);
-		World.Instance.StartCoroutine(World.Instance.SearchPath(searchParameters));
-		return searchParameters.Path.Count - 2;
+		var path = new List<Cell>();
+		
+		var pf = new Pathfinder<Cell>(0, 0, new List<Type>(2) { typeof(Road), typeof(City) });
+		pf.FindPath(a, b);
+		if (pf.Path != null)
+			return pf.Path.TotalCost;
+		else
+			return -1;
 	}
 
 	public Flux(Flux dummyFlux)
@@ -60,7 +65,7 @@ public class Flux
 		var trueTarget = World.Instance.Constructions[dummyFlux.Target.Point.X, dummyFlux.Target.Point.Y] as City;
 		Source = trueSource;
 		Target = trueTarget;
-		Distance = RoadDistance(Source.Point, Target.Point);
+		Distance = (float) RoadDistance(Source.Point, Target.Point);
 		speed = Simulation.TickFrequency * 2;
 		Position = dummyFlux.Position;
 		TotalCargoMoved = dummyFlux.TotalCargoMoved;
@@ -69,6 +74,11 @@ public class Flux
 		Target.ReferenceFlux(this, Flux.Direction.incoming);
 
 		AllFlux.Add(this);
+	}
+
+	public void ResetDistance(double distance)
+	{
+		Distance = distance;
 	}
 
 	private bool Consume()
@@ -85,7 +95,7 @@ public class Flux
 			var flyDistance = Source.FlyDistance(Target);
 			var optimumGain = World.LocalEconomy.GetGain("flux_deliver_optimum_percell");
 			var obtainedGain = World.LocalEconomy.GetGain("flux_deliver_percell");
-			var gain = (int) Math.Round(optimumGain * flyDistance - obtainedGain * Distance);
+			var gain = (int)Math.Round(optimumGain * flyDistance - obtainedGain * Distance);
 			World.LocalEconomy.Credit(gain);
 			TotalCargoMoved++;
 			Position = 0;
@@ -99,6 +109,13 @@ public class Flux
 		World.LocalEconomy.ForcedCost("flux_running", out cost);
 		IsWaitingForInput = false;
 		IsWaitingForDelivery = false;
+		IsWaitingForPath = false;
+
+		if (!Source.IsLinkedTo(Target))
+		{
+			IsWaitingForPath = true;
+			return;
+		}
 
 		if (Position == 0)
 		{

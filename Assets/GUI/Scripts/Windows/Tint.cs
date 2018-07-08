@@ -9,7 +9,7 @@ public class Tint : MonoBehaviour {
 	{
 		var r = GetComponent<Image>();
 		r.color = color;
-		Debug.Log(r.color);
+		//Debug.Log(r.color);
 	}
 
 	public void SetActive(bool activeState)

@@ -40,7 +40,7 @@ public class Screenshot : MonoBehaviour
 			var now = DateTime.Now;
 			var fileName = $"screenshot_{now.ToString("yyy-MM-dd")}_{now.ToString("HH-mm-ss-ffff")}";
 			var screenshotFullFilePath = screenshotPath + fileName + Extention;
-			Debug.Log($"Screenshot sauvegardé dans {screenshotFullFilePath}");
+			//Debug.Log($"Screenshot sauvegardé dans {screenshotFullFilePath}");
 			File.WriteAllBytes(screenshotFullFilePath, screenshotData);
 			InfoText.Display($"Screenshot sauvegardé sous {fileName}");
 		}
