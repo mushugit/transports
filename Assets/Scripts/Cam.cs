@@ -15,7 +15,7 @@ public class Cam : MonoBehaviour
 	public float minZoom = 2f;
 	public float maxZoom = 4096;
 	public float zoomSpeed = 1.2f;
-	public float defaultZoomPosition = 4f;
+	public float defaultZoomPosition = 10f;
 
 	public float edgeScrollSize = 20f;
 	public float scrollSpeed = 5f;
@@ -30,33 +30,15 @@ public class Cam : MonoBehaviour
 	readonly Vector3 referencePoint = new Vector3(0f, -2f, 0f);
 
 
-	void Center()
-	{
-		/*var backward = transform.forward / -transform.forward.magnitude;
-		var maxIteration = (int)maxZoom;
-		var iteration = 0;
-		for (iteration = 0; iteration < maxIteration; iteration++)
-		{
-			if (Physics.Raycast(transform.position, Vector3.zero - transform.position))
-				break;
-			//transform.Translate(backward);
-			//transform.SetPositionAndRotation(new Vector3(transform.position.x, transform.position.y, transform.position.x), transform.rotation);
-		}*/
-
-		CamReferencePosition.transform.position = defaultPositionRef;
-		transform.position = defaultPosition;
-		transform.rotation = defaultRotation;
-	}
-
-	void Start()
+	public void Center()
 	{
 		camRadius = camRadiusRatio * Mathf.Max(World.width, World.height);
 		//Debug.Log($"Cam radius {camRadius}");
-		defaultPositionRef = CamReferencePosition.transform.position;
-
-
-		defaultPositionRef.x = (World.width / defaultZoomPosition) + defaultCoord;
-		defaultPositionRef.z = (World.height / defaultZoomPosition) + defaultCoord;
+		var defaultPositionRef = new Vector3()
+		{
+			x = (World.width / defaultZoomPosition) + defaultCoord,
+			z = (World.height / defaultZoomPosition) + defaultCoord
+		};
 
 		CamReferencePosition.transform.position = defaultPositionRef;
 
@@ -72,6 +54,11 @@ public class Cam : MonoBehaviour
 		defaultPositionRef = CamReferencePosition.transform.position;
 		defaultPosition = transform.position;
 		defaultRotation = transform.rotation;
+	}
+
+	void Start()
+	{
+		Center();
 	}
 
 	void Update()

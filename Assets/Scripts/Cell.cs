@@ -68,10 +68,8 @@ public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasConstruction, I
 	{
 		var diffX = Mathf.Abs(c.X - X);
 		var diffY = Mathf.Abs(c.Y - Y);
-		var delta = 0;
-		if (diffX > 0 && diffY > 0)
-			delta = 1;
-		var d = diffX + diffY - delta;
+		
+		var d = diffX + diffY;
 		//Debug.Log("ManhattanDistance entre " + ToString() + " et " + c.ToString() + " = " + d);
 		return d;
 	}
@@ -96,7 +94,7 @@ public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasConstruction, I
 
 	public override string ToString()
 	{
-		return $"[{X},{Y}]{{{Type}}}";
+		return Type!=null ? $"[{X},{Y}]" : $"[{X},{Y}] {{{Type}}}"; 
 	}
 
 	public Cell Left()

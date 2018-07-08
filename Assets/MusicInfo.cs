@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MusicInfo : MonoBehaviour {
+public class MusicInfo : MonoBehaviour
+{
 
 	public Text MusicNameLabel;
 	public GameObject MusicNameDisplay;
@@ -16,7 +17,13 @@ public class MusicInfo : MonoBehaviour {
 
 	private void Awake()
 	{
-		instance = this;
+		if (instance == null)
+			instance = this;
+		else
+		{
+			Destroy(gameObject);
+			return;
+		}
 	}
 
 	private void Update()
@@ -36,7 +43,6 @@ public class MusicInfo : MonoBehaviour {
 		instance.MusicNameDisplay.SetActive(true);
 		instance.MusicNameLabel.text = $" ♫ {currentName} ♫ ";
 		instance.StartCoroutine(instance.HideName());
-
 	}
 
 	private IEnumerator HideName()

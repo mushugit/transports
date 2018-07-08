@@ -353,6 +353,7 @@ public class City : Construction
 		sb.Append($"\tProbabilité de {(int)(CargoChance * 100f)}%\n\tProduction à {Mathf.Round(100 * CargoProduction * (1f / Simulation.TickFrequency)) / 100}/s\n");
 		sb.Append($"<b>Position</b>: {Point}\n");
 		sb.Append("<b>Production:</b>\n");
+
 		if (outgoingFlux.Count == 0)
 			sb.Append("\tExport: aucun\n");
 		else
@@ -370,13 +371,23 @@ public class City : Construction
 				sb.Append($"(D:V={Math.Round(FlyDistance(f.Target), 2)} I={ManhattanDistance(f.Target)} R={f.Distance})\n");
 			}
 		}
-		if (outgoingFlux.Count == 0)
+
+		if (incomingFlux.Count == 0)
 			sb.Append("\tImport: aucun\n");
 		else
 		{
 			sb.Append("\tImport:\n");
 			foreach (Flux f in incomingFlux)
-				sb.Append($"\t\t{f.TotalCargoMoved} depuis {f.Source} \r({ManhattanDistance(f.Source)} cases)\n");
+			{
+				sb.Append($"\t\t{f.TotalCargoMoved} vers {f.Target} \r");
+				if (f.IsWaitingForDelivery)
+					sb.Append($"\n\t\t\t<color=\"red\">Attente d'espace pour livrer</color>\n\t\t\t");
+				if (f.IsWaitingForInput)
+					sb.Append($"\n\t\t\t<color=\"red\">Attente de marchandise à livrer</color>\n\t\t\t");
+				if (f.IsWaitingForPath)
+					sb.Append($"\n\t\t\t<color=\"red\">Pas de chemin !</color>\n\t\t\t");
+				sb.Append($"(D:V={Math.Round(FlyDistance(f.Target), 2)} I={ManhattanDistance(f.Target)} R={f.Distance})\n");
+			}
 		}
 		sb.Append("<b>Lié aux villes</b>:\n");
 		var linkedCities = LinkedCities.OrderBy(c => ManhattanDistance(c));

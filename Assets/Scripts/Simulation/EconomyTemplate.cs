@@ -69,8 +69,7 @@ public class EconomyTemplate
 			{ "start",                              (int)Math.Round(10000 * mGain) },
 			{ "loose",								(int)Math.Round(-10000 * mGain) },
 
-			{ "flux_deliver_percell",				(int)Math.Round(20 * mGain) },
-			{ "flux_deliver_optimum_percell",		(int)Math.Round(80 * mGain) }
+			{ "flux_deliver_percell",				(int)Math.Round(42 * mGain) }
 		};
 
 		operationsCosts = new Dictionary<string, int>

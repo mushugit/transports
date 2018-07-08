@@ -69,9 +69,6 @@ public class World : MonoBehaviour
 
 		if (LocalEconomy.Balance < LocalEconomy.GetGain("loose"))
 			Loose();
-
-		if (Input.GetButton("Reload"))
-			ReloadLevel();
 	}
 
 	void InitLoader()
@@ -207,9 +204,17 @@ public class World : MonoBehaviour
 		gameLoading = false;
 
 		LocalEconomy = new Economy(EconomyTemplate.Difficulty.Normal);
+		CompleteLoading();
+		yield return StartCoroutine(Simulation.Run());
+	}
+
+	private void CompleteLoading()
+	{
 		ActivateUI();
 		CleanLoader();
-		yield return StartCoroutine(Simulation.Run());
+		MiniMapCamera.UpdateRender();
+		var cam = Camera.main.GetComponent<Cam>();
+		cam.Center();
 	}
 
 	private void ActivateUI()
@@ -251,8 +256,7 @@ public class World : MonoBehaviour
 		gameLoading = false;
 
 		LocalEconomy = new Economy(EconomyTemplate.Difficulty.Normal);
-		ActivateUI();
-		CleanLoader();
+		CompleteLoading();
 		yield return StartCoroutine(Simulation.Run());
 	}
 

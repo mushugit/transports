@@ -54,7 +54,22 @@ public class SaveHandler
 		var stream = File.OpenText(fullFilePath);
 		var jsonStream = new JsonTextReader(stream);
 
-		var saveData = serializer.Deserialize<WorldSave>(jsonStream);
+		WorldSave saveData = null;
+		try
+		{
+			saveData = serializer.Deserialize<WorldSave>(jsonStream);
+		}
+		catch(JsonSerializationException jsonException)
+		{
+			jsonStream.Close();
+			var sb = new StringBuilder();
+			sb.Append("<b>Erreur de lecture de la sauvegarde</b>");
+			sb.Append($"\n{fileName} n'a pas pu être chargée.\n");
+			sb.Append($"\nDétail : {jsonException.Message}");
+			errorMessage = sb.ToString();
+			return false;
+		}
+
 		jsonStream.Close();
 
 		if (CheckVersionCompatibility(saveData.Version))
