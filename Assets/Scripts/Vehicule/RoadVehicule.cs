@@ -102,7 +102,7 @@ public class RoadVehicule
 
 		if (path != null)
 		{
-			Debug.Log($"New path found from {targetCell} to {target.Point}");
+			//Debug.Log($"New path found from {targetCell} to {target.Point}");
 			pathPosition = path.GetEnumerator();
 		}
 		else

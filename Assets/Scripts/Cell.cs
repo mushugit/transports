@@ -81,6 +81,7 @@ public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasConstruction, I
 
 	public double FlyDistance(Cell c)
 	{
+		if(c==null) return 0;
 		double d = Mathf.Sqrt((c.X - X) * (c.X - X) + (c.Y - Y) * (c.Y - Y));
 		//Debug.Log("Distance entre " + ToString() + " et " + c.ToString() + " = " + d);
 		return d;

@@ -26,8 +26,8 @@ public class City : Construction, IEquatable<City>
 
 	public int Cargo { get; private set; } = 0;
 
-	private Dictionary<City,Flux> incomingFlux;
-	private Dictionary<City, Flux> outgoingFlux;
+	public Dictionary<City,Flux> IncomingFlux { get; private set; }
+	public Dictionary<City, Flux> OutgoingFlux { get; private set; }
 
 	public List<City> LinkedCities { get; private set; }
 	public List<City> UnreachableCities { get; private set; }
@@ -55,8 +55,8 @@ public class City : Construction, IEquatable<City>
 
 		LinkedCities = new List<City>();
 		UnreachableCities = new List<City>();
-		incomingFlux = new Dictionary<City, Flux>();
-		outgoingFlux = new Dictionary<City, Flux>();
+		IncomingFlux = new Dictionary<City, Flux>();
+		OutgoingFlux = new Dictionary<City, Flux>();
 	}
 
 	[JsonConstructor]
@@ -214,9 +214,9 @@ public class City : Construction, IEquatable<City>
 	{
 		//Debug.Log($"Add {direction} to {this} : {flux}");
 		if (direction == Flux.Direction.incoming)
-			incomingFlux.Add(flux.Source,flux);
+			IncomingFlux.Add(flux.Source,flux);
 		else
-			outgoingFlux.Add(flux.Target,flux);
+			OutgoingFlux.Add(flux.Target,flux);
 
 	}
 
@@ -260,16 +260,16 @@ public class City : Construction, IEquatable<City>
 
 	public void RemoveFlux(Flux f)
 	{
-		if (outgoingFlux.ContainsKey(f.Target))
-			outgoingFlux.Remove(f.Target);
+		if (OutgoingFlux.ContainsKey(f.Target))
+			OutgoingFlux.Remove(f.Target);
 
-		if (incomingFlux.ContainsKey(f.Source))
-			incomingFlux.Remove(f.Source);
+		if (IncomingFlux.ContainsKey(f.Source))
+			IncomingFlux.Remove(f.Source);
 	}
 
 	public void UpdateAllOutgoingFlux()
 	{
-		foreach(var k in outgoingFlux)
+		foreach(var k in OutgoingFlux)
 		{
 			k.Value.UpdateTruckPath();
 		}
@@ -352,12 +352,12 @@ public class City : Construction, IEquatable<City>
 		sb.Append($"<b>Position</b>: {Point}\n");
 		sb.Append("<b>Production:</b>\n");
 
-		if (outgoingFlux.Count == 0)
+		if (OutgoingFlux.Count == 0)
 			sb.Append("\tExport: aucun\n");
 		else
 		{
 			sb.Append("\tExport:\n");
-			foreach (var k in outgoingFlux)
+			foreach (var k in OutgoingFlux)
 			{
 				sb.Append($"\t\t{k.Value.TotalCargoMoved} vers {k.Key} \r");
 				if (k.Value.IsWaitingForDelivery)
@@ -369,12 +369,12 @@ public class City : Construction, IEquatable<City>
 			}
 		}
 
-		if (incomingFlux.Count == 0)
+		if (IncomingFlux.Count == 0)
 			sb.Append("\tImport: aucun\n");
 		else
 		{
 			sb.Append("\tImport:\n");
-			foreach (var k in incomingFlux)
+			foreach (var k in IncomingFlux)
 			{
 				sb.Append($"\t\t{k.Value.TotalCargoMoved} depuis {k.Key} \r");
 				if (k.Value.IsWaitingForDelivery)

@@ -515,6 +515,8 @@ public class World : MonoBehaviour
 		{
 			UpdateRoad(neighborsRoad);
 		}
+
+		RecalculateLinks();
 	}
 
 	public void DestroyCity(Cell cityCenter)
@@ -782,46 +784,6 @@ public class World : MonoBehaviour
 		}
 
 		return neighbors;
-	}
-
-	List<Cell> TraceBackPath(Cell[,] cameFrom, Cell current)
-	{
-		var path = new List<Cell>();
-		var p = current;
-		UnityEngine.Debug.Log($"Je suis à {p} et je venais de {cameFrom[p.X, p.Y]}");
-		path.Add(p);
-		while (cameFrom[p.X, p.Y] != null)
-		{
-			p = cameFrom[p.X, p.Y];
-			UnityEngine.Debug.Log($"Je suis à {p} et je venais de {cameFrom[p.X, p.Y]}");
-			path.Add(p);
-		}
-		UnityEngine.Debug.Log($"Trouvé chemin de longeur {path.Count}");
-		return path;
-	}
-
-	public class SearchParameter
-	{
-		public Cell Start { get; }
-		public Cell Target { get; }
-		public List<Cell> Path { get; set; }
-		public float Speed { get; }
-		public float WaitAtTheEnd { get; }
-		public bool AvoidCities { get; }
-		public bool OnlyRoads { get; }
-		public bool VisualSearch { get; }
-
-		public SearchParameter(Cell start, Cell target, float speed, float waitAtTheEnd, bool avoidCities, List<Cell> path, bool onlyRoads = false, bool visualSearch = false)
-		{
-			Start = start;
-			Target = target;
-			Speed = speed;
-			Path = path;
-			WaitAtTheEnd = waitAtTheEnd;
-			AvoidCities = avoidCities;
-			OnlyRoads = onlyRoads;
-			VisualSearch = visualSearch;
-		}
 	}
 
 	public static void DisplayTimeSpan(string label, TimeSpan ts, int divisor)
