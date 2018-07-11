@@ -6,13 +6,13 @@ using Newtonsoft.Json;
 using System;
 
 [JsonObject(MemberSerialization.OptIn)]
-public class City : Construction
+public class City : Construction, IEquatable<City>
 {
 
 	public static readonly Vector2 CargoChanceRange = new Vector2(.1f, 1f);
 	public static readonly Vector2 CargoProductionRange = new Vector2(0.002f, 0.02f);
 
-	Component cityRender; //TODO : déplacer dans Construction
+	public Component CityRenderComponent { get; private set; } //TODO : déplacer dans Construction
 
 	[JsonProperty]
 	public string Name { get; private set; } //TODO : variable globale commence par maj
@@ -26,8 +26,8 @@ public class City : Construction
 
 	public int Cargo { get; private set; } = 0;
 
-	private List<Flux> incomingFlux;
-	private List<Flux> outgoingFlux;
+	private Dictionary<City,Flux> incomingFlux;
+	private Dictionary<City, Flux> outgoingFlux;
 
 	public List<City> LinkedCities { get; private set; }
 	public List<City> UnreachableCities { get; private set; }
@@ -40,8 +40,8 @@ public class City : Construction
 		Point = position;
 		if (cityPrefab != null)
 		{
-			cityRender = CityRender.Build(new Vector3(Point.X, 0f, Point.Y), cityPrefab);
-			var objectRenderer = cityRender.GetComponentInChildren<CityObjectRender>();
+			CityRenderComponent = CityRender.Build(new Vector3(Point.X, 0f, Point.Y), cityPrefab);
+			var objectRenderer = CityRenderComponent.GetComponentInChildren<CityObjectRender>();
 			objectRenderer.City(this);
 		}
 
@@ -55,8 +55,8 @@ public class City : Construction
 
 		LinkedCities = new List<City>();
 		UnreachableCities = new List<City>();
-		incomingFlux = new List<Flux>();
-		outgoingFlux = new List<Flux>();
+		incomingFlux = new Dictionary<City, Flux>();
+		outgoingFlux = new Dictionary<City, Flux>();
 	}
 
 	[JsonConstructor]
@@ -84,13 +84,13 @@ public class City : Construction
 	public void UpdateLabel()
 	{
 		var label = $"{Name} [{Cargo}]";
-		cityRender?.SendMessage(nameof(CityRender.Label), label);
+		CityRenderComponent?.SendMessage(nameof(CityRender.Label), label);
 	}
 
 	public override void Destroy()
 	{
 		InfoWindow.Close();
-		var r = cityRender?.GetComponent<CityRender>();
+		var r = CityRenderComponent?.GetComponent<CityRender>();
 		r?.Destroy();
 
 		//TODO : update links
@@ -212,10 +212,11 @@ public class City : Construction
 
 	public void ReferenceFlux(Flux flux, Flux.Direction direction)
 	{
+		//Debug.Log($"Add {direction} to {this} : {flux}");
 		if (direction == Flux.Direction.incoming)
-			incomingFlux.Add(flux);
+			incomingFlux.Add(flux.Source,flux);
 		else
-			outgoingFlux.Add(flux);
+			outgoingFlux.Add(flux.Target,flux);
 
 	}
 
@@ -252,28 +253,25 @@ public class City : Construction
 	{
 		if (InfoWindow == null)
 		{
-			var screenPosition = Camera.main.WorldToScreenPoint(cityRender.transform.position);
+			var screenPosition = Camera.main.WorldToScreenPoint(CityRenderComponent.transform.position);
 			InfoWindow = WindowFactory.BuildTextInfo(Name, screenPosition, this);
 		}
 	}
 
 	public void RemoveFlux(Flux f)
 	{
-		outgoingFlux.Remove(f);
-		incomingFlux.Remove(f);
+		if (outgoingFlux.ContainsKey(f.Target))
+			outgoingFlux.Remove(f.Target);
+
+		if (incomingFlux.ContainsKey(f.Source))
+			incomingFlux.Remove(f.Source);
 	}
-	
-	public void UpdateFlux(double distance, City c)
+
+	public void UpdateAllOutgoingFlux()
 	{
-		foreach(Flux f in outgoingFlux)
+		foreach(var k in outgoingFlux)
 		{
-			if(f.Target == c)
-				f.ResetDistance(distance);
-		}
-		foreach (Flux f in incomingFlux)
-		{
-			if(f.Source == c)
-				f.ResetDistance(distance);
+			k.Value.UpdateTruckPath();
 		}
 	}
 
@@ -292,7 +290,7 @@ public class City : Construction
 				values[2, y] += 2;
 			}
 		}
-		if(Point.X < target.X)
+		if (Point.X < target.X)
 		{
 			for (int y = 0; y < 3; y++)
 			{
@@ -300,7 +298,7 @@ public class City : Construction
 				values[0, y] += 2;
 			}
 		}
-		if(target.X==Point.X)
+		if (target.X == Point.X)
 		{
 			for (int y = 0; y < 3; y++)
 			{
@@ -320,15 +318,15 @@ public class City : Construction
 		{
 			for (int x = 0; x < 3; x++)
 			{
-				values[x,1] += 1;
-				values[x,0] += 2;
+				values[x, 1] += 1;
+				values[x, 0] += 2;
 			}
 		}
 		if (target.Y == Point.Y)
 		{
 			for (int x = 0; x < 3; x++)
 			{
-				multiplier[x,1] = 2;
+				multiplier[x, 1] = 2;
 			}
 		}
 
@@ -338,7 +336,7 @@ public class City : Construction
 		{
 			for (int j = 0; j < 3; j++)
 			{
-				g += values[i, j] * ((multiplier[i,j]!=0)? multiplier[i, j]:1);
+				g += values[i, j] * ((multiplier[i, j] != 0) ? multiplier[i, j] : 1);
 			}
 		}
 		return g;
@@ -359,16 +357,15 @@ public class City : Construction
 		else
 		{
 			sb.Append("\tExport:\n");
-			foreach (Flux f in outgoingFlux)
+			foreach (var k in outgoingFlux)
 			{
-				sb.Append($"\t\t{f.TotalCargoMoved} vers {f.Target} \r");
-				if (f.IsWaitingForDelivery)
+				sb.Append($"\t\t{k.Value.TotalCargoMoved} vers {k.Key} \r");
+				if (k.Value.IsWaitingForDelivery)
 					sb.Append($"\n\t\t\t<color=\"red\">Attente d'espace pour livrer</color>\n\t\t\t");
-				if (f.IsWaitingForInput)
+				if (k.Value.IsWaitingForInput)
 					sb.Append($"\n\t\t\t<color=\"red\">Attente de marchandise à livrer</color>\n\t\t\t");
-				if (f.IsWaitingForPath)
+				if (k.Value.IsWaitingForPath)
 					sb.Append($"\n\t\t\t<color=\"red\">Pas de chemin !</color>\n\t\t\t");
-				sb.Append($"(D:W={Math.Round(ManhattanDistance(f.Target)*Pathfinder<Cell>.WalkingSpeed,2)} R={f.Distance})\n");
 			}
 		}
 
@@ -377,16 +374,15 @@ public class City : Construction
 		else
 		{
 			sb.Append("\tImport:\n");
-			foreach (Flux f in incomingFlux)
+			foreach (var k in incomingFlux)
 			{
-				sb.Append($"\t\t{f.TotalCargoMoved} vers {f.Target} \r");
-				if (f.IsWaitingForDelivery)
+				sb.Append($"\t\t{k.Value.TotalCargoMoved} depuis {k.Key} \r");
+				if (k.Value.IsWaitingForDelivery)
 					sb.Append($"\n\t\t\t<color=\"red\">Attente d'espace pour livrer</color>\n\t\t\t");
-				if (f.IsWaitingForInput)
+				if (k.Value.IsWaitingForInput)
 					sb.Append($"\n\t\t\t<color=\"red\">Attente de marchandise à livrer</color>\n\t\t\t");
-				if (f.IsWaitingForPath)
+				if (k.Value.IsWaitingForPath)
 					sb.Append($"\n\t\t\t<color=\"red\">Pas de chemin !</color>\n\t\t\t");
-				sb.Append($"(D:W={Math.Round(ManhattanDistance(f.Source) * Pathfinder<Cell>.WalkingSpeed, 2)} R={f.Distance})\n");
 			}
 		}
 		sb.Append("<b>Lié aux villes</b>:\n");
@@ -411,6 +407,13 @@ public class City : Construction
 	public override string ToString()
 	{
 		return Name;
+	}
+
+	public bool Equals(City other)
+	{
+		var e = Point.Equals(other?.Point);
+		//Debug.Log($"Testing if {this} equals {other} : {e}");
+		return e;
 	}
 }
 

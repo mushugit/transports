@@ -22,7 +22,7 @@ public class RoadRender : MonoBehaviour
 
 	public static Component Build(Vector3 position, Component roadPrefab)
 	{
-		return Instantiate(roadPrefab, position, Quaternion.identity);
+		return Instantiate(roadPrefab, position, Quaternion.identity, World.Instance.roadContainer);
 	}
 
 	void Start()

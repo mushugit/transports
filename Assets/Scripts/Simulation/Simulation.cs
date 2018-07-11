@@ -38,7 +38,7 @@ public class Simulation
 
 		var f = new Flux(source, target);
 
-		if(f.Distance <= 0)
+		if(f.Path == null)
 		{
 			Message.ShowError("Flux impossible",
 				$"Impossible de trouver un flux de {source} vers {target} par la route.");
@@ -57,7 +57,7 @@ public class Simulation
 
 		var f = new Flux(dummyFlux);
 
-		if (f.Distance <= 0)
+		if (f.Path == null)
 		{
 			Message.ShowError("Flux impossible",
 				$"Impossible de trouver un flux de {f.Source} vers {f.Target} par la route.");

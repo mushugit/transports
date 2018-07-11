@@ -25,6 +25,12 @@ public class World : MonoBehaviour
 	public Component roadPrefab;
 	public Component depotPrefab;
 
+	public Transform cityContainer;
+	public Transform roadContainer;
+	public Transform depotContainer;
+
+	public Component truckPrefab;
+
 	public Component uiCanvas;
 
 	public static float width = 25;
@@ -92,8 +98,8 @@ public class World : MonoBehaviour
 
 	private void RecalculateLinks()
 	{
-		var sw = new Stopwatch();
-		sw.Start();
+		/*var sw = new Stopwatch();
+		sw.Start();*/
 
 
 		foreach (City c in Cities)
@@ -114,7 +120,7 @@ public class World : MonoBehaviour
 					{
 						//UnityEngine.Debug.Log($"Found path of {path.TotalCost} steps from {c} to {otherCity}");
 						StartCoroutine(UpdateLink(c, otherCity));
-						c.UpdateFlux(path.TotalCost, otherCity);
+						
 					}
 					else
 					{
@@ -123,10 +129,12 @@ public class World : MonoBehaviour
 					}
 				}
 			}
+
+			c.UpdateAllOutgoingFlux();
 		}
 
-		sw.Stop();
-		DisplayTimeSpan("RecalculateLinks", sw.Elapsed, 1);
+		/*sw.Stop();
+		DisplayTimeSpan("RecalculateLinks", sw.Elapsed, 1);*/
 	}
 
 	IEnumerator UpdateUnreachable(City a, City b)

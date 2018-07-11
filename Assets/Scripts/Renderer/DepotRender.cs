@@ -9,7 +9,7 @@ public class DepotRender : MonoBehaviour
 {
 	public static Component Build(Vector3 position, Component depotPrefab, int direction)
 	{
-		var d = Instantiate(depotPrefab, position, Quaternion.identity);
+		var d = Instantiate(depotPrefab, position, Quaternion.identity, World.Instance.depotContainer);
 
 		float angle = 180 - direction * -90;
 

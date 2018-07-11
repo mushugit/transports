@@ -15,7 +15,7 @@ public class CityRender : MonoBehaviour
 
 	public static Component Build(Vector3 position, Component cityPrefab) //TODO:Déplacer dans générique Render
 	{
-		return Instantiate(cityPrefab, position, Quaternion.identity);
+		return Instantiate(cityPrefab, position, Quaternion.identity, World.Instance.cityContainer);
 	}
 
 	public void Destroy()

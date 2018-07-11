@@ -99,7 +99,7 @@ public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasConstruction, I
 
 	public override string ToString()
 	{
-		return Type != null ? $"[{X},{Y}]" : $"[{X},{Y}] {{{Type}}}";
+		return Type == null ? $"[{X},{Y}]" : $"[{X},{Y}] {{{Type}}}";
 	}
 
 	public Cell Left()

@@ -15,13 +15,17 @@ public class Flux
 	public bool IsWaitingForDelivery { get; private set; } = false;
 	public bool IsWaitingForPath { get; private set; } = false;
 
+	private static readonly float defaultSpeed = 0.1f;
+
 	private readonly float speed;
-	[JsonProperty]
-	public double Position { get; private set; }
-	public double Distance { get; private set; }
 
 	[JsonProperty]
+	public bool InTransit { get; private set; }
+	[JsonProperty]
 	public int TotalCargoMoved { get; private set; }
+
+	private RoadVehicule truck;
+	public Path<Cell> Path { get; private set; }
 
 	public enum Direction
 	{
@@ -36,27 +40,17 @@ public class Flux
 	{
 		Source = source;
 		Target = target;
-		Distance = (float) RoadDistance(Source.Point, Target.Point);
-		speed = Simulation.TickFrequency * 2;
-		Position = 0;
+		speed = defaultSpeed;
 		TotalCargoMoved = 0;
 
-		Source.ReferenceFlux(this, Flux.Direction.outgoing);
-		Target.ReferenceFlux(this, Flux.Direction.incoming);
+		GetPath();
 
-		AllFlux.Add(this);
-	}
-
-	private double RoadDistance(Cell a, Cell b)
-	{
-		var path = new List<Cell>();
-		
-		var pf = new Pathfinder<Cell>(0, 0, new List<Type>(2) { typeof(Road), typeof(City) });
-		pf.FindPath(a, b);
-		if (pf.Path != null)
-			return pf.Path.TotalCost;
-		else
-			return -1;
+		if (Path != null)
+		{
+			Source.ReferenceFlux(this, Flux.Direction.outgoing);
+			Target.ReferenceFlux(this, Flux.Direction.incoming);
+			AllFlux.Add(this);
+		}
 	}
 
 	public Flux(Flux dummyFlux)
@@ -65,39 +59,53 @@ public class Flux
 		var trueTarget = World.Instance.Constructions[dummyFlux.Target.Point.X, dummyFlux.Target.Point.Y] as City;
 		Source = trueSource;
 		Target = trueTarget;
-		Distance = (float) RoadDistance(Source.Point, Target.Point);
-		speed = Simulation.TickFrequency * 2;
-		Position = dummyFlux.Position;
+		speed = defaultSpeed;
 		TotalCargoMoved = dummyFlux.TotalCargoMoved;
 
-		Source.ReferenceFlux(this, Flux.Direction.outgoing);
-		Target.ReferenceFlux(this, Flux.Direction.incoming);
-
-		AllFlux.Add(this);
+		GetPath();
+		if (Path != null)
+		{
+			Source.ReferenceFlux(this, Flux.Direction.outgoing);
+			Target.ReferenceFlux(this, Flux.Direction.incoming);
+			AllFlux.Add(this);
+		}
 	}
 
-	public void ResetDistance(double distance)
+	public void UpdateTruckPath()
 	{
-		Distance = distance;
+		truck?.UpdatePath();
+	}
+
+	private Path<Cell> GetPath()
+	{
+		var pf = new Pathfinder<Cell>(speed, 0, new List<Type>() { typeof(Road), typeof(City) });
+		pf.FindPath(Target.Point, Source.Point);
+		Path = pf.Path;
+		return pf.Path;
 	}
 
 	private bool Consume()
 	{
-		return Source.DistributeCargo(1);
+		if (Source.DistributeCargo(1))
+		{
+			truck = new RoadVehicule(World.Instance.truckPrefab, speed, GetPath(), Source, Target, this);
+			return true;
+		}
+		else
+			return false;
 	}
 
-	private bool Distribute()
+	public bool Distribute(double ticks, double actualDistance)
 	{
-		Position = Distance;
 		var delivered = true;
 		if (delivered)
 		{
+			InTransit = false;
 			var walkingDistance = Source.ManhattanDistance(Target) * Pathfinder<Cell>.WalkingSpeed;
 			var obtainedGain = World.LocalEconomy.GetGain("flux_deliver_percell");
-			var gain = (int)Math.Round((walkingDistance - Distance) * obtainedGain);
+			var gain = (int)Math.Round((walkingDistance - actualDistance) * obtainedGain);
 			World.LocalEconomy.Credit(gain);
 			TotalCargoMoved++;
-			Position = 0;
 		}
 		return delivered;
 	}
@@ -110,36 +118,36 @@ public class Flux
 		IsWaitingForDelivery = false;
 		IsWaitingForPath = false;
 
+		truck?.Tick();
+
 		if (!Source.IsLinkedTo(Target))
 		{
 			IsWaitingForPath = true;
 			return;
 		}
 
-		if (Position == 0)
+		if (!InTransit)
 		{
 			if (!Consume())
 			{
 				IsWaitingForInput = true;
 				return;
 			}
+			else
+				InTransit = true;
 		}
 
-		Position += speed;
-
-		if (Position > Distance)
-		{
-			if (!Distribute())
-			{
-				IsWaitingForDelivery = true;
-				return;
-			}
-		}
+		truck.Move();
 	}
 
 	public static void RemoveFlux(Flux f)
 	{
 		AllFlux.Remove(f);
+	}
+
+	public override string ToString()
+	{
+		return $"[{Source} => {Target}]";
 	}
 }
 
