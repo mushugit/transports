@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -86,6 +82,11 @@ public class World : MonoBehaviour
 	void InitLoader(int forcedLoadCount)
 	{
 		totalLoading = 1 + forcedLoadCount;
+	}
+
+	private void TestDelegate(int value)
+	{
+		UnityEngine.Debug.Log($"Delegate received {value}");
 	}
 
 	private void Awake()
