@@ -6,149 +6,145 @@ using UnityEngine;
 [JsonObject(MemberSerialization.OptIn)]
 public class Flux
 {
-	[JsonProperty]
-	public Construction Source { get; private set; }
+    [JsonProperty]
+    public IFluxSource Source { get; private set; }
 
-	[JsonProperty]
-	public Construction Target { get; private set; }
+    [JsonProperty]
+    public IFluxTarget Target { get; private set; }
 
-	public bool IsWaitingForInput { get; private set; } = false;
-	public bool IsWaitingForDelivery { get; private set; } = false;
-	public bool IsWaitingForPath { get; private set; } = false;
+    public bool IsWaitingForInput { get; set; } = false;
+    public bool IsWaitingForDelivery { get; set; } = false;
+    public bool IsWaitingForPath { get; set; } = false;
 
-	private static readonly float defaultSpeed = 0.1f;
+    private static readonly float defaultSpeed = 0.1f;
 
-	private readonly float speed;
+    private readonly float speed;
 
-	[JsonProperty]
-	public bool InTransit { get; private set; }
-	[JsonProperty]
-	public int TotalCargoMoved { get; private set; }
+    [JsonProperty]
+    public bool InTransit { get; private set; }
+    [JsonProperty]
+    public int TotalCargoMoved { get; private set; }
 
-	private RoadVehicule truck;
-	public Path<Cell> Path { get; private set; }
+    private RoadVehicule truck;
+    public Path<Cell> Path { get; private set; }
 
-	public enum Direction
-	{
-		incoming,
-		outgoing
-	}
+    public enum Direction
+    {
+        incoming,
+        outgoing
+    }
 
-	public static List<Flux> AllFlux = new List<Flux>();
+    public static List<Flux> AllFlux = new List<Flux>();
 
-	[JsonConstructor]
-	public Flux(City source, City target)
-	{
-		Source = source;
-		Target = target;
-		speed = defaultSpeed;
-		TotalCargoMoved = 0;
+    [JsonConstructor]
+    public Flux(IFluxSource source, IFluxTarget target)
+    {
+        Source = source;
+        Target = target;
+        speed = defaultSpeed;
+        TotalCargoMoved = 0;
 
-		GetPath();
+        GetPath();
 
-		if (Path != null)
-		{
-			Source.ReferenceFlux(this, Flux.Direction.outgoing);
-			Target.ReferenceFlux(this, Flux.Direction.incoming);
-			AllFlux.Add(this);
-		}
-	}
+        if (Path != null)
+        {
+            Source.ReferenceFlux(this);
+            Target.ReferenceFlux(this);
+            AllFlux.Add(this);
+        }
+    }
 
-	public Flux(Flux dummyFlux)
-	{
-		var trueSource = World.Instance.Constructions[dummyFlux.Source.Point.X, dummyFlux.Source.Point.Y] as City;
-		var trueTarget = World.Instance.Constructions[dummyFlux.Target.Point.X, dummyFlux.Target.Point.Y] as City;
-		Source = trueSource;
-		Target = trueTarget;
-		speed = defaultSpeed;
-		TotalCargoMoved = dummyFlux.TotalCargoMoved;
+    public Flux(Flux dummyFlux)
+    {
+        var trueSource = World.Instance.Constructions[dummyFlux.Source.Coord.X, dummyFlux.Source.Coord.Y] as IFluxSource;
+        var trueTarget = World.Instance.Constructions[dummyFlux.Target.Coord.X, dummyFlux.Target.Coord.Y] as IFluxTarget;
+        Source = trueSource;
+        Target = trueTarget;
+        speed = defaultSpeed;
+        TotalCargoMoved = dummyFlux.TotalCargoMoved;
 
-		GetPath();
-		if (Path != null)
-		{
-			Source.ReferenceFlux(this, Flux.Direction.outgoing);
-			Target.ReferenceFlux(this, Flux.Direction.incoming);
-			AllFlux.Add(this);
-		}
-	}
+        GetPath();
+        if (Path != null)
+        {
+            Source.ReferenceFlux(this);
+            Target.ReferenceFlux(this);
+            AllFlux.Add(this);
+        }
+    }
 
-	public void UpdateTruckPath()
-	{
-		truck?.UpdatePath();
-	}
+    public void UpdateTruckPath()
+    {
+        truck?.UpdatePath();
+    }
 
-	private Path<Cell> GetPath()
-	{
-		var pf = new Pathfinder<Cell>(speed, 0, new List<Type>() { typeof(Road), typeof(City) });
-		pf.FindPath(Target.Point, Source.Point);
-		Path = pf.Path;
-		return pf.Path;
-	}
+    private Path<Cell> GetPath()
+    {
+        var pf = new Pathfinder<Cell>(speed, 0, new List<Type>() { typeof(Road), typeof(City) });
+        pf.FindPath(Target.Coord, Source.Coord);
+        Path = pf.Path;
+        return pf.Path;
+    }
 
-	private bool Consume()
-	{
-		if (Source.DistributeCargo(1))
-		{
-			truck = new RoadVehicule(World.Instance.truckPrefab, speed, GetPath(), Source, Target, this);
-			return true;
-		}
-		else
-			return false;
-	}
+    private bool Consume()
+    {
+        if (Source.ProvideCargo(1))
+        {
+            truck = new RoadVehicule(World.Instance.truckPrefab, speed, GetPath(), Source, Target, this);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
-	public bool Distribute(double ticks, double actualDistance)
-	{
-		var delivered = true;
-		if (delivered)
-		{
-			InTransit = false;
-			var walkingDistance = Source.ManhattanDistance(Target) * Pathfinder<Cell>.WalkingSpeed;
-			var obtainedGain = World.LocalEconomy.GetGain("flux_deliver_percell");
-			var gain = (int)Math.Round((walkingDistance - actualDistance) * obtainedGain);
-			World.LocalEconomy.Credit(gain);
-			TotalCargoMoved++;
-		}
-		return delivered;
-	}
+    public bool Distribute(double ticks, double actualDistance)
+    {
+        var delivered = true;
+        if (delivered)
+        {
+            InTransit = false;
+            var walkingDistance = Source.ManhattanDistance(Target) * Pathfinder<Cell>.WalkingSpeed;
+            var obtainedGain = World.LocalEconomy.GetGain("flux_deliver_percell");
+            var gain = (int)Math.Round((walkingDistance - actualDistance) * obtainedGain);
+            World.LocalEconomy.Credit(gain);
+            TotalCargoMoved++;
+        }
+        return delivered;
+    }
 
-	public void Move()
-	{
-		int cost;
-		World.LocalEconomy.ForcedCost("flux_running", out cost);
-		IsWaitingForInput = false;
-		IsWaitingForDelivery = false;
-		IsWaitingForPath = false;
+    public void Move()
+    {
+        int cost;
+        World.LocalEconomy.ForcedCost("flux_running", out cost);
+        IsWaitingForInput = false;
+        IsWaitingForDelivery = false;
+        IsWaitingForPath = false;
 
-		truck?.Tick();
+        truck?.Tick();
 
-		if (!Source.IsLinkedTo(Target))
-		{
-			IsWaitingForPath = true;
-			return;
-		}
+        if (!InTransit)
+        {
+            if (!Consume())
+            {
+                IsWaitingForInput = true;
+                return;
+            }
+            else
+                InTransit = true;
+        }
 
-		if (!InTransit)
-		{
-			if (!Consume())
-			{
-				IsWaitingForInput = true;
-				return;
-			}
-			else
-				InTransit = true;
-		}
+        truck.Move();
+    }
 
-		truck.Move();
-	}
+    public static void RemoveFlux(Flux f)
+    {
+        AllFlux.Remove(f);
+    }
 
-	public static void RemoveFlux(Flux f)
-	{
-		AllFlux.Remove(f);
-	}
-
-	public override string ToString()
-	{
-		return $"[{Source} => {Target}]";
-	}
+    public override string ToString()
+    {
+        return $"[{Source} => {Target}]";
+    }
 }
 

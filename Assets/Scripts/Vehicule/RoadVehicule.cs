@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RoadVehicule<Ts,Tt>
-    where Ts : ICargoGenerator, IHasCoord, IHasColor
-    where Tt : IHasCoord, IHasColor
+public class RoadVehicule
 {
 	private Path<Cell> path;
 	private IEnumerator<Cell> pathPosition;
 	public float Speed;
-	private readonly Ts source;
-	private readonly Tt target;
+	private readonly IFluxSource source;
+	private readonly IFluxTarget target;
 	private readonly Flux flux;
 
 	private readonly VehiculeRender vr;
@@ -25,7 +23,7 @@ public class RoadVehicule<Ts,Tt>
 	private double ticks;
 
 
-	public RoadVehicule(Component prefab, float speed, Path<Cell> initialPath, Ts source, Tt target, Flux flux)
+	public RoadVehicule(Component prefab, float speed, Path<Cell> initialPath, IFluxSource source, IFluxTarget target, Flux flux)
 	{
 		this.Speed = speed;
 		//Debug.Log($"Truck speed = {this.speed}");
@@ -35,14 +33,9 @@ public class RoadVehicule<Ts,Tt>
 
 		path = initialPath;
 
-		vrComponent = VehiculeRender.Build(prefab, new Vector3(source.X, 0, source.Y), this);
+		vrComponent = VehiculeRender.Build(prefab, new Vector3(source.Coord.X, 0, source.Coord.Y), this);
 		vr = vrComponent.GetComponent<VehiculeRender>();
-
-		var sourceCityRender = source.CityRenderComponent.GetComponentInChildren<CityObjectRender>().GetComponentInChildren<Renderer>();
-		var sourceCityColor = sourceCityRender.material.color;
-		var targetCityRender = target.CityRenderComponent.GetComponentInChildren<CityObjectRender>().GetComponentInChildren<Renderer>();
-		var targetCityColor = targetCityRender.material.color;
-		vr.InitColor(sourceCityColor, targetCityColor);
+		vr.InitColor(source.Color, target.Color);
 
 		position = 0;
 		pathPosition = path.GetEnumerator();
@@ -62,7 +55,8 @@ public class RoadVehicule<Ts,Tt>
 
 			if (pathPosition.MoveNext())
 			{
-				currentCell = targetCell;
+                flux.IsWaitingForDelivery = false;
+                currentCell = targetCell;
 				targetCell = pathPosition.Current;
 				position = 0;
 
@@ -76,8 +70,12 @@ public class RoadVehicule<Ts,Tt>
 				//Debug.Log($"Distribute t={ticks} s={Speed} pathD={path.TotalCost}");
 				if (flux.Distribute(ticks, (ticks+1)*Speed))
 				{
-					GameObject.Destroy(vrComponent.gameObject);
+                    GameObject.Destroy(vrComponent.gameObject);
 				}
+                else
+                {
+                    flux.IsWaitingForDelivery = true;
+                }
 			}
 		}
 	}
@@ -99,7 +97,7 @@ public class RoadVehicule<Ts,Tt>
 	public void UpdatePath()
 	{
 		var pf = new Pathfinder<Cell>(Speed, 0, new List<Type>() { typeof(Road), typeof(City) });
-		pf.FindPath(target.Point, targetCell);
+		pf.FindPath(target.Coord, targetCell);
 		path = pf.Path;
 
 		if (path != null)

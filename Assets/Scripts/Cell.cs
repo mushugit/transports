@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasConstruction, IHasRelativeDistance<Cell>, IHasCoord
+public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasConstruction, IHasRelativeDistance, IHasCoord, IHasCell
 {
 	public static int minX;
 	public static int maxX;
@@ -15,6 +15,8 @@ public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasConstruction, I
 	public int X { get; }
 	[JsonProperty]
 	public int Y { get; }
+
+    public Cell Coord { get { return this; } }
 
 	public Construction CellConstruction { get; }
 
@@ -69,8 +71,9 @@ public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasConstruction, I
 		Type = construction?.GetType();
 	}
 
-	public int ManhattanDistance(Cell c)
+	public int ManhattanDistance(IHasCell cell)
 	{
+        var c = cell.Coord;
 		var diffX = Mathf.Abs(c.X - X);
 		var diffY = Mathf.Abs(c.Y - Y);
 
@@ -79,9 +82,10 @@ public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasConstruction, I
 		return d;
 	}
 
-	public double FlyDistance(Cell c)
+	public double FlyDistance(IHasCell cell)
 	{
-		if(c==null) return 0;
+		if(cell==null || cell.Coord==null) return 0;
+        var c = cell.Coord;
 		double d = Mathf.Sqrt((c.X - X) * (c.X - X) + (c.Y - Y) * (c.Y - Y));
 		//Debug.Log("Distance entre " + ToString() + " et " + c.ToString() + " = " + d);
 		return d;

@@ -115,7 +115,7 @@ public class World : MonoBehaviour
 				if (c != otherCity && !c.IsLinkedTo(otherCity) && !c.IsUnreachable(otherCity))
 				{
 					var pf = new Pathfinder<Cell>(0, 0, new List<Type>(2) { typeof(Road), typeof(City) });
-					StartCoroutine(pf.RoutineFindPath(c.Point, otherCity.Point));
+					StartCoroutine(pf.RoutineFindPath(c.Coord, otherCity.Coord));
 					var path = pf.Path;
 					if (path?.TotalCost > 0)
 					{
@@ -208,11 +208,11 @@ public class World : MonoBehaviour
 			if (c is Depot)
 			{
 				var d = c as Depot;
-				BuildDepot(d.Point, d.Direction);
+				BuildDepot(d.Coord, d.Direction);
 			}
 			if (c is Road)
 			{
-				roads.Add(c.Point);
+				roads.Add(c.Coord);
 			}
 			progressLoading++;
 		}
@@ -294,7 +294,7 @@ public class World : MonoBehaviour
 		{
 			if ((a.LinkedCities == null && b.LinkedCities == null) || (a.LinkedCities != null && b.LinkedCities != null))
 			{
-				if (a.RoadInDirection(b.Point) < b.RoadInDirection(a.Point))
+				if (a.RoadInDirection(b.Coord) < b.RoadInDirection(a.Coord))
 				{
 					var c = a;
 					a = b;
@@ -313,7 +313,7 @@ public class World : MonoBehaviour
 
 			itemLoading = "Relie " + a.Name + " vers " + b.Name;
 			var pf = new Pathfinder<Cell>(0, 0, null);
-			yield return StartCoroutine(pf.RoutineFindPath(a.Point, b.Point));
+			yield return StartCoroutine(pf.RoutineFindPath(a.Coord, b.Coord));
 			if (pf.Path != null && pf.Path.TotalCost > 0)
 			{
 				//UnityEngine.Debug.Log($"Path from {a.Name} to {b.Name}");
@@ -475,7 +475,7 @@ public class World : MonoBehaviour
 			return;
 
 		var c = new City(dummyCity, cityPrefab);
-		var cityCenter = dummyCity.Point;
+		var cityCenter = dummyCity.Coord;
 
 		Constructions[cityCenter.X, cityCenter.Y] = c;
 		Cities.Add(c);
@@ -617,7 +617,7 @@ public class World : MonoBehaviour
 		{
 			countLoop++;
 
-			foreach (Road neighborsRoad in Neighbors(r.Point))
+			foreach (Road neighborsRoad in Neighbors(r.Coord))
 			{
 				if (!neighborsRoads.Contains(neighborsRoad))
 					neighborsRoads.Add(neighborsRoad);
@@ -658,7 +658,7 @@ public class World : MonoBehaviour
 		{
 			countLoop++;
 
-			foreach (Road neighborsRoad in Neighbors(r.Point))
+			foreach (Road neighborsRoad in Neighbors(r.Coord))
 			{
 				if (!neighborsRoads.Contains(neighborsRoad))
 					neighborsRoads.Add(neighborsRoad);
@@ -685,7 +685,7 @@ public class World : MonoBehaviour
 		var r = Constructions[pos.X, pos.Y] as Road;
 
 		var neighborsRoads = new List<Road>();
-		foreach (Road neighborsRoad in Neighbors(r.Point))
+		foreach (Road neighborsRoad in Neighbors(r.Coord))
 		{
 			if (!neighborsRoads.Contains(neighborsRoad))
 				neighborsRoads.Add(neighborsRoad);
@@ -706,20 +706,20 @@ public class World : MonoBehaviour
 		int count = 0;
 
 		//left
-		if (c.Point.X > 0)
-			if (Constructions[c.Point.X - 1, c.Point.Y] != null)
+		if (c.Coord.X > 0)
+			if (Constructions[c.Coord.X - 1, c.Coord.Y] != null)
 				count++;
 		//right
-		if (c.Point.X < width - 1)
-			if (Constructions[c.Point.X + 1, c.Point.Y] != null)
+		if (c.Coord.X < width - 1)
+			if (Constructions[c.Coord.X + 1, c.Coord.Y] != null)
 				count++;
 		//up
-		if (c.Point.Y < height - 1)
-			if (Constructions[c.Point.X, c.Point.Y + 1] != null)
+		if (c.Coord.Y < height - 1)
+			if (Constructions[c.Coord.X, c.Coord.Y + 1] != null)
 				count++;
 		//down
-		if (c.Point.Y > 0)
-			if (Constructions[c.Point.X, c.Point.Y - 1] != null)
+		if (c.Coord.Y > 0)
+			if (Constructions[c.Coord.X, c.Coord.Y - 1] != null)
 				count++;
 
 		return count;
@@ -727,29 +727,29 @@ public class World : MonoBehaviour
 
 	public Construction West(Construction c)
 	{
-		if (c.Point.X > 0)
-			return Constructions[c.Point.X - 1, c.Point.Y];
+		if (c.Coord.X > 0)
+			return Constructions[c.Coord.X - 1, c.Coord.Y];
 		return null;
 	}
 
 	public Construction East(Construction c)
 	{
-		if (c.Point.X < width - 1)
-			return Constructions[c.Point.X + 1, c.Point.Y];
+		if (c.Coord.X < width - 1)
+			return Constructions[c.Coord.X + 1, c.Coord.Y];
 		return null;
 	}
 
 	public Construction North(Construction c)
 	{
-		if (c.Point.Y < height - 1)
-			return Constructions[c.Point.X, c.Point.Y + 1];
+		if (c.Coord.Y < height - 1)
+			return Constructions[c.Coord.X, c.Coord.Y + 1];
 		return null;
 	}
 
 	public Construction South(Construction c)
 	{
-		if (c.Point.Y > 0)
-			return Constructions[c.Point.X, c.Point.Y - 1];
+		if (c.Coord.Y > 0)
+			return Constructions[c.Coord.X, c.Coord.Y - 1];
 		return null;
 	}
 
@@ -775,7 +775,7 @@ public class World : MonoBehaviour
 	public List<Road> ExtendedNeighbors(Road r)
 	{
 		var neighbors = new List<Road>();
-		var directions = r.Point.ExtendedDirections();
+		var directions = r.Coord.ExtendedDirections();
 
 		foreach (Cell p in directions)
 		{

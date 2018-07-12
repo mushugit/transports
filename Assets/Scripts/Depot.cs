@@ -12,10 +12,10 @@ public class Depot : Construction
 
 	public Depot(Cell position, Component depotPrefab, int direction)
 	{
-		Point = position;
+		Coord = position;
 		if (depotPrefab != null)
 		{
-			depotRender = DepotRender.Build(new Vector3(Point.X, 0f, Point.Y), depotPrefab, direction);
+			depotRender = DepotRender.Build(new Vector3(Coord.X, 0f, Coord.Y), depotPrefab, direction);
 			var objectRenderer = depotRender.GetComponentInChildren<DepotObjectRender>();
 			objectRenderer.Depot(this);
 		}

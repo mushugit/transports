@@ -11,7 +11,7 @@ public class Road : Construction
 
     public Road(int x, int y, Component roadPrefab)
     {
-        Point = new Cell(x, y, this);
+        Coord = new Cell(x, y, this);
         var r = RoadRender.Build(new Vector3(x, 0f, y), roadPrefab);
 		roadRender = r.GetComponent<RoadRender>();
     }
@@ -19,10 +19,10 @@ public class Road : Construction
 	[JsonConstructor]
 	public Road(Cell point, Component roadPrefab)
     {
-        Point = point;
+        Coord = point;
 		if (roadPrefab != null)
 		{
-			var r = RoadRender.Build(new Vector3(Point.X, 0f, Point.Y), roadPrefab);
+			var r = RoadRender.Build(new Vector3(Coord.X, 0f, Coord.Y), roadPrefab);
 			roadRender = r.GetComponent<RoadRender>();
 		}
     }

@@ -1,20 +1,20 @@
 ﻿using Newtonsoft.Json;
 
-public abstract class Construction
+public abstract class Construction : IHasCell
 {
 	[JsonProperty]
-	public Cell Point { get; protected set; }
+	public Cell Coord { get; protected set; }
 
     protected Construction() : this(0, 0) { }
 
     protected Construction(int x, int y)
     {
-        Point = new Cell(x, y,this);
+        Coord = new Cell(x, y,this);
     }
 
-    protected Construction(Cell point)
+    protected Construction(Cell cell)
     {
-        Point = Point;
+        Coord = cell;
     }
 
 	public abstract void Destroy();

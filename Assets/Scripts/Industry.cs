@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using System;
 
 [JsonObject(MemberSerialization.OptIn)]
-public class Industry : Construction, IEquatable<Industry>, ICargoGenerator
+public class Industry : Construction, IEquatable<Industry>, ICargoProvider
 {
     public Component IndustryRenderComponent { get; private set; }
 
@@ -32,11 +32,11 @@ public class Industry : Construction, IEquatable<Industry>, ICargoGenerator
 
     private void SetupIndustry(Cell position, Component prefab, string name)
     {
-        Point = position;
+        Coord = position;
         Name = name;
         if (prefab != null)
         {
-            IndustryRenderComponent = IndustryRender.Build(new Vector3(Point.X, 0f, Point.Y), prefab);
+            IndustryRenderComponent = IndustryRender.Build(new Vector3(Coord.X, 0f, Coord.Y), prefab);
             var objectRenderer = IndustryRenderComponent.GetComponentInChildren<IndustryObjectRender>();
             objectRenderer.Industry(this);
         }
@@ -63,7 +63,7 @@ public class Industry : Construction, IEquatable<Industry>, ICargoGenerator
 
     public bool Equals(Industry other)
     {
-        var e = Point.Equals(other?.Point);
+        var e = Coord.Equals(other?.Coord);
         //Debug.Log($"Testing if {this} equals {other} : {e}");
         return e;
     }
@@ -100,6 +100,11 @@ public class Industry : Construction, IEquatable<Industry>, ICargoGenerator
     }
 
     public void GenerateCargo()
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool ProvideCargo(int quantity)
     {
         throw new NotImplementedException();
     }
