@@ -6,11 +6,11 @@ using Newtonsoft.Json;
 using System;
 
 [JsonObject(MemberSerialization.OptIn)]
-public class City : Construction, IEquatable<City>
+public class City : Construction, IEquatable<City>, ICargoGenerator
 {
 
-	public static readonly Vector2 CargoChanceRange = new Vector2(.1f, 1f);
-	public static readonly Vector2 CargoProductionRange = new Vector2(0.002f, 0.02f);
+    public Vector2 CargoChanceRange { get; private set; } = new Vector2(.1f, 1f);
+    public Vector2 CargoProductionRange { get; private set; }  = new Vector2(0.002f, 0.02f);
 
 	public Component CityRenderComponent { get; private set; } //TODO : déplacer dans Construction
 
@@ -26,8 +26,8 @@ public class City : Construction, IEquatable<City>
 
 	public int Cargo { get; private set; } = 0;
 
-	public Dictionary<City,Flux> IncomingFlux { get; private set; }
-	public Dictionary<City, Flux> OutgoingFlux { get; private set; }
+	public Dictionary<Construction, Flux> IncomingFlux { get; private set; }
+	public Dictionary<Construction, Flux> OutgoingFlux { get; private set; }
 
 	public List<City> LinkedCities { get; private set; }
 	public List<City> UnreachableCities { get; private set; }
@@ -55,8 +55,8 @@ public class City : Construction, IEquatable<City>
 
 		LinkedCities = new List<City>();
 		UnreachableCities = new List<City>();
-		IncomingFlux = new Dictionary<City, Flux>();
-		OutgoingFlux = new Dictionary<City, Flux>();
+		IncomingFlux = new Dictionary<Construction, Flux>();
+		OutgoingFlux = new Dictionary<Construction, Flux>();
 	}
 
 	[JsonConstructor]
@@ -210,17 +210,17 @@ public class City : Construction, IEquatable<City>
 		}
 	}
 
-	public void ReferenceFlux(Flux flux, Flux.Direction direction)
+	public void ReferenceFlux(Flux flux)
 	{
 		//Debug.Log($"Add {direction} to {this} : {flux}");
-		if (direction == Flux.Direction.incoming)
+		if (flux.Target == this)
 			IncomingFlux.Add(flux.Source,flux);
 		else
 			OutgoingFlux.Add(flux.Target,flux);
 
 	}
 
-	private void UpdateCargo()
+	public void UpdateCargo()
 	{
 		Cargo = Mathf.FloorToInt(ExactCargo);
 	}

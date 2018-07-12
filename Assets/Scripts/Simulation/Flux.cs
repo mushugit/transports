@@ -7,9 +7,10 @@ using UnityEngine;
 public class Flux
 {
 	[JsonProperty]
-	public City Source { get; private set; }
+	public Construction Source { get; private set; }
+
 	[JsonProperty]
-	public City Target { get; private set; }
+	public Construction Target { get; private set; }
 
 	public bool IsWaitingForInput { get; private set; } = false;
 	public bool IsWaitingForDelivery { get; private set; } = false;

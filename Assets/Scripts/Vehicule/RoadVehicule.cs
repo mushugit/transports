@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RoadVehicule
+public class RoadVehicule<Ts,Tt>
+    where Ts : ICargoGenerator, IHasCoord, IHasColor
+    where Tt : IHasCoord, IHasColor
 {
 	private Path<Cell> path;
 	private IEnumerator<Cell> pathPosition;
 	public float Speed;
-	private readonly City source;
-	private readonly City target;
+	private readonly Ts source;
+	private readonly Tt target;
 	private readonly Flux flux;
 
 	private readonly VehiculeRender vr;
@@ -23,7 +25,7 @@ public class RoadVehicule
 	private double ticks;
 
 
-	public RoadVehicule(Component prefab, float speed, Path<Cell> initialPath, City source, City target, Flux flux)
+	public RoadVehicule(Component prefab, float speed, Path<Cell> initialPath, Ts source, Tt target, Flux flux)
 	{
 		this.Speed = speed;
 		//Debug.Log($"Truck speed = {this.speed}");
@@ -33,7 +35,7 @@ public class RoadVehicule
 
 		path = initialPath;
 
-		vrComponent = VehiculeRender.Build(prefab, new Vector3(source.Point.X, 0, source.Point.Y), this);
+		vrComponent = VehiculeRender.Build(prefab, new Vector3(source.X, 0, source.Y), this);
 		vr = vrComponent.GetComponent<VehiculeRender>();
 
 		var sourceCityRender = source.CityRenderComponent.GetComponentInChildren<CityObjectRender>().GetComponentInChildren<Renderer>();

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class LabelOperation : MonoBehaviour, IPointerClickHandler
+public class CityLabelOperation : MonoBehaviour, IPointerClickHandler
 {
 	public CityObjectRender cityObject;
 
