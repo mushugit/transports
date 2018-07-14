@@ -39,16 +39,38 @@ public class Industry : Construction, IEquatable<Industry>, IFluxSource, ICargoS
 
     #region Constructor
     public Industry(Cell cell)
-        :base(cell, World.Instance.IndustryPrefab, World.Instance.IndustryContainer)
+        :base(cell, World.Instance?.IndustryPrefab, World.Instance?.IndustryContainer)
     {
         cargoGenerator = new HCargoGenerator(UpdateLabel, this);
         linkHandler = new HLinkHandler(cell, null);
-        var city = World.Instance.ClosestCity(cell);
-        InitCityReference();
-        var n = ++numberOfIndustryPerCity[city];
-        Name = $"Industrie #{n} de {city.Name}";
+        var city = World.Instance?.ClosestCity(cell);
+        if (city != null)
+        {
+            InitCityReference();
+            var n = ++numberOfIndustryPerCity[city];
+            Name = $"Industrie #{n} de {city.Name}";
+        }
+        else
+            Name = "Industrie";
 
         UpdateLabel();
+    }
+
+    public Industry(Industry dummyIndustry)
+        :base(dummyIndustry._Cell, World.Instance?.IndustryPrefab, World.Instance?.IndustryContainer)
+    {
+        cargoGenerator = new HCargoGenerator(UpdateLabel, this, dummyIndustry.CargoChance, dummyIndustry.CargoProduction, dummyIndustry.ExactCargo);
+        linkHandler = new HLinkHandler(dummyIndustry._Cell, null);
+        Name = dummyIndustry.Name;
+    }
+
+    [JsonConstructor]
+    public Industry(Cell _cell, string name, float cargoChance, float cargoProduction, float exactCargo)
+        : base(_cell, World.Instance?.IndustryPrefab, World.Instance?.IndustryContainer)
+    {
+        cargoGenerator = new HCargoGenerator(UpdateLabel, this, cargoChance, cargoProduction, exactCargo);
+        linkHandler = new HLinkHandler(_cell, null);
+        Name = name;
     }
     #endregion
 
@@ -163,8 +185,8 @@ public class Industry : Construction, IEquatable<Industry>, IFluxSource, ICargoS
     public void UpdateLabel()
     {
         var label = $"{Name} [{Cargo}]";
-        var renderer = GlobalRenderer.GetComponentInChildren<IUnityLabelable>();
-        renderer.Label(label);
+        var renderer = GlobalRenderer?.GetComponentInChildren<IUnityLabelable>();
+        renderer?.Label(label);
     }
     #endregion
 

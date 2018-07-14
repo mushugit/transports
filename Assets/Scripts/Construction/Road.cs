@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+[JsonObject(MemberSerialization.OptIn)]
 public class Road : Construction
 {
     #region Constructor
     [JsonConstructor]
     public Road(Cell cell)
-        : base(cell, World.Instance.RoadPrefab, World.Instance.RoadContainer)
+        : base(cell, World.Instance?.RoadPrefab, World.Instance?.RoadContainer)
     {
 
     }

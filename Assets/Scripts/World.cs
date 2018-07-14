@@ -224,13 +224,16 @@ public class World : MonoBehaviour
         progressLoading++;
 
         itemLoading = "Chargement des constructions";
-        Cities = new List<City>();
         var roads = new List<Cell>();
         foreach (Construction c in loadData.Constructions)
         {
             if (c is City)
             {
                 BuildCity(c as City);
+            }
+            if (c is Industry)
+            {
+                BuildIndustry(c as Industry);
             }
             if (c is Depot)
             {
@@ -541,20 +544,48 @@ public class World : MonoBehaviour
         _BuildDepot(pos, Builder.RotationDirection);
     }
 
-    public void BuildCity(City dummyCity)
+    public void BuildIndustry(Industry dummy)
+    {
+        int cost;
+        if (!CheckCost("build_industry", "fonder une nouvelle industrie", out cost))
+            return;
+
+        AudioManager.Player.Play("buildCity");
+        var i = new Industry(dummy);
+        var center = dummy._Cell;
+
+        Constructions[center.X, center.Y] = i;
+        Industries.Add(i);
+
+        var neighborsRoads = new List<Road>();
+        foreach (Road neighborsRoad in Neighbors(center))
+        {
+            if (!neighborsRoads.Contains(neighborsRoad))
+                neighborsRoads.Add(neighborsRoad);
+        }
+
+        foreach (Road neighborsRoad in neighborsRoads)
+        {
+            UpdateRoad(neighborsRoad);
+        }
+
+        RecalculateLinks();
+    }
+
+    public void BuildCity(City dummy)
     {
         int cost;
         if (!CheckCost("build_city", "bâtir une nouvelle ville", out cost))
             return;
 
-        var c = new City(dummyCity);
-        var cityCenter = dummyCity._Cell;
+        var c = new City(dummy);
+        var center = dummy._Cell;
 
-        Constructions[cityCenter.X, cityCenter.Y] = c;
+        Constructions[center.X, center.Y] = c;
         Cities.Add(c);
 
         var neighborsRoads = new List<Road>();
-        foreach (Road neighborsRoad in Neighbors(cityCenter))
+        foreach (Road neighborsRoad in Neighbors(center))
         {
             if (!neighborsRoads.Contains(neighborsRoad))
                 neighborsRoads.Add(neighborsRoad);
@@ -569,7 +600,7 @@ public class World : MonoBehaviour
     public void BuildIndustry(Cell center)
     {
         int cost;
-        if (!CheckCost("build_industry", "bfonder une nouvelle industrie", out cost))
+        if (!CheckCost("build_industry", "fonder une nouvelle industrie", out cost))
             return;
 
         AudioManager.Player.Play("buildCity");
@@ -592,7 +623,6 @@ public class World : MonoBehaviour
 
         RecalculateLinks();
     }
-
 
     public void BuildCity(Cell center)
     {

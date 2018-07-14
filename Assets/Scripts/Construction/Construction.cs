@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+[JsonObject(MemberSerialization.OptIn)]
 public abstract class Construction
 {
     public delegate void ClickCallbackDelegate(PointerEventData eventData);
@@ -9,10 +10,7 @@ public abstract class Construction
     [JsonProperty]
     public Cell _Cell { get; protected set; }
 
-    [JsonProperty]
     public Component GlobalRenderer;
-    /*[JsonProperty]
-    public Component ObjectRenderer;*/
 
     public ClickCallbackDelegate ClickCallback;
 

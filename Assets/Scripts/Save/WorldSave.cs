@@ -29,7 +29,7 @@ public class WorldSave
 
 			Version = Application.version,
 			Build = Application.buildGUID,
-			AllFlux = Flux.AllFlux
+			//AllFlux = Flux.AllFlux
 		};
 
 		var c = w.Constructions;

@@ -96,7 +96,7 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
 
     #region Constructor
     public City(City dummyCity)
-        : base(dummyCity._Cell, World.Instance.CityPrefab, World.Instance.CityContainer)
+        : base(dummyCity._Cell, World.Instance?.CityPrefab, World.Instance?.CityContainer)
     {
         SetupCity(dummyCity._Cell, dummyCity.Name, dummyCity.CargoChance, dummyCity.CargoProduction, dummyCity.ExactCargo);
     }
@@ -108,10 +108,10 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
     }
 
     [JsonConstructor]
-    public City(Cell cell, string name, float cargoChance, float cargoProduction, float exactCargo)
-        : base(cell, World.Instance.CityPrefab, World.Instance.CityContainer)
+    public City(Cell _cell, string name, float cargoChance, float cargoProduction, float exactCargo)
+        : base(_cell, World.Instance?.CityPrefab, World.Instance?.CityContainer)
     {
-        SetupCity(cell, name, cargoChance, cargoProduction, exactCargo);
+        SetupCity(_cell, name, cargoChance, cargoProduction, exactCargo);
     }
     #endregion
 
@@ -126,8 +126,8 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
     public void UpdateLabel()
     {
         var label = $"{Name} [{Cargo}]";
-        var cityRender = GlobalRenderer.GetComponentInChildren<IUnityLabelable>();
-        cityRender.Label(label);
+        var cityRender = GlobalRenderer?.GetComponentInChildren<IUnityLabelable>();
+        cityRender?.Label(label);
     }
 
     public static string RandomName()

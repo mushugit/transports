@@ -60,7 +60,10 @@ public class PauseMenu : MonoBehaviour
 
 	public void Save()
 	{
-		SaveHandler.Save();
+        string errorMessage;
+        if (!SaveHandler.Save(out errorMessage))
+            Message.ShowError("Erreur de création de la sauvegarde", errorMessage);
+       
 		Resume();
 	}
 

@@ -2,13 +2,14 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+[JsonObject(MemberSerialization.OptIn)]
 public class Depot : Construction
 {
 	[JsonProperty]
 	public int Direction { get; }
 
 	public Depot(Cell cell, int direction)
-        : base(cell, World.Instance.DepotPrefab, World.Instance.DepotContainer)
+        : base(cell, World.Instance?.DepotPrefab, World.Instance?.DepotContainer)
 	{				
 		Direction = direction;
 	}
