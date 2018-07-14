@@ -39,7 +39,7 @@ GameObject:
   - component: {fileID: 114511612153391916}
   - component: {fileID: 114678418503570854}
   - component: {fileID: 114935592596283650}
-  - component: {fileID: 114402216479889540}
+  - component: {fileID: 114637560598081260}
   m_Layer: 28
   m_Name: LabelWithBackground
   m_TagString: Untagged
@@ -75,6 +75,7 @@ GameObject:
   - component: {fileID: 223027472435002416}
   - component: {fileID: 114821651038466072}
   - component: {fileID: 114128144907312854}
+  - component: {fileID: 114051933895109816}
   m_Layer: 28
   m_Name: Canvas
   m_TagString: Untagged
@@ -123,6 +124,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4631265420062298}
+  - component: {fileID: 114427584418708370}
   m_Layer: 0
   m_Name: IndustryObject
   m_TagString: Untagged
@@ -191,7 +193,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4728192635335406}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &4135896874523794
 Transform:
@@ -234,7 +236,7 @@ Transform:
   m_Children:
   - {fileID: 4200886129298456}
   m_Father: {fileID: 4728192635335406}
-  m_RootOrder: 2
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &4692814993010262
 Transform:
@@ -256,12 +258,12 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1347245572199052}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 106.87281, y: 283.2956, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
+  - {fileID: 4631265420062298}
   - {fileID: 224155408383998244}
   - {fileID: 4071227640774484}
-  - {fileID: 4631265420062298}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -422,6 +424,19 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &114051933895109816
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1303845954282804}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c5ab05296a5742468509545e54d2a29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  labelPosition: {fileID: 1117713209062410}
+  label: {fileID: 224276949852206790}
 --- !u!114 &114128144907312854
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -438,18 +453,6 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!114 &114402216479889540
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1188488596045068}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c5ab05296a5742468509545e54d2a29, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  industry: {fileID: 1117713209062410}
 --- !u!114 &114426979254212930
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -483,6 +486,17 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: "Un nom de ville tr\xE8s long"
+--- !u!114 &114427584418708370
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1539557099276630}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 366366e17a94f004aaa5bd3a8942aa59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114428563346089128
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -551,6 +565,18 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
+--- !u!114 &114637560598081260
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1188488596045068}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e8e3334ae4891449a377a93b971b268, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  objectRenderer: {fileID: 4728192635335406}
 --- !u!114 &114678418503570854
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -684,7 +710,7 @@ RectTransform:
   m_Children:
   - {fileID: 224276949852206790}
   m_Father: {fileID: 4728192635335406}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}

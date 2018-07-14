@@ -45,10 +45,10 @@ public class Economy
 		ForcedDebit(cost);
 	}
 
-	public bool DoCost(string operationName, out int cost)
+	public bool DoCost(string operationName, out int cost, int quantity)
 	{
 		cost = template.Cost(operationName);
-		return Debit(cost);
+		return Debit(cost*quantity);
 	}
 
 	public void DoGain(string operationName, out int gain)

@@ -7,16 +7,19 @@ using System;
 using UnityEngine.EventSystems;
 
 [JsonObject(MemberSerialization.OptIn)]
-public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, ICargoStocker, ICargoGenerator
+public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, ICargoStocker, ICargoGenerator, ILinkable, IHasName
 {
     private static List<string> cityNames = null;
 
+    #region IHasName
     [JsonProperty]
-    public string Name { get; private set; } //TODO : variable globale commence par maj
+    public string Name { get; private set; }
+    #endregion
+
+    HCargoGenerator cargoGenerator;
+    HLinkHandler linkHandler;
 
     #region ICargoProvider Properties
-    HCargoGenerator cargoGenerator;
-
     [JsonProperty]
     public float CargoChance { get { return cargoGenerator.CargoChance; } }
     [JsonProperty]
@@ -31,8 +34,10 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
 
     public Dictionary<ICargoProvider, Flux> IncomingFlux { get; private set; }
 
-    public List<City> LinkedCities { get; private set; }
-    public List<City> UnreachableCities { get; private set; }
+    #region ILinkable Properties
+    public List<ILinkable> Linked { get { return linkHandler.Linked; } }
+    public List<ILinkable> Unreachable { get { return linkHandler.Unreachable; } }
+    #endregion  
 
     public WindowTextInfo InfoWindow = null;
 
@@ -69,21 +74,21 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
         Name = name;
         UpdateLabel();
 
-        LinkedCities = new List<City>();
-        UnreachableCities = new List<City>();
         IncomingFlux = new Dictionary<ICargoProvider, Flux>();
     }
 
     private void SetupCity(Cell position, string name)
     {
-        cargoGenerator = new HCargoGenerator(UpdateInformations);
+        cargoGenerator = new HCargoGenerator(UpdateInformations, this, HCargoGenerator.CargoLevel.LowCargo);
+        linkHandler = new HLinkHandler(this._Cell, UpdateInformations);
 
         InitCity(position, name);
     }
 
     private void SetupCity(Cell position, string name, float cargoChance, float cargoProduction, float exactCargo)
     {
-        cargoGenerator = new HCargoGenerator(UpdateInformations, cargoChance, cargoProduction, exactCargo);
+        cargoGenerator = new HCargoGenerator(UpdateInformations, this, cargoChance, cargoProduction, exactCargo);
+        linkHandler = new HLinkHandler(this._Cell, UpdateInformations);
 
         InitCity(position, name);
     }
@@ -151,72 +156,6 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
     }
     #endregion
 
-    #region Link stuff
-    public void ClearLinks()
-    {
-        LinkedCities.Clear();
-        UnreachableCities.Clear();
-    }
-
-    public void AddUnreachable(City c)
-    {
-        if (!UnreachableCities.Contains(c))
-        {
-            UnreachableCities.Add(c);
-            UpdateInformations();
-        }
-    }
-
-    public void AddUnreachable(List<City> list)
-    {
-        var addedACity = false;
-        foreach (City c in list)
-        {
-            if (!UnreachableCities.Contains(c))
-            {
-                addedACity = true;
-                UnreachableCities.Add(c);
-            }
-        }
-        if (addedACity)
-            UpdateInformations();
-    }
-
-    public void AddLinkTo(City c)
-    {
-        if (!LinkedCities.Contains(c))
-        {
-            LinkedCities.Add(c);
-            UpdateInformations();
-        }
-    }
-
-    public void AddLinkTo(List<City> list)
-    {
-        var addedACity = false;
-        foreach (City c in list)
-        {
-            if (!LinkedCities.Contains(c))
-            {
-                addedACity = true;
-                LinkedCities.Add(c);
-            }
-        }
-        if (addedACity)
-            UpdateInformations();
-    }
-
-    public bool IsUnreachable(City c)
-    {
-        return UnreachableCities.Contains(c);
-    }
-
-    public bool IsLinkedTo(City c)
-    {
-        return LinkedCities.Contains(c);
-    }
-    #endregion
-
     #region IFluxReferencer
     public void ReferenceFlux(Flux flux)
     {
@@ -237,10 +176,52 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
     }
     #endregion
 
+    #region ILinkable
+    public void ClearLinks()
+    {
+        linkHandler.ClearLinks();
+    }
+
+    public void AddUnreachable(ILinkable c)
+    {
+        linkHandler.AddUnreachable(c);
+    }
+
+    public void AddUnreachable(List<ILinkable> list)
+    {
+        linkHandler.AddUnreachable(list);
+    }
+
+    public void AddLinkTo(ILinkable c)
+    {
+        linkHandler.AddLinkTo(c);
+    }
+
+    public void AddLinkTo(List<ILinkable> list)
+    {
+        linkHandler.AddLinkTo(list);
+    }
+
+    public bool IsUnreachable(ILinkable c)
+    {
+        return linkHandler.IsUnreachable(c);
+    }
+
+    public bool IsLinkedTo(ILinkable c)
+    {
+        return linkHandler.IsLinkedTo(c);
+    }
+
+    public int RoadInDirection(Cell target)
+    {
+        return linkHandler.RoadInDirection(target);
+    }
+    #endregion
+
     public static int Quantity(int w, int h)
     {
         var averageSquareSize = Mathf.Sqrt(w * h);
-        return Mathf.RoundToInt(Mathf.Sqrt(averageSquareSize * 2)) + 1;
+        return Mathf.RoundToInt(Mathf.Sqrt(averageSquareSize * 2) * (2f/5f)) + 1;
     }
 
     #region Cargo
@@ -256,6 +237,11 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
     public bool ProvideCargo(int quantity)
     {
         return cargoGenerator.ProvideCargo(quantity);
+    }
+
+    public void UpdateAllOutgoingFlux()
+    {
+        cargoGenerator.UpdateAllOutgoingFlux();
     }
     #endregion
 
@@ -284,82 +270,7 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
 
 
 
-    public void UpdateAllOutgoingFlux()
-    {
-        var outgoingFlux = cargoGenerator.OutgoingFlux;
-        foreach (var flux in outgoingFlux)
-        {
-            //Debug.Log($"Update truck path for {flux}");
-            flux.Value.UpdateTruckPath();
-        }
-    }
-
-    public int RoadInDirection(Cell target)
-    {
-
-        var values = new int[9, 9];
-        var multiplier = new int[9, 9];
-
-
-        if (target.X > _Cell.X)
-        {
-            for (int y = 0; y < 3; y++)
-            {
-                values[1, y] += 1;
-                values[2, y] += 2;
-            }
-        }
-        if (_Cell.X < target.X)
-        {
-            for (int y = 0; y < 3; y++)
-            {
-                values[1, y] += 1;
-                values[0, y] += 2;
-            }
-        }
-        if (target.X == _Cell.X)
-        {
-            for (int y = 0; y < 3; y++)
-            {
-                multiplier[1, y] = 2;
-            }
-        }
-
-        if (target.Y > _Cell.Y)
-        {
-            for (int x = 0; x < 3; x++)
-            {
-                values[x, 1] += 1;
-                values[x, 2] += 2;
-            }
-        }
-        if (_Cell.Y < target.Y)
-        {
-            for (int x = 0; x < 3; x++)
-            {
-                values[x, 1] += 1;
-                values[x, 0] += 2;
-            }
-        }
-        if (target.Y == _Cell.Y)
-        {
-            for (int x = 0; x < 3; x++)
-            {
-                multiplier[x, 1] = 2;
-            }
-        }
-
-        var g = 0;
-        values[1, 1] = 0;
-        for (int i = 0; i < 3; i++)
-        {
-            for (int j = 0; j < 3; j++)
-            {
-                g += values[i, j] * ((multiplier[i, j] != 0) ? multiplier[i, j] : 1);
-            }
-        }
-        return g;
-    }
+    
 
     public string InfoText()
     {
@@ -405,10 +316,11 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
             }
         }
         sb.Append("<b>Lié aux villes</b>:\n");
-        var linkedCities = LinkedCities.OrderBy(c => ManhattanDistance(c));
-        foreach (City c in linkedCities)
+        var linked = Linked.OrderBy(c => ManhattanDistance(c));
+        foreach (ILinkable c in linked)
         {
-            sb.Append($"\t{c.Name} \r({ManhattanDistance(c)} cases)\n");
+            if(c is IHasName)
+                sb.Append($"\t{(c as IHasName).Name} \r({ManhattanDistance(c)} cases)\n");
         }
 
         return sb.ToString().Replace("\r", "");

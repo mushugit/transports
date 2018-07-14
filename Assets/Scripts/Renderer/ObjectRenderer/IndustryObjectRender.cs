@@ -2,14 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class IndustryObjectRender : MonoBehaviour {
+public class IndustryObjectRender : MonoBehaviour, IUnityObjectRenderer
+{
 
-    public Industry _Industry { get; private set; }
-
-    public void Industry(Industry ind)
-    {
-        _Industry = ind;
-    }
+    public Construction NestedConstruction { get; set; }
 
     void Start()
     {

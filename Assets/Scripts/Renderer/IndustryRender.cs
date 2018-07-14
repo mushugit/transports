@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class IndustryRender : MonoBehaviour {
+public class IndustryRender : MonoBehaviour, IUnityLabelable
+{
 
     public GUISkin GuiSkin;
 

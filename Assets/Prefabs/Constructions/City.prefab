@@ -76,7 +76,6 @@ GameObject:
   - component: {fileID: 222050448131287060}
   - component: {fileID: 114286868264180156}
   - component: {fileID: 114378504858283130}
-  - component: {fileID: 114889447901681552}
   - component: {fileID: 114341599402603186}
   - component: {fileID: 114245670269666418}
   - component: {fileID: 114229898040411226}
@@ -166,6 +165,7 @@ GameObject:
   - component: {fileID: 223457597748217164}
   - component: {fileID: 114443892053287294}
   - component: {fileID: 114374637276263530}
+  - component: {fileID: 114393850567918490}
   m_Layer: 28
   m_Name: Canvas
   m_TagString: Untagged
@@ -295,7 +295,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1419470739133756}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -37.327446, y: 162.51562, z: -6.4722533}
+  m_LocalPosition: {x: 71.405136, y: 247.25583, z: -6.4722533}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4378202776513836}
@@ -728,6 +728,19 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
+--- !u!114 &114393850567918490
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1791120380836180}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c5ab05296a5742468509545e54d2a29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  labelPosition: {fileID: 1851490846057672}
+  label: {fileID: 224864594366312066}
 --- !u!114 &114443892053287294
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -806,18 +819,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c0b5e0527a6e8648a9c391ad0722af3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &114889447901681552
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1339311503437262}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 57d0adccdc57e1a4e8e00256f80efe9a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  city: {fileID: 1851490846057672}
 --- !u!222 &222036251667534552
 CanvasRenderer:
   m_ObjectHideFlags: 1

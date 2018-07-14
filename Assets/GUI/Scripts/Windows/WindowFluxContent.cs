@@ -3,17 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class WindowFluxContent : MonoBehaviour {
+public class WindowFluxContent : MonoBehaviour
+{
 
-	public Dropdown source;
-	public Dropdown target;
+    public Dropdown source;
+    public Dropdown target;
 
-	public void AddFlux()
-	{
-		var citySource = World.Instance.Cities[source.value];
-		var cityTarget = World.Instance.Cities[target.value];
+    public void AddFlux()
+    {
+        IFluxSource sourceConstruction;
+        var cityCount = World.Instance.Cities.Count;
+        if (source.value < cityCount)
+            sourceConstruction = World.Instance.Cities[source.value];
+        else
+            sourceConstruction = World.Instance.Industries[source.value - cityCount];
 
-		Simulation.AddFlux(citySource, cityTarget);
-	}
+        var cityTarget = World.Instance.Cities[target.value];
+
+        Simulation.AddFlux(sourceConstruction, cityTarget);
+    }
 
 }

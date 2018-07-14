@@ -6,6 +6,8 @@ using UnityEngine;
 [JsonObject(MemberSerialization.OptIn)]
 public class Flux
 {
+    public static float FrameDelayBetweenTrucks = 50;
+
     [JsonProperty]
     public IFluxSource Source { get; private set; }
 
@@ -21,11 +23,14 @@ public class Flux
     private readonly float speed;
 
     [JsonProperty]
-    public bool InTransit { get; private set; }
+    public int AvailableTrucks { get; private set; }
     [JsonProperty]
     public int TotalCargoMoved { get; private set; }
 
-    private RoadVehicule truck;
+    private List<RoadVehicule> trucks;
+    private RoadVehicule waitingTruck;
+    private float currentDelay;
+
     public Path<Cell> Path { get; private set; }
 
     public enum Direction
@@ -37,12 +42,15 @@ public class Flux
     public static List<Flux> AllFlux = new List<Flux>();
 
     [JsonConstructor]
-    public Flux(IFluxSource source, IFluxTarget target)
+    public Flux(IFluxSource source, IFluxTarget target, int truckQuantity)
     {
         Source = source;
         Target = target;
         speed = defaultSpeed;
         TotalCargoMoved = 0;
+        AvailableTrucks = truckQuantity;
+        trucks = new List<RoadVehicule>(truckQuantity);
+        currentDelay = FrameDelayBetweenTrucks;
 
         GetPath();
 
@@ -62,6 +70,9 @@ public class Flux
         Target = trueTarget;
         speed = defaultSpeed;
         TotalCargoMoved = dummyFlux.TotalCargoMoved;
+        AvailableTrucks = dummyFlux.AvailableTrucks;
+        trucks = new List<RoadVehicule>(AvailableTrucks);
+        currentDelay = FrameDelayBetweenTrucks;
 
         GetPath();
         if (Path != null)
@@ -72,14 +83,20 @@ public class Flux
         }
     }
 
+    public void AddTrucks(int quantity)
+    {
+        AvailableTrucks += quantity;
+    }
+
     public void UpdateTruckPath()
     {
-        truck?.UpdatePath();
+        foreach (RoadVehicule truck in trucks)
+            truck.UpdatePath();
     }
 
     private Path<Cell> GetPath()
     {
-        var pf = new Pathfinder<Cell>(speed, 0, new List<Type>() { typeof(Road), typeof(City) });
+        var pf = new Pathfinder<Cell>(speed, 0, new List<Type>() { typeof(Road), typeof(City), typeof(Industry) });
         pf.FindPath(Target._Cell, Source._Cell);
         Path = pf.Path;
         return pf.Path;
@@ -89,7 +106,10 @@ public class Flux
     {
         if (Source.ProvideCargo(1))
         {
-            truck = new RoadVehicule(World.Instance.TruckPrefab, speed, GetPath(), Source, Target, this);
+            currentDelay = 0;
+            AvailableTrucks--;
+            var truck = new RoadVehicule(World.Instance.TruckPrefab, speed, GetPath(), Source, Target, this);
+            trucks.Add(truck);
             return true;
         }
         else
@@ -98,12 +118,13 @@ public class Flux
         }
     }
 
-    public bool Distribute(double ticks, double actualDistance)
+    public bool Distribute(double ticks, double actualDistance, RoadVehicule truck)
     {
         var delivered = true;
         if (delivered)
         {
-            InTransit = false;
+            truck.HasArrived = true;
+            AvailableTrucks++;
             var walkingDistance = Source.ManhattanDistance(Target) * Pathfinder<Cell>.WalkingSpeed;
             var obtainedGain = World.LocalEconomy.GetGain("flux_deliver_percell");
             var gain = (int)Math.Round((walkingDistance - actualDistance) * obtainedGain);
@@ -116,25 +137,34 @@ public class Flux
     public void Move()
     {
         int cost;
+        currentDelay++;
         World.LocalEconomy.ForcedCost("flux_running", out cost);
         IsWaitingForInput = false;
         IsWaitingForDelivery = false;
         IsWaitingForPath = false;
 
-        truck?.Tick();
 
-        if (!InTransit)
+        foreach (RoadVehicule truck in trucks)
+        {
+            truck.Tick();
+            truck.CheckArrived();
+        }
+
+        trucks.RemoveAll(r => r.HasArrived);
+
+        if (AvailableTrucks > 0 && currentDelay >= FrameDelayBetweenTrucks)
         {
             if (!Consume())
             {
                 IsWaitingForInput = true;
-                return;
             }
             else
-                InTransit = true;
+            {
+            }
         }
 
-        truck.Move();
+        foreach (RoadVehicule truck in trucks)
+            truck.Move();
     }
 
     public static void RemoveFlux(Flux f)

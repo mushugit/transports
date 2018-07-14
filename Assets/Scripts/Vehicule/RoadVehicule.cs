@@ -4,9 +4,13 @@ using UnityEngine;
 
 public class RoadVehicule
 {
-	private Path<Cell> path;
+    public float Speed;
+
+    public bool HasArrived;
+
+    private Path<Cell> path;
 	private IEnumerator<Cell> pathPosition;
-	public float Speed;
+	
 	private readonly IFluxSource source;
 	private readonly IFluxTarget target;
 	private readonly Flux flux;
@@ -43,7 +47,7 @@ public class RoadVehicule
         else
             pathPosition = null;
 
-
+        HasArrived = false;
         MoveCell();
 	}
 
@@ -59,7 +63,7 @@ public class RoadVehicule
 
 			if (pathPosition.MoveNext())
 			{
-                flux.IsWaitingForDelivery = false;
+
                 currentCell = targetCell;
 				targetCell = pathPosition.Current;
 				position = 0;
@@ -72,10 +76,11 @@ public class RoadVehicule
 			else
 			{
 				//Debug.Log($"Distribute t={ticks} s={Speed} pathD={path.TotalCost}");
-				if (flux.Distribute(ticks, (ticks+1)*Speed))
+				if (flux.Distribute(ticks, (ticks+1)*Speed, this))
 				{
-                    GameObject.Destroy(vrComponent.gameObject);
-				}
+                    HasArrived = true;
+                    //GameObject.Destroy(vrComponent.gameObject);
+                }
                 else
                 {
                     flux.IsWaitingForDelivery = true;
@@ -83,6 +88,14 @@ public class RoadVehicule
 			}
 		}
 	}
+
+    public void CheckArrived()
+    {
+        if (HasArrived)
+        {
+            GameObject.Destroy(vrComponent.gameObject);
+        }
+    }
 
 	public void Tick()
 	{
@@ -103,7 +116,7 @@ public class RoadVehicule
 
 	public void UpdatePath()
 	{
-        var pf = new Pathfinder<Cell>(Speed, 0, new List<Type>() { typeof(Road), typeof(City) });
+        var pf = new Pathfinder<Cell>(Speed, 0, new List<Type>() { typeof(Road), typeof(City), typeof(Industry) });
         if (targetCell == null)
             targetCell = source._Cell;
         pf.FindPath(target._Cell, targetCell);
