@@ -1,5 +1,5 @@
 ﻿public interface IHasCell
 {
-    Cell Coord { get; }
+    Cell _Cell { get; }
 }
 

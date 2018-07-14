@@ -33,14 +33,18 @@ public class RoadVehicule
 
 		path = initialPath;
 
-		vrComponent = VehiculeRender.Build(prefab, new Vector3(source.Coord.X, 0, source.Coord.Y), this);
+		vrComponent = VehiculeRender.Build(prefab, new Vector3(source._Cell.X, 0, source._Cell.Y), this);
 		vr = vrComponent.GetComponent<VehiculeRender>();
 		vr.InitColor(source.Color, target.Color);
 
 		position = 0;
-		pathPosition = path.GetEnumerator();
+        if (path != null)
+            pathPosition = path.GetEnumerator();
+        else
+            pathPosition = null;
 
-		MoveCell();
+
+        MoveCell();
 	}
 
 	public void MoveCell()
@@ -87,28 +91,37 @@ public class RoadVehicule
 
 	public void Move()
 	{
-		position += Speed;
-		//Debug.Log($"Truck tracer {position} for distance {distance} (s={speed})");
-		if (position >= distance)
-			MoveCell();
+        if (path != null)
+        {
+            position += Speed;
+            //Debug.Log($"Truck tracer {position} for distance {distance} (s={speed})");
+            if (position >= distance)
+                MoveCell();
+        }
 
 	}
 
 	public void UpdatePath()
 	{
-		var pf = new Pathfinder<Cell>(Speed, 0, new List<Type>() { typeof(Road), typeof(City) });
-		pf.FindPath(target.Coord, targetCell);
+        var pf = new Pathfinder<Cell>(Speed, 0, new List<Type>() { typeof(Road), typeof(City) });
+        if (targetCell == null)
+            targetCell = source._Cell;
+        pf.FindPath(target._Cell, targetCell);
 		path = pf.Path;
 
-		if (path != null)
-		{
-			//Debug.Log($"New path found from {targetCell} to {target.Point}");
-			pathPosition = path.GetEnumerator();
-		}
-		else
-			pathPosition = null;
+        if (path != null)
+        {
+            Debug.Log($"New path found from {targetCell} to {target._Cell}");
+            pathPosition = path.GetEnumerator();
+            targetCell = null;
+        }
+        else
+        {
+            Debug.Log($"No path found from {targetCell} to {target._Cell}");
+            pathPosition = null;
+        }
 
-		targetCell = null;
+		
 	}
 }
 

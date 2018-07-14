@@ -1,0 +1,436 @@
+﻿using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Newtonsoft.Json;
+using System;
+using UnityEngine.EventSystems;
+
+[JsonObject(MemberSerialization.OptIn)]
+public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, ICargoStocker, ICargoGenerator
+{
+    private static List<string> cityNames = null;
+
+    [JsonProperty]
+    public string Name { get; private set; } //TODO : variable globale commence par maj
+
+    #region ICargoProvider Properties
+    HCargoGenerator cargoGenerator;
+
+    [JsonProperty]
+    public float CargoChance { get { return cargoGenerator.CargoChance; } }
+    [JsonProperty]
+    public float CargoProduction { get { return cargoGenerator.CargoProduction; } }
+    [JsonProperty]
+    public float ExactCargo { get { return cargoGenerator.ExactCargo; } }
+
+    public int Cargo { get { return cargoGenerator.Cargo; } }
+
+    public Dictionary<ICargoAccepter, Flux> OutgoingFlux { get { return cargoGenerator.OutgoingFlux; } }
+    #endregion
+
+    public Dictionary<ICargoProvider, Flux> IncomingFlux { get; private set; }
+
+    public List<City> LinkedCities { get; private set; }
+    public List<City> UnreachableCities { get; private set; }
+
+    public WindowTextInfo InfoWindow = null;
+
+    #region IHasColor
+    public Color Color
+    {
+        get
+        {
+            var internalRenderer = GlobalRenderer.GetComponentInChildren<Renderer>();
+            return internalRenderer.material.color;
+        }
+    }
+    #endregion
+
+    #region IEquatable<City>
+    public bool Equals(City other)
+    {
+        var e = _Cell.Equals(other?._Cell);
+        //Debug.Log($"Testing if {this} equals {other} : {e}");
+        return e;
+    }
+    #endregion
+
+    static City()
+    {
+        var allCityNames = Resources.Load("Text/CityNames/françaises") as TextAsset;
+        cityNames = allCityNames.text.Split('\n').ToList();
+    }
+
+    #region Initializer
+    private void InitCity(Cell position, string name)
+    {
+        _Cell = position;
+        Name = name;
+        UpdateLabel();
+
+        LinkedCities = new List<City>();
+        UnreachableCities = new List<City>();
+        IncomingFlux = new Dictionary<ICargoProvider, Flux>();
+    }
+
+    private void SetupCity(Cell position, string name)
+    {
+        cargoGenerator = new HCargoGenerator(UpdateInformations);
+
+        InitCity(position, name);
+    }
+
+    private void SetupCity(Cell position, string name, float cargoChance, float cargoProduction, float exactCargo)
+    {
+        cargoGenerator = new HCargoGenerator(UpdateInformations, cargoChance, cargoProduction, exactCargo);
+
+        InitCity(position, name);
+    }
+    #endregion
+
+    #region Constructor
+    public City(City dummyCity)
+        : base(dummyCity._Cell, World.Instance.CityPrefab, World.Instance.CityContainer)
+    {
+        SetupCity(dummyCity._Cell, dummyCity.Name, dummyCity.CargoChance, dummyCity.CargoProduction, dummyCity.ExactCargo);
+    }
+
+    public City(Cell cell)
+        : base(cell, World.Instance.CityPrefab, World.Instance.CityContainer)
+    {
+        SetupCity(cell, RandomName());
+    }
+
+    [JsonConstructor]
+    public City(Cell cell, string name, float cargoChance, float cargoProduction, float exactCargo)
+        : base(cell, World.Instance.CityPrefab, World.Instance.CityContainer)
+    {
+        SetupCity(cell, name, cargoChance, cargoProduction, exactCargo);
+    }
+    #endregion
+
+    #region Construction override
+    public override void ClickHandler(PointerEventData eventData)
+    {
+        ShowInfo();
+    }
+    #endregion
+
+    #region Name and label
+    public void UpdateLabel()
+    {
+        var label = $"{Name} [{Cargo}]";
+        var cityRender = GlobalRenderer.GetComponentInChildren<IUnityLabelable>();
+        cityRender.Label(label);
+    }
+
+    public static string RandomName()
+    {
+        var r = UnityEngine.Random.Range(0, cityNames.Count - 1);
+        var name = cityNames[r];
+        cityNames.RemoveAt(r);
+        return name;
+    }
+    #endregion
+
+    #region IHasRelativeDistance
+    public int ManhattanDistance(IHasCell target)
+    {
+        return _Cell.ManhattanDistance(target._Cell);
+    }
+
+    public double FlyDistance(IHasCell target)
+    {
+        return _Cell.FlyDistance(target._Cell);
+    }
+
+    public double FlyDistance(Cell point)
+    {
+        return _Cell.FlyDistance(point);
+    }
+    #endregion
+
+    #region Link stuff
+    public void ClearLinks()
+    {
+        LinkedCities.Clear();
+        UnreachableCities.Clear();
+    }
+
+    public void AddUnreachable(City c)
+    {
+        if (!UnreachableCities.Contains(c))
+        {
+            UnreachableCities.Add(c);
+            UpdateInformations();
+        }
+    }
+
+    public void AddUnreachable(List<City> list)
+    {
+        var addedACity = false;
+        foreach (City c in list)
+        {
+            if (!UnreachableCities.Contains(c))
+            {
+                addedACity = true;
+                UnreachableCities.Add(c);
+            }
+        }
+        if (addedACity)
+            UpdateInformations();
+    }
+
+    public void AddLinkTo(City c)
+    {
+        if (!LinkedCities.Contains(c))
+        {
+            LinkedCities.Add(c);
+            UpdateInformations();
+        }
+    }
+
+    public void AddLinkTo(List<City> list)
+    {
+        var addedACity = false;
+        foreach (City c in list)
+        {
+            if (!LinkedCities.Contains(c))
+            {
+                addedACity = true;
+                LinkedCities.Add(c);
+            }
+        }
+        if (addedACity)
+            UpdateInformations();
+    }
+
+    public bool IsUnreachable(City c)
+    {
+        return UnreachableCities.Contains(c);
+    }
+
+    public bool IsLinkedTo(City c)
+    {
+        return LinkedCities.Contains(c);
+    }
+    #endregion
+
+    #region IFluxReferencer
+    public void ReferenceFlux(Flux flux)
+    {
+        //Debug.Log($"Add {this} : {flux}");
+        if (flux.Target == this)
+            IncomingFlux.Add(flux.Source, flux);
+        else
+            cargoGenerator.ReferenceFlux(flux);
+
+    }
+
+    public void RemoveFlux(Flux flux)
+    {
+        cargoGenerator.RemoveFlux(flux);
+
+        if (IncomingFlux.ContainsKey(flux.Source))
+            IncomingFlux.Remove(flux.Source);
+    }
+    #endregion
+
+    public static int Quantity(int w, int h)
+    {
+        var averageSquareSize = Mathf.Sqrt(w * h);
+        return Mathf.RoundToInt(Mathf.Sqrt(averageSquareSize * 2)) + 1;
+    }
+
+    #region Cargo
+
+    #region ICargoGenerator
+    public bool GenerateCargo()
+    {
+        return cargoGenerator.GenerateCargo();
+    }
+    #endregion
+
+    #region ICargoProvider
+    public bool ProvideCargo(int quantity)
+    {
+        return cargoGenerator.ProvideCargo(quantity);
+    }
+    #endregion
+
+    #region ICargoAccepter
+    public bool DistributeCargo(int quantity)
+    {
+        return true;
+    }
+    #endregion
+
+    #endregion
+
+    public override int GetHashCode()
+    {
+        return _Cell.GetHashCode() ^ Name.GetHashCode();
+    }
+
+    public void ShowInfo()
+    {
+        if (InfoWindow == null)
+        {
+            var screenPosition = Camera.main.WorldToScreenPoint(GlobalRenderer.transform.position);
+            InfoWindow = WindowFactory.BuildTextInfo(Name, screenPosition, this);
+        }
+    }
+
+
+
+    public void UpdateAllOutgoingFlux()
+    {
+        var outgoingFlux = cargoGenerator.OutgoingFlux;
+        foreach (var flux in outgoingFlux)
+        {
+            //Debug.Log($"Update truck path for {flux}");
+            flux.Value.UpdateTruckPath();
+        }
+    }
+
+    public int RoadInDirection(Cell target)
+    {
+
+        var values = new int[9, 9];
+        var multiplier = new int[9, 9];
+
+
+        if (target.X > _Cell.X)
+        {
+            for (int y = 0; y < 3; y++)
+            {
+                values[1, y] += 1;
+                values[2, y] += 2;
+            }
+        }
+        if (_Cell.X < target.X)
+        {
+            for (int y = 0; y < 3; y++)
+            {
+                values[1, y] += 1;
+                values[0, y] += 2;
+            }
+        }
+        if (target.X == _Cell.X)
+        {
+            for (int y = 0; y < 3; y++)
+            {
+                multiplier[1, y] = 2;
+            }
+        }
+
+        if (target.Y > _Cell.Y)
+        {
+            for (int x = 0; x < 3; x++)
+            {
+                values[x, 1] += 1;
+                values[x, 2] += 2;
+            }
+        }
+        if (_Cell.Y < target.Y)
+        {
+            for (int x = 0; x < 3; x++)
+            {
+                values[x, 1] += 1;
+                values[x, 0] += 2;
+            }
+        }
+        if (target.Y == _Cell.Y)
+        {
+            for (int x = 0; x < 3; x++)
+            {
+                multiplier[x, 1] = 2;
+            }
+        }
+
+        var g = 0;
+        values[1, 1] = 0;
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                g += values[i, j] * ((multiplier[i, j] != 0) ? multiplier[i, j] : 1);
+            }
+        }
+        return g;
+    }
+
+    public string InfoText()
+    {
+        StringBuilder sb = new StringBuilder();
+
+        sb.Append($"<b>Stock</b>: {Cargo} caisse{((Cargo > 1) ? "s" : "")} de cargo ({Mathf.Round(100 * ExactCargo) / 100})\n");
+        sb.Append($"<b>Génération de cargo</b>:\n");
+        sb.Append($"\tProbabilité de {(int)(CargoChance * 100f)}%\n\tProduction à {Mathf.Round(100 * CargoProduction * (1f / Simulation.TickFrequency)) / 100}/s\n");
+        sb.Append($"<b>Position</b>: {_Cell}\n");
+        sb.Append("<b>Production:</b>\n");
+
+        if (OutgoingFlux.Count == 0)
+            sb.Append("\tExport: aucun\n");
+        else
+        {
+            sb.Append("\tExport:\n");
+            foreach (var k in OutgoingFlux)
+            {
+                sb.Append($"\t\t{k.Value.TotalCargoMoved} vers {k.Key} \n");
+                if (k.Value.IsWaitingForDelivery)
+                    sb.Append($"\t\t\t<color=\"red\">Attente d'espace pour livrer</color>\n");
+                if (k.Value.IsWaitingForInput)
+                    sb.Append($"\t\t\t<color=\"red\">Attente de marchandise à livrer</color>\n");
+                if (k.Value.IsWaitingForPath)
+                    sb.Append($"\t\t\t<color=\"red\">Pas de chemin !</color>\n");
+            }
+        }
+
+        if (IncomingFlux.Count == 0)
+            sb.Append("\tImport: aucun\n");
+        else
+        {
+            sb.Append("\tImport:\n");
+            foreach (var k in IncomingFlux)
+            {
+                sb.Append($"\t\t{k.Value.TotalCargoMoved} depuis {k.Key}\n");
+                if (k.Value.IsWaitingForDelivery)
+                    sb.Append($"\t\t\t<color=\"red\">Attente d'espace pour livrer</color>\n");
+                if (k.Value.IsWaitingForInput)
+                    sb.Append($"\t\t\t<color=\"red\">Attente de marchandise à livrer</color>\n");
+                if (k.Value.IsWaitingForPath)
+                    sb.Append($"\t\t\t<color=\"red\">Pas de chemin !</color>\n");
+            }
+        }
+        sb.Append("<b>Lié aux villes</b>:\n");
+        var linkedCities = LinkedCities.OrderBy(c => ManhattanDistance(c));
+        foreach (City c in linkedCities)
+        {
+            sb.Append($"\t{c.Name} \r({ManhattanDistance(c)} cases)\n");
+        }
+
+        return sb.ToString().Replace("\r", "");
+    }
+
+    public void UpdateInformations()
+    {
+        if (InfoWindow != null)
+        {
+            InfoWindow.TextContent(InfoText());
+        }
+        UpdateLabel();
+    }
+
+    public override string ToString()
+    {
+        return Name;
+    }
+
+
+
+
+}
+
+

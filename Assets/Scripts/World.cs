@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -14,26 +15,38 @@ public class World : MonoBehaviour
 	public static string itemLoading = "Niveau en préparation";
 	public static float totalLoading = 1f;
 
-	public double searchSpeed = 200d;
+	private double coroutineYieldRate = 200d;
 
-	public Component terrainPrefab;
-	public Component cityPrefab;
-	public Component roadPrefab;
-	public Component depotPrefab;
+    public static float width = 25;
+    public static float height = width;
 
-	public Transform cityContainer;
-	public Transform roadContainer;
-	public Transform depotContainer;
+    #region Unity editor properties
 
-	public Component truckPrefab;
+    [Header("World Gen settings")]
+    
+    public int minCityDistance = 4;
 
-	public Component uiCanvas;
+    [Header("General prefabs")]
+    public Component TruckPrefab;
+    public Component TerrainPrefab;
 
-	public static float width = 25;
-	public static float height = width;
+    [Header("Construction prefabs")]
+    public Component CityPrefab;
+	public Component RoadPrefab;
+	public Component DepotPrefab;
+    public Component IndustryPrefab;
 
-	public int minCityDistance = 4;
-	public static Economy LocalEconomy { get; private set; }
+    [Header("Containers")]
+    public Transform CityContainer;
+	public Transform RoadContainer;
+	public Transform DepotContainer;
+    public Transform IndustryContainer;
+
+    [Header("UI")]
+    public Component uiCanvas;
+    #endregion
+
+    public static Economy LocalEconomy { get; private set; }
 
 	public static readonly int worldLoadSceneIndex = 1;
 	public static readonly int looseSceneIndex = 3;
@@ -115,7 +128,7 @@ public class World : MonoBehaviour
 				if (c != otherCity && !c.IsLinkedTo(otherCity) && !c.IsUnreachable(otherCity))
 				{
 					var pf = new Pathfinder<Cell>(0, 0, new List<Type>(2) { typeof(Road), typeof(City) });
-					StartCoroutine(pf.RoutineFindPath(c.Coord, otherCity.Coord));
+					StartCoroutine(pf.RoutineFindPath(c._Cell, otherCity._Cell));
 					var path = pf.Path;
 					if (path?.TotalCost > 0)
 					{
@@ -208,11 +221,11 @@ public class World : MonoBehaviour
 			if (c is Depot)
 			{
 				var d = c as Depot;
-				BuildDepot(d.Coord, d.Direction);
+				BuildDepot(d._Cell, d.Direction);
 			}
 			if (c is Road)
 			{
-				roads.Add(c.Coord);
+				roads.Add(c._Cell);
 			}
 			progressLoading++;
 		}
@@ -294,7 +307,7 @@ public class World : MonoBehaviour
 		{
 			if ((a.LinkedCities == null && b.LinkedCities == null) || (a.LinkedCities != null && b.LinkedCities != null))
 			{
-				if (a.RoadInDirection(b.Coord) < b.RoadInDirection(a.Coord))
+				if (a.RoadInDirection(b._Cell) < b.RoadInDirection(a._Cell))
 				{
 					var c = a;
 					a = b;
@@ -313,7 +326,7 @@ public class World : MonoBehaviour
 
 			itemLoading = "Relie " + a.Name + " vers " + b.Name;
 			var pf = new Pathfinder<Cell>(0, 0, null);
-			yield return StartCoroutine(pf.RoutineFindPath(a.Coord, b.Coord));
+			yield return StartCoroutine(pf.RoutineFindPath(a._Cell, b._Cell));
 			if (pf.Path != null && pf.Path.TotalCost > 0)
 			{
 				//UnityEngine.Debug.Log($"Path from {a.Name} to {b.Name}");
@@ -353,7 +366,7 @@ public class World : MonoBehaviour
 
 	void Terrain(float width, float height)
 	{
-		var t = Instantiate(terrainPrefab, Vector3.zero, Quaternion.identity);
+		var t = Instantiate(TerrainPrefab, Vector3.zero, Quaternion.identity);
 		t.transform.localScale = new Vector3(width, 1f, height);
 		var c = t.GetComponentInChildren<CellRender>();
 		c?.SetScale(width, height);
@@ -400,7 +413,7 @@ public class World : MonoBehaviour
 		{
 			int x = UnityEngine.Random.Range(0, w);
 			int y = UnityEngine.Random.Range(0, h);
-			var cityCenter = new Cell(x, y, null);
+			var cityCenter = new Cell(x, y);
 			if (Constructions[x, y] == null)
 			{
 				var canBuild = true;
@@ -440,7 +453,7 @@ public class World : MonoBehaviour
 			return;
 
 		AudioManager.Player.Play("buildCity");
-		var c = new Depot(pos, depotPrefab, direction);
+		var c = new Depot(pos, direction);
 
 		Constructions[pos.X, pos.Y] = c;
 
@@ -474,8 +487,8 @@ public class World : MonoBehaviour
 		if (!CheckCost("build_city", "bâtir une nouvelle ville", out cost))
 			return;
 
-		var c = new City(dummyCity, cityPrefab);
-		var cityCenter = dummyCity.Coord;
+		var c = new City(dummyCity);
+		var cityCenter = dummyCity._Cell;
 
 		Constructions[cityCenter.X, cityCenter.Y] = c;
 		Cities.Add(c);
@@ -500,7 +513,7 @@ public class World : MonoBehaviour
 			return;
 
 		AudioManager.Player.Play("buildCity");
-		var c = new City(cityCenter, cityPrefab);
+		var c = new City(cityCenter);
 
 		Constructions[cityCenter.X, cityCenter.Y] = c;
 		Cities.Add(c);
@@ -583,7 +596,7 @@ public class World : MonoBehaviour
 			return;
 
 		AudioManager.Player.Play("buildRoad");
-		Road road = new Road(pos, roadPrefab);
+		Road road = new Road(pos);
 		Constructions[pos.X, pos.Y] = road;
 
 		UpdateRoad(road);
@@ -604,11 +617,11 @@ public class World : MonoBehaviour
 			countLoop++;
 			if (Constructions[p.X, p.Y] == null)
 			{
-				Road r = new Road(p, roadPrefab);
+				Road r = new Road(p);
 				constructedRoads.Add(r);
 				Constructions[p.X, p.Y] = r;
 			}
-			if (countLoop % searchSpeed == 0)
+			if (countLoop % coroutineYieldRate == 0)
 				yield return null;
 		}
 
@@ -617,7 +630,7 @@ public class World : MonoBehaviour
 		{
 			countLoop++;
 
-			foreach (Road neighborsRoad in Neighbors(r.Coord))
+			foreach (Road neighborsRoad in Neighbors(r._Cell))
 			{
 				if (!neighborsRoads.Contains(neighborsRoad))
 					neighborsRoads.Add(neighborsRoad);
@@ -629,7 +642,7 @@ public class World : MonoBehaviour
 				UpdateRoad(neighborsRoad);
 			}
 
-			if (countLoop % searchSpeed == 0)
+			if (countLoop % coroutineYieldRate == 0)
 				yield return null;
 		}
 		yield return null;
@@ -645,11 +658,11 @@ public class World : MonoBehaviour
 			countLoop++;
 			if (Constructions[p.X, p.Y] == null)
 			{
-				Road r = new Road(p, roadPrefab);
+				Road r = new Road(p);
 				constructedRoads.Add(r);
 				Constructions[p.X, p.Y] = r;
 			}
-			if (countLoop % searchSpeed == 0)
+			if (countLoop % coroutineYieldRate == 0)
 				yield return null;
 		}
 
@@ -658,7 +671,7 @@ public class World : MonoBehaviour
 		{
 			countLoop++;
 
-			foreach (Road neighborsRoad in Neighbors(r.Coord))
+			foreach (Road neighborsRoad in Neighbors(r._Cell))
 			{
 				if (!neighborsRoads.Contains(neighborsRoad))
 					neighborsRoads.Add(neighborsRoad);
@@ -670,7 +683,7 @@ public class World : MonoBehaviour
 				UpdateRoad(neighborsRoad);
 			}
 
-			if (countLoop % searchSpeed == 0)
+			if (countLoop % coroutineYieldRate == 0)
 				yield return null;
 		}
 		yield return null;
@@ -685,7 +698,7 @@ public class World : MonoBehaviour
 		var r = Constructions[pos.X, pos.Y] as Road;
 
 		var neighborsRoads = new List<Road>();
-		foreach (Road neighborsRoad in Neighbors(r.Coord))
+		foreach (Road neighborsRoad in Neighbors(r._Cell))
 		{
 			if (!neighborsRoads.Contains(neighborsRoad))
 				neighborsRoads.Add(neighborsRoad);
@@ -706,20 +719,20 @@ public class World : MonoBehaviour
 		int count = 0;
 
 		//left
-		if (c.Coord.X > 0)
-			if (Constructions[c.Coord.X - 1, c.Coord.Y] != null)
+		if (c._Cell.X > 0)
+			if (Constructions[c._Cell.X - 1, c._Cell.Y] != null)
 				count++;
 		//right
-		if (c.Coord.X < width - 1)
-			if (Constructions[c.Coord.X + 1, c.Coord.Y] != null)
+		if (c._Cell.X < width - 1)
+			if (Constructions[c._Cell.X + 1, c._Cell.Y] != null)
 				count++;
 		//up
-		if (c.Coord.Y < height - 1)
-			if (Constructions[c.Coord.X, c.Coord.Y + 1] != null)
+		if (c._Cell.Y < height - 1)
+			if (Constructions[c._Cell.X, c._Cell.Y + 1] != null)
 				count++;
 		//down
-		if (c.Coord.Y > 0)
-			if (Constructions[c.Coord.X, c.Coord.Y - 1] != null)
+		if (c._Cell.Y > 0)
+			if (Constructions[c._Cell.X, c._Cell.Y - 1] != null)
 				count++;
 
 		return count;
@@ -727,29 +740,29 @@ public class World : MonoBehaviour
 
 	public Construction West(Construction c)
 	{
-		if (c.Coord.X > 0)
-			return Constructions[c.Coord.X - 1, c.Coord.Y];
+		if (c._Cell.X > 0)
+			return Constructions[c._Cell.X - 1, c._Cell.Y];
 		return null;
 	}
 
 	public Construction East(Construction c)
 	{
-		if (c.Coord.X < width - 1)
-			return Constructions[c.Coord.X + 1, c.Coord.Y];
+		if (c._Cell.X < width - 1)
+			return Constructions[c._Cell.X + 1, c._Cell.Y];
 		return null;
 	}
 
 	public Construction North(Construction c)
 	{
-		if (c.Coord.Y < height - 1)
-			return Constructions[c.Coord.X, c.Coord.Y + 1];
+		if (c._Cell.Y < height - 1)
+			return Constructions[c._Cell.X, c._Cell.Y + 1];
 		return null;
 	}
 
 	public Construction South(Construction c)
 	{
-		if (c.Coord.Y > 0)
-			return Constructions[c.Coord.X, c.Coord.Y - 1];
+		if (c._Cell.Y > 0)
+			return Constructions[c._Cell.X, c._Cell.Y - 1];
 		return null;
 	}
 
@@ -775,7 +788,7 @@ public class World : MonoBehaviour
 	public List<Road> ExtendedNeighbors(Road r)
 	{
 		var neighbors = new List<Road>();
-		var directions = r.Coord.ExtendedDirections();
+		var directions = r._Cell.ExtendedDirections();
 
 		foreach (Cell p in directions)
 		{
@@ -790,7 +803,7 @@ public class World : MonoBehaviour
 	public static void DisplayTimeSpan(string label, TimeSpan ts, int divisor)
 	{
 		var t = (long)ts.TotalMilliseconds * 10 * 1000 / divisor;
-		//UnityEngine.Debug.Log($"{label}:{new TimeSpan(t)} ({ts}/{divisor})");
+		UnityEngine.Debug.Log($"{label}:{new TimeSpan(t)} ({ts}/{divisor})");
 	}
 
 
@@ -822,7 +835,26 @@ public class World : MonoBehaviour
 		return closestCity;
 	}
 
-	City ClosestCity(City c)
+    public City ClosestCity(Cell c)
+    {
+        var minDistance = int.MaxValue;
+        City closestCity = null;
+        foreach (City city in Cities)
+        {
+            if (city._Cell != c)
+            {
+                var d = c.ManhattanDistance(city);
+                if (d < minDistance)
+                {
+                    minDistance = d;
+                    closestCity = city;
+                }
+            }
+        }
+        return closestCity;
+    }
+
+    public City ClosestCity(City c)
 	{
 		var minDistance = int.MaxValue;
 		City closestCity = null;

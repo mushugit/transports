@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-class Pathfinder<Node> where Node : IHasNeighbours<Node>, IHasConstruction, IHasRelativeDistance, IHasCoord, IHasCell
+class Pathfinder<Node> where Node : IHasNeighbours<Node>, IHasRelativeDistance, IHasCoord, IHasCell
 {
 	public Path<Node> Path { get; private set; }
 

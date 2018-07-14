@@ -56,8 +56,8 @@ public class Flux
 
     public Flux(Flux dummyFlux)
     {
-        var trueSource = World.Instance.Constructions[dummyFlux.Source.Coord.X, dummyFlux.Source.Coord.Y] as IFluxSource;
-        var trueTarget = World.Instance.Constructions[dummyFlux.Target.Coord.X, dummyFlux.Target.Coord.Y] as IFluxTarget;
+        var trueSource = World.Instance.Constructions[dummyFlux.Source._Cell.X, dummyFlux.Source._Cell.Y] as IFluxSource;
+        var trueTarget = World.Instance.Constructions[dummyFlux.Target._Cell.X, dummyFlux.Target._Cell.Y] as IFluxTarget;
         Source = trueSource;
         Target = trueTarget;
         speed = defaultSpeed;
@@ -80,7 +80,7 @@ public class Flux
     private Path<Cell> GetPath()
     {
         var pf = new Pathfinder<Cell>(speed, 0, new List<Type>() { typeof(Road), typeof(City) });
-        pf.FindPath(Target.Coord, Source.Coord);
+        pf.FindPath(Target._Cell, Source._Cell);
         Path = pf.Path;
         return pf.Path;
     }
@@ -89,7 +89,7 @@ public class Flux
     {
         if (Source.ProvideCargo(1))
         {
-            truck = new RoadVehicule(World.Instance.truckPrefab, speed, GetPath(), Source, Target, this);
+            truck = new RoadVehicule(World.Instance.TruckPrefab, speed, GetPath(), Source, Target, this);
             return true;
         }
         else
