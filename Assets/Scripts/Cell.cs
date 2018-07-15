@@ -18,7 +18,7 @@ public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasRelativeDistanc
 
     public Cell _Cell { get { return this; } }
 
-    public Type Type => World.Instance.Constructions[X, Y]?.GetType();
+    public Type Type => World.Instance?.Constructions[X, Y]?.GetType();
 
     public IEnumerable<Cell> Neighbours(List<Type> passable)
 	{

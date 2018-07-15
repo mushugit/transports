@@ -26,9 +26,9 @@ public class Flux
     public int AvailableTrucks { get; private set; }
     [JsonProperty]
     public int TotalCargoMoved { get; private set; }
-
+    [JsonProperty]
     private List<RoadVehicule> trucks;
-    private RoadVehicule waitingTruck;
+    [JsonProperty]
     private float currentDelay;
 
     public Path<Cell> Path { get; private set; }
@@ -40,8 +40,7 @@ public class Flux
     }
 
     public static List<Flux> AllFlux = new List<Flux>();
-
-    [JsonConstructor]
+ 
     public Flux(IFluxSource source, IFluxTarget target, int truckQuantity)
     {
         Source = source;
@@ -60,6 +59,18 @@ public class Flux
             Target.ReferenceFlux(this);
             AllFlux.Add(this);
         }
+    }
+
+    [JsonConstructor]
+    public Flux(IFluxSource source, IFluxTarget target, int availableTrucks, int totalCargoMoved, List<RoadVehicule> trucks, float currentDelay)
+    {
+        Source = source;
+        Target = target;
+        speed = defaultSpeed;
+        TotalCargoMoved = totalCargoMoved;
+        AvailableTrucks = availableTrucks;
+        this.trucks = trucks;
+        this.currentDelay = currentDelay;
     }
 
     public Flux(Flux dummyFlux)
@@ -108,7 +119,7 @@ public class Flux
         {
             currentDelay = 0;
             AvailableTrucks--;
-            var truck = new RoadVehicule(World.Instance.TruckPrefab, speed, GetPath(), Source, Target, this);
+            var truck = new RoadVehicule(speed, GetPath(), Source, Target, this);
             trucks.Add(truck);
             return true;
         }

@@ -19,13 +19,13 @@ public class VehiculeRender : MonoBehaviour {
 		return r;
 	}
 
-	public void Init(Cell start, Cell finish, float speed)
+	public void Init(Cell start, Cell finish, float speed, float position = 0)
 	{
-		transform.position = new Vector3(start.X, 0, start.Y);
-		//Debug.Log($"Truck init at {start}, target at {finish} (s={speed})");
+		//Debug.Log($"Truck init at {start}, target at {finish} (p={position} s={speed})");
 		this.finish = new Vector3(finish.X, 0, finish.Y);
 		this.Speed = speed;
-	}
+        transform.position = Vector3.MoveTowards(new Vector3(start.X, 0, start.Y), this.finish, position);
+    }
 
 	public void InitColor(Color truckColor, Color cargoColor)
 	{

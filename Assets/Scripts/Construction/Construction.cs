@@ -20,12 +20,12 @@ public abstract class Construction
 
         ClickCallback = ClickHandler;
 
-        if (prefab != null)
+        if (prefab != null && container != null && _Cell != null)
         {
             GlobalRenderer = HUnityRenderer.UnityRenderer.Build(new Vector3(_Cell.X, 0f, _Cell.Y), prefab, container);
 
             var objectRenderer = GlobalRenderer.GetComponentInChildren<IUnityObjectRenderer>();
-            if(objectRenderer!=null)
+            if (objectRenderer != null)
                 objectRenderer.NestedConstruction = this;
         }
     }

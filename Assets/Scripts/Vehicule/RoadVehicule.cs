@@ -1,47 +1,97 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+[JsonObject(MemberSerialization.OptIn)]
 public class RoadVehicule
 {
+    [JsonProperty]
     public float Speed;
 
+    [JsonProperty]
     public bool HasArrived;
 
     private Path<Cell> path;
-	private IEnumerator<Cell> pathPosition;
-	
-	private readonly IFluxSource source;
-	private readonly IFluxTarget target;
-	private readonly Flux flux;
+    private IEnumerator<Cell> pathPosition;
 
-	private readonly VehiculeRender vr;
-	private readonly Component vrComponent;
+    [JsonProperty]
+    private readonly IFluxSource source;
+    [JsonProperty]
+    private readonly IFluxTarget target;
 
-	private Cell currentCell;
-	private Cell targetCell;
+    private readonly Flux flux;
 
-	private float distance;
-	private float position;
+    private readonly VehiculeRender vr;
+    private readonly Component vrComponent;
 
-	private double ticks;
+    [JsonProperty]
+    private Cell currentCell;
+    [JsonProperty]
+    private Cell targetCell;
+
+    [JsonProperty]
+    private float distance;
+    [JsonProperty]
+    private float position;
+
+    [JsonProperty]
+    private double ticks;
 
 
-	public RoadVehicule(Component prefab, float speed, Path<Cell> initialPath, IFluxSource source, IFluxTarget target, Flux flux)
-	{
-		this.Speed = speed;
-		//Debug.Log($"Truck speed = {this.speed}");
-		this.source = source;
-		this.target = target;
-		this.flux = flux;
+    [JsonConstructor]
+    public RoadVehicule(float speed, IFluxSource source, IFluxTarget target, Cell currentCell, Cell targetCell,
+        bool hasArrived, float position, float distance, double ticks)
+    {
+        this.Speed = speed;
+        this.source = source;
+        this.target = target;
+        this.flux = null;
 
-		path = initialPath;
+        this.currentCell = currentCell;
+        this.targetCell = targetCell;
+        UpdatePath();
 
-		vrComponent = VehiculeRender.Build(prefab, new Vector3(source._Cell.X, 0, source._Cell.Y), this);
-		vr = vrComponent.GetComponent<VehiculeRender>();
-		vr.InitColor(source.Color, target.Color);
+        this.position = position;
+        this.distance = distance;
 
-		position = 0;
+        var prefab = World.Instance?.TruckPrefab;
+
+        if (prefab != null)
+        {
+            vrComponent = VehiculeRender.Build(prefab, new Vector3(source._Cell.X, 0, source._Cell.Y), this);
+            vr = vrComponent.GetComponent<VehiculeRender>();
+            vr.InitColor(source.Color, target.Color);
+            vr.Init(currentCell, targetCell, speed, position / distance);
+        }
+
+        
+        HasArrived = hasArrived;
+        this.ticks = ticks;
+    }
+
+    public RoadVehicule(float speed, Path<Cell> initialPath, IFluxSource source, IFluxTarget target, Flux flux)
+    {
+        this.Speed = speed;
+        //Debug.Log($"Truck speed = {this.speed}");
+        this.source = source;
+        this.target = target;
+        this.flux = flux;
+
+        path = initialPath;
+
+        var prefab = World.Instance?.TruckPrefab;
+
+        if (prefab != null)
+        {
+            vrComponent = VehiculeRender.Build(prefab, new Vector3(source._Cell.X, 0, source._Cell.Y), this);
+            vr = vrComponent.GetComponent<VehiculeRender>();
+            vr.InitColor(source.Color, target.Color);
+        }
+
+        position = 0;
+        ticks = 0;
         if (path != null)
             pathPosition = path.GetEnumerator();
         else
@@ -49,45 +99,48 @@ public class RoadVehicule
 
         HasArrived = false;
         MoveCell();
-	}
+    }
 
-	public void MoveCell()
-	{
-		if (path != null)
-		{
-			if (targetCell == null)
-			{
-				pathPosition.MoveNext();
-				targetCell = pathPosition.Current;
-			}
+    public void MoveCell()
+    {
+        if (path != null)
+        {
+            if (targetCell == null)
+            {
+                pathPosition.MoveNext();
+                targetCell = pathPosition.Current;
+            }
 
-			if (pathPosition.MoveNext())
-			{
+            if (pathPosition.MoveNext())
+            {
 
                 currentCell = targetCell;
-				targetCell = pathPosition.Current;
-				position = 0;
+                targetCell = pathPosition.Current;
+                position = 0;
 
-				distance = (float)currentCell.FlyDistance(targetCell);
+                distance = (float)currentCell.FlyDistance(targetCell);
 
-				vr.Init(currentCell, targetCell, Speed);
-				//Debug.Log($"Truck has to move from {currentCell} to {targetCell} (d={distance})");
-			}
-			else
-			{
-				//Debug.Log($"Distribute t={ticks} s={Speed} pathD={path.TotalCost}");
-				if (flux.Distribute(ticks, (ticks+1)*Speed, this))
-				{
-                    HasArrived = true;
-                    //GameObject.Destroy(vrComponent.gameObject);
-                }
-                else
+                vr.Init(currentCell, targetCell, Speed);
+                //Debug.Log($"Truck has to move from {currentCell} to {targetCell} (d={distance})");
+            }
+            else
+            {
+                if (flux != null)
                 {
-                    flux.IsWaitingForDelivery = true;
+                    //Debug.Log($"Distribute t={ticks} s={Speed} pathD={path.TotalCost}");
+                    if (flux.Distribute(ticks, (ticks + 1) * Speed, this))
+                    {
+                        HasArrived = true;
+                        //GameObject.Destroy(vrComponent.gameObject);
+                    }
+                    else
+                    {
+                        flux.IsWaitingForDelivery = true;
+                    }
                 }
-			}
-		}
-	}
+            }
+        }
+    }
 
     public void CheckArrived()
     {
@@ -97,13 +150,13 @@ public class RoadVehicule
         }
     }
 
-	public void Tick()
-	{
-		ticks++;
-	}
+    public void Tick()
+    {
+        ticks++;
+    }
 
-	public void Move()
-	{
+    public void Move()
+    {
         if (path != null)
         {
             position += Speed;
@@ -112,29 +165,29 @@ public class RoadVehicule
                 MoveCell();
         }
 
-	}
+    }
 
-	public void UpdatePath()
-	{
+    public void UpdatePath()
+    {
         var pf = new Pathfinder<Cell>(Speed, 0, new List<Type>() { typeof(Road), typeof(City), typeof(Industry) });
         if (targetCell == null)
             targetCell = source._Cell;
         pf.FindPath(target._Cell, targetCell);
-		path = pf.Path;
+        path = pf.Path;
 
         if (path != null)
         {
-            Debug.Log($"New path found from {targetCell} to {target._Cell}");
+            //Debug.Log($"New path found from {targetCell} to {target._Cell}");
             pathPosition = path.GetEnumerator();
             targetCell = null;
         }
         else
         {
-            Debug.Log($"No path found from {targetCell} to {target._Cell}");
+            //Debug.Log($"No path found from {targetCell} to {target._Cell}");
             pathPosition = null;
         }
 
-		
-	}
+
+    }
 }
 
