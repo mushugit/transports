@@ -27,7 +27,7 @@ public class Flux
     [JsonProperty]
     public int TotalCargoMoved { get; private set; }
     [JsonProperty]
-    private List<RoadVehicule> trucks;
+    public List<RoadVehicule> Trucks { get; private set; }
     [JsonProperty]
     private float currentDelay;
 
@@ -48,7 +48,7 @@ public class Flux
         speed = defaultSpeed;
         TotalCargoMoved = 0;
         AvailableTrucks = truckQuantity;
-        trucks = new List<RoadVehicule>(truckQuantity);
+        Trucks = new List<RoadVehicule>(truckQuantity);
         currentDelay = FrameDelayBetweenTrucks;
 
         GetPath();
@@ -64,25 +64,31 @@ public class Flux
     [JsonConstructor]
     public Flux(IFluxSource source, IFluxTarget target, int availableTrucks, int totalCargoMoved, List<RoadVehicule> trucks, float currentDelay)
     {
+        Debug.Log("New flux from Json");
+
         Source = source;
         Target = target;
         speed = defaultSpeed;
         TotalCargoMoved = totalCargoMoved;
         AvailableTrucks = availableTrucks;
-        this.trucks = trucks;
+        this.Trucks = trucks;
         this.currentDelay = currentDelay;
     }
 
-    public Flux(Flux dummyFlux)
+    public Flux(Flux dummy)
     {
-        var trueSource = World.Instance.Constructions[dummyFlux.Source._Cell.X, dummyFlux.Source._Cell.Y] as IFluxSource;
-        var trueTarget = World.Instance.Constructions[dummyFlux.Target._Cell.X, dummyFlux.Target._Cell.Y] as IFluxTarget;
+        Debug.Log("New flux from dummy");
+        var trueSource = World.Instance.Constructions[dummy.Source._Cell.X, dummy.Source._Cell.Y] as IFluxSource;
+        var trueTarget = World.Instance.Constructions[dummy.Target._Cell.X, dummy.Target._Cell.Y] as IFluxTarget;
         Source = trueSource;
         Target = trueTarget;
         speed = defaultSpeed;
-        TotalCargoMoved = dummyFlux.TotalCargoMoved;
-        AvailableTrucks = dummyFlux.AvailableTrucks;
-        trucks = new List<RoadVehicule>(AvailableTrucks);
+        TotalCargoMoved = dummy.TotalCargoMoved;
+        AvailableTrucks = dummy.AvailableTrucks;
+        Trucks = new List<RoadVehicule>(AvailableTrucks);
+        foreach (RoadVehicule truck in dummy.Trucks)
+            Trucks.Add(new RoadVehicule(truck));
+
         currentDelay = FrameDelayBetweenTrucks;
 
         GetPath();
@@ -101,7 +107,7 @@ public class Flux
 
     public void UpdateTruckPath()
     {
-        foreach (RoadVehicule truck in trucks)
+        foreach (RoadVehicule truck in Trucks)
             truck.UpdatePath();
     }
 
@@ -120,7 +126,7 @@ public class Flux
             currentDelay = 0;
             AvailableTrucks--;
             var truck = new RoadVehicule(speed, GetPath(), Source, Target, this);
-            trucks.Add(truck);
+            Trucks.Add(truck);
             return true;
         }
         else
@@ -155,13 +161,13 @@ public class Flux
         IsWaitingForPath = false;
 
 
-        foreach (RoadVehicule truck in trucks)
+        foreach (RoadVehicule truck in Trucks)
         {
             truck.Tick();
             truck.CheckArrived();
         }
 
-        trucks.RemoveAll(r => r.HasArrived);
+        Trucks.RemoveAll(r => r.HasArrived);
 
         if (AvailableTrucks > 0 && currentDelay >= FrameDelayBetweenTrucks)
         {
@@ -174,7 +180,7 @@ public class Flux
             }
         }
 
-        foreach (RoadVehicule truck in trucks)
+        foreach (RoadVehicule truck in Trucks)
             truck.Move();
     }
 

@@ -10,6 +10,10 @@ public class IndustryObjectRender : MonoBehaviour, IUnityObjectRenderer
     void Start()
     {
         var c = Random.ColorHSV();
+        while (c == Color.black)
+        {
+            c = Random.ColorHSV();
+        }
 
         var renderers = GetComponentsInChildren<Renderer>();
         foreach (Renderer r in renderers)

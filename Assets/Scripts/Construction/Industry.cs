@@ -39,7 +39,7 @@ public class Industry : Construction, IEquatable<Industry>, IFluxSource, ICargoS
 
     #region Constructor
     public Industry(Cell cell)
-        :base(cell, World.Instance?.IndustryPrefab, World.Instance?.IndustryContainer)
+        : base(cell, World.Instance?.IndustryPrefab, World.Instance?.IndustryContainer)
     {
         cargoGenerator = new HCargoGenerator(UpdateLabel, this);
         linkHandler = new HLinkHandler(cell, null);
@@ -57,7 +57,7 @@ public class Industry : Construction, IEquatable<Industry>, IFluxSource, ICargoS
     }
 
     public Industry(Industry dummyIndustry)
-        :base(dummyIndustry._Cell, World.Instance?.IndustryPrefab, World.Instance?.IndustryContainer)
+        : base(dummyIndustry._Cell, World.Instance?.IndustryPrefab, World.Instance?.IndustryContainer)
     {
         cargoGenerator = new HCargoGenerator(UpdateLabel, this, dummyIndustry.CargoChance, dummyIndustry.CargoProduction, dummyIndustry.ExactCargo);
         linkHandler = new HLinkHandler(dummyIndustry._Cell, null);
@@ -65,12 +65,14 @@ public class Industry : Construction, IEquatable<Industry>, IFluxSource, ICargoS
     }
 
     [JsonConstructor]
-    public Industry(Cell _cell, string name, float cargoChance, float cargoProduction, float exactCargo)
+    public Industry(Cell _cell, string name, float cargoChance, float cargoProduction, float exactCargo,
+        float colorR, float colorG, float colorB, float colorA)
         : base(_cell, World.Instance?.IndustryPrefab, World.Instance?.IndustryContainer)
     {
         cargoGenerator = new HCargoGenerator(UpdateLabel, this, cargoChance, cargoProduction, exactCargo);
         linkHandler = new HLinkHandler(_cell, null);
         Name = name;
+        SetColor(new Color(colorR, colorG, colorB, colorA));
     }
     #endregion
 
@@ -104,12 +106,40 @@ public class Industry : Construction, IEquatable<Industry>, IFluxSource, ICargoS
     #endregion
 
     #region IHasColor
+    [JsonProperty]
+    public float ColorR { get { return Color.r; } }
+    [JsonProperty]
+    public float ColorG { get { return Color.g; } }
+    [JsonProperty]
+    public float ColorB { get { return Color.b; } }
+    [JsonProperty]
+    public float ColorA { get { return Color.a; } }
+    private Color color = Color.black;
     public Color Color
     {
         get
         {
-            var internalRenderer = GlobalRenderer.GetComponentInChildren<Renderer>();
-            return internalRenderer.material.color;
+            if (color != Color.black)
+                return color;
+            else
+            {
+                var internalRenderer = GlobalRenderer?.GetComponentInChildren<Renderer>();
+                if (internalRenderer != null)
+                    return internalRenderer.material.color;
+                else return Color.black;
+            }
+        }
+    }
+    public void SetColor(Color color)
+    {
+        this.color = color;
+        var renderers = GlobalRenderer?.GetComponentsInChildren<Renderer>();
+        if (renderers != null)
+        {
+            foreach (Renderer r in renderers)
+            {
+                r.material.color = color;
+            }
         }
     }
     #endregion
@@ -214,7 +244,7 @@ public class Industry : Construction, IEquatable<Industry>, IFluxSource, ICargoS
 
     private static void InitCityReference()
     {
-        if(numberOfIndustryPerCity == null)
+        if (numberOfIndustryPerCity == null)
         {
             var cities = World.Instance.Cities;
             numberOfIndustryPerCity = new Dictionary<City, int>(cities.Count);

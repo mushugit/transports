@@ -6,16 +6,21 @@ using UnityEngine.EventSystems;
 
 public class CityObjectRenderer : MonoBehaviour, IUnityObjectRenderer
 {
-	public Construction NestedConstruction{ get; set; }
+    public Construction NestedConstruction { get; set; }
 
-	void Start()
+    void Start()
     {
         var c = Random.ColorHSV();
 
-		var renderers = GetComponentsInChildren<Renderer>();
-		foreach(Renderer r in renderers)
-		{
-			r.material.color = c;
-		}
+        while (c == Color.black)
+        {
+            c = Random.ColorHSV();
+        }
+
+        var renderers = GetComponentsInChildren<Renderer>();
+        foreach (Renderer r in renderers)
+        {
+            r.material.color = c;
+        }
     }
 }

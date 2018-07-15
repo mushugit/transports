@@ -66,6 +66,7 @@ public class World : MonoBehaviour
 
     public static void ReloadLevel()
     {
+        Simulation.Clear();
         PauseMenu.ForceResume();
         SceneManager.LoadScene(worldLoadSceneIndex);
     }
@@ -211,6 +212,7 @@ public class World : MonoBehaviour
 
     IEnumerator Load()
     {
+        UnityEngine.Debug.Log($"Load");
         var w = (int)width;
         var h = (int)height;
         Constructions = new Construction[w, h];
@@ -218,6 +220,7 @@ public class World : MonoBehaviour
         Industries = new List<Industry>(Industry.Quantity(w, h));
 
         Cell.ResetCellSystem();
+        Simulation.Clear();
 
         itemLoading = "Chargement du terrain";
         Terrain(width, height);

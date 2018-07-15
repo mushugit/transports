@@ -6,7 +6,7 @@ using UnityEngine;
 public class Simulation
 {
 	public static readonly float TickFrequency = 0.02f;
-
+    public static bool Running = false;
 	private static List<Flux> flux;
 
 	static Simulation()
@@ -16,7 +16,8 @@ public class Simulation
 
 	public static IEnumerator Run()
 	{
-		while (true)
+        Running = true;
+		while (Running)
 		{
 			foreach (City c in World.Instance.Cities)
 			{
@@ -84,6 +85,12 @@ public class Simulation
 	{
 		flux.Remove(f);
 	}
+
+    public static void Clear()
+    {
+        flux.Clear();
+        Running = false;
+    }
 
 	public static void CityDestroyed(City c)
 	{

@@ -42,12 +42,41 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
     public WindowTextInfo InfoWindow = null;
 
     #region IHasColor
+    [JsonProperty]
+    public float ColorR { get { return Color.r; } }
+    [JsonProperty]
+    public float ColorG { get { return Color.g; } }
+    [JsonProperty]
+    public float ColorB { get { return Color.b; } }
+    [JsonProperty]
+    public float ColorA { get { return Color.a; } }
+    private Color color = Color.black;
     public Color Color
     {
         get
         {
-            var internalRenderer = GlobalRenderer.GetComponentInChildren<Renderer>();
-            return internalRenderer.material.color;
+            if (color != Color.black)
+                return color;
+            else
+            {
+                var internalRenderer = GlobalRenderer?.GetComponentInChildren<Renderer>();
+                if (internalRenderer != null)
+                    return internalRenderer.material.color;
+                else return Color.black;
+            }
+        }
+    }
+    public void SetColor(Color color)
+    {
+        this.color = color;
+        var renderers = GlobalRenderer?.GetComponentsInChildren<Renderer>();
+        if (renderers != null)
+        {
+            foreach (Renderer r in renderers)
+            {
+                Debug.Log($"Set color of {this} to {color}");
+                r.material.color = color;
+            }
         }
     }
     #endregion
@@ -68,6 +97,17 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
     }
 
     #region Initializer
+    private void InitCity(Cell position, string name, Color color)
+    {
+        _Cell = position;
+        Name = name;
+        UpdateLabel();
+
+        SetColor(color);
+
+        IncomingFlux = new Dictionary<ICargoProvider, Flux>();
+    }
+
     private void InitCity(Cell position, string name)
     {
         _Cell = position;
@@ -83,14 +123,22 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
         linkHandler = new HLinkHandler(this._Cell, UpdateInformations);
 
         InitCity(position, name);
+
+    }
+    private void SetupCity(Cell position, string name, Color color)
+    {
+        cargoGenerator = new HCargoGenerator(UpdateInformations, this, HCargoGenerator.CargoLevel.LowCargo);
+        linkHandler = new HLinkHandler(this._Cell, UpdateInformations);
+
+        InitCity(position, name, color);
     }
 
-    private void SetupCity(Cell position, string name, float cargoChance, float cargoProduction, float exactCargo)
+    private void SetupCity(Cell position, string name, float cargoChance, float cargoProduction, float exactCargo, Color color)
     {
         cargoGenerator = new HCargoGenerator(UpdateInformations, this, cargoChance, cargoProduction, exactCargo);
         linkHandler = new HLinkHandler(this._Cell, UpdateInformations);
 
-        InitCity(position, name);
+        InitCity(position, name, color);
     }
     #endregion
 
@@ -98,7 +146,7 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
     public City(City dummyCity)
         : base(dummyCity._Cell, World.Instance?.CityPrefab, World.Instance?.CityContainer)
     {
-        SetupCity(dummyCity._Cell, dummyCity.Name, dummyCity.CargoChance, dummyCity.CargoProduction, dummyCity.ExactCargo);
+        SetupCity(dummyCity._Cell, dummyCity.Name, dummyCity.CargoChance, dummyCity.CargoProduction, dummyCity.ExactCargo, dummyCity.Color);
     }
 
     public City(Cell cell)
@@ -108,10 +156,13 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
     }
 
     [JsonConstructor]
-    public City(Cell _cell, string name, float cargoChance, float cargoProduction, float exactCargo)
+    public City(Cell _cell, string name, float cargoChance, float cargoProduction, float exactCargo,
+        float colorR, float colorG, float colorB, float colorA)
         : base(_cell, World.Instance?.CityPrefab, World.Instance?.CityContainer)
     {
-        SetupCity(_cell, name, cargoChance, cargoProduction, exactCargo);
+        var c = new Color(colorR, colorG, colorB, colorA);
+        Debug.Log($"Set color of {this} to {c}");
+        SetupCity(_cell, name, cargoChance, cargoProduction, exactCargo, c);
     }
     #endregion
 
@@ -221,7 +272,7 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
     public static int Quantity(int w, int h)
     {
         var averageSquareSize = Mathf.Sqrt(w * h);
-        return Mathf.RoundToInt(Mathf.Sqrt(averageSquareSize * 2) * (2f/5f)) + 1;
+        return Mathf.RoundToInt(Mathf.Sqrt(averageSquareSize * 2) * (2f / 5f)) + 1;
     }
 
     #region Cargo
@@ -270,7 +321,7 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
 
 
 
-    
+
 
     public string InfoText()
     {
@@ -319,7 +370,7 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
         var linked = Linked.OrderBy(c => ManhattanDistance(c));
         foreach (ILinkable c in linked)
         {
-            if(c is IHasName)
+            if (c is IHasName)
                 sb.Append($"\t{(c as IHasName).Name} \r({ManhattanDistance(c)} cases)\n");
         }
 
