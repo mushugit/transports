@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-class Pathfinder<Node> where Node : IHasNeighbours<Node>, IHasConstruction, IHasRelativeDistance<Node>, IHasCoord
+class Pathfinder<Node> where Node : IHasNeighbours<Node>, IHasRelativeDistance, IHasCoord, IHasCell
 {
 	public Path<Node> Path { get; private set; }
 
@@ -55,7 +55,7 @@ class Pathfinder<Node> where Node : IHasNeighbours<Node>, IHasConstruction, IHas
 				queue.Enqueue(newPath.TotalCost + estimate(n), newPath);
 			}
 		}
-		//Debug.Log("\tNOT found ({start} to {destination})");
+		//Debug.Log($"\tNOT found ({start} to {destination})");
 		Path = null;
 		return Path;
 	}
@@ -111,8 +111,8 @@ class Pathfinder<Node> where Node : IHasNeighbours<Node>, IHasConstruction, IHas
 
 	public static float TrueDistance(Node origin, Node target)
 	{
-		var constructionOrigin = World.Instance.Constructions[origin.X, origin.Y];
-		var constructionTarget = World.Instance.Constructions[target.X, target.Y];
+        var constructionOrigin = World.Instance.Constructions[origin.X,origin.Y];
+        var constructionTarget = World.Instance.Constructions[target.X, target.Y];
 
 		var multiplierCost = WalkingSpeed;
 

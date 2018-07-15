@@ -46,8 +46,10 @@ class WindowFactory : MonoBehaviour
 
 		var fluxContent = windowObject.GetComponent<WindowFluxContent>();
 		var cityNames = World.Instance.Cities.Select(c => c.Name).ToList();
-		fluxContent.source.AddOptions(cityNames);
-		fluxContent.target.AddOptions(cityNames);
+        fluxContent.target.AddOptions(cityNames);
+        var sourcesNames = cityNames;
+        sourcesNames.AddRange(World.Instance.Industries.Select(i => i.Name).ToList());
+		fluxContent.source.AddOptions(sourcesNames);
 
 		fluxContent.target.value = 1;
 		var managerTarget = fluxContent.target.GetComponent<DropdownManager>();

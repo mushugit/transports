@@ -6,7 +6,7 @@ using UnityEngine;
 public class Simulation
 {
 	public static readonly float TickFrequency = 0.02f;
-
+    public static bool Running = false;
 	private static List<Flux> flux;
 
 	static Simulation()
@@ -16,12 +16,17 @@ public class Simulation
 
 	public static IEnumerator Run()
 	{
-		while (true)
+        Running = true;
+		while (Running)
 		{
 			foreach (City c in World.Instance.Cities)
 			{
 				c.GenerateCargo();
 			}
+            foreach(Industry i in World.Instance.Industries)
+            {
+                i.GenerateCargo();
+            }
 			foreach(Flux f in flux)
 			{
 				f.Move();
@@ -30,23 +35,31 @@ public class Simulation
 		}
 	}
 
-	public static void AddFlux(City source, City target)
+	public static void AddFlux(IFluxSource source, IFluxTarget target, int quantity = 1)
 	{
 		int cost;
 		if (!World.CheckCost("flux_create", "ajouter un flux", out cost))
 			return;
 
-		var f = new Flux(source, target);
+        if (source.OutgoingFlux.ContainsKey(target))
+        {
+            var f = source.OutgoingFlux[target];
+            f.AddTrucks(quantity);
+        }
+        else
+        {
+            var f = new Flux(source, target, quantity);
 
-		if(f.Path == null)
-		{
-			Message.ShowError("Flux impossible",
-				$"Impossible de trouver un flux de {source} vers {target} par la route.");
-			World.LocalEconomy.Credit(cost);
-			return;
-		}
+            if (f.Path == null)
+            {
+                Message.ShowError("Flux impossible",
+                    $"Impossible de trouver un flux de {source} vers {target} par la route.");
+                World.LocalEconomy.Credit(cost);
+                return;
+            }
 
-		flux.Add(f);
+            flux.Add(f);
+        }
 	}
 
 	public static void AddFlux(Flux dummyFlux)
@@ -72,6 +85,12 @@ public class Simulation
 	{
 		flux.Remove(f);
 	}
+
+    public static void Clear()
+    {
+        flux.Clear();
+        Running = false;
+    }
 
 	public static void CityDestroyed(City c)
 	{

@@ -17,8 +17,6 @@ public class CellRender : MonoBehaviour, IPointerClickHandler
 
 	private Cell currentPoint = null;
 
-	private bool isColored = false;
-
 	private static int direction = 2;
 
 	private Transform parentTransform;
@@ -63,7 +61,7 @@ public class CellRender : MonoBehaviour, IPointerClickHandler
 				var y = (int) d.z;
 
 				var constr = World.Instance.Constructions[x, y];
-				currentPoint = new Cell(x, y, constr);
+				currentPoint = new Cell(x, y);
 				//Debug.Log($"Highlighting {currentPoint}");
 
 				highlighter.SetActive(true);
@@ -132,7 +130,6 @@ public class CellRender : MonoBehaviour, IPointerClickHandler
 
 	public void Revert()
 	{
-		isColored = false;
 		highlighter.SetActive(false);
 	}
 
