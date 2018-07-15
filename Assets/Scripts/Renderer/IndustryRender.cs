@@ -12,14 +12,4 @@ public class IndustryRender : MonoBehaviour, IUnityLabelable
     {
         UILabel.text = " " + name + " ";
     }
-
-    public static Component Build(Vector3 position, Component cityPrefab) //TODO:Déplacer dans générique Render
-    {
-        return Instantiate(cityPrefab, position, Quaternion.identity, World.Instance.CityContainer);
-    }
-
-    public void Destroy()
-    {
-        DestroyImmediate(this.gameObject);
-    }
 }

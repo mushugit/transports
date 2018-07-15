@@ -44,7 +44,6 @@ public class RoadVehicule
     public RoadVehicule(float speed, IFluxSource source, IFluxTarget target, Cell currentCell, Cell targetCell,
         bool hasArrived, float position, float distance, double ticks)
     {
-        Debug.Log("New Truck from Json");
         this.Speed = speed;
         this.Source = source;
         this.Target = target;
@@ -52,7 +51,6 @@ public class RoadVehicule
 
         this.CurrentCell = currentCell;
         this.TargetCell = targetCell;
-        UpdatePath();
 
         this.Position = position;
         this.Distance = distance;
@@ -64,24 +62,25 @@ public class RoadVehicule
             vrComponent = VehiculeRender.Build(prefab, new Vector3(source._Cell.X, 0, source._Cell.Y), this);
             vr = vrComponent.GetComponent<VehiculeRender>();
             vr.InitColor(source.Color, target.Color);
-            vr.Init(currentCell, targetCell, speed, position / distance);
+            vr.Init(CurrentCell, TargetCell, Speed, Position / Distance);
         }
 
-        
         HasArrived = hasArrived;
         this.Ticks = ticks;
+
+        UpdatePath();
     }
 
-    public RoadVehicule(RoadVehicule dummy)
-        :this(dummy.Speed, dummy.Source, dummy.Target, dummy.CurrentCell, dummy.TargetCell,
+    public RoadVehicule(RoadVehicule dummy, Flux flux)
+        : this(dummy.Speed, dummy.Source, dummy.Target, dummy.CurrentCell, dummy.TargetCell,
              dummy.HasArrived, dummy.Position, dummy.Distance, dummy.Ticks)
     {
-        Debug.Log("New Truck from dummy");
+        Debug.Log($"Loaded truck at {dummy.CurrentCell}");
+        this.flux = flux;
     }
 
     public RoadVehicule(float speed, Path<Cell> initialPath, IFluxSource source, IFluxTarget target, Flux flux)
     {
-        Debug.Log("Normal new Truck");
         this.Speed = speed;
         //Debug.Log($"Truck speed = {this.speed}");
         this.Source = source;
@@ -123,7 +122,6 @@ public class RoadVehicule
 
             if (pathPosition.MoveNext())
             {
-
                 CurrentCell = TargetCell;
                 TargetCell = pathPosition.Current;
                 Position = 0;
@@ -137,9 +135,9 @@ public class RoadVehicule
             {
                 if (flux != null)
                 {
-                    //Debug.Log($"Distribute t={ticks} s={Speed} pathD={path.TotalCost}");
                     if (flux.Distribute(Ticks, (Ticks + 1) * Speed, this))
                     {
+                        //Debug.Log($"Distribute t={Ticks} s={Speed} pathD={path.TotalCost}");
                         HasArrived = true;
                         //GameObject.Destroy(vrComponent.gameObject);
                     }
@@ -189,7 +187,8 @@ public class RoadVehicule
         {
             //Debug.Log($"New path found from {targetCell} to {target._Cell}");
             pathPosition = path.GetEnumerator();
-            TargetCell = null;
+            pathPosition.MoveNext();
+            TargetCell = pathPosition.Current;
         }
         else
         {

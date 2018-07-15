@@ -64,8 +64,6 @@ public class Flux
     [JsonConstructor]
     public Flux(IFluxSource source, IFluxTarget target, int availableTrucks, int totalCargoMoved, List<RoadVehicule> trucks, float currentDelay)
     {
-        Debug.Log("New flux from Json");
-
         Source = source;
         Target = target;
         speed = defaultSpeed;
@@ -77,7 +75,6 @@ public class Flux
 
     public Flux(Flux dummy)
     {
-        Debug.Log("New flux from dummy");
         var trueSource = World.Instance.Constructions[dummy.Source._Cell.X, dummy.Source._Cell.Y] as IFluxSource;
         var trueTarget = World.Instance.Constructions[dummy.Target._Cell.X, dummy.Target._Cell.Y] as IFluxTarget;
         Source = trueSource;
@@ -87,7 +84,7 @@ public class Flux
         AvailableTrucks = dummy.AvailableTrucks;
         Trucks = new List<RoadVehicule>(AvailableTrucks);
         foreach (RoadVehicule truck in dummy.Trucks)
-            Trucks.Add(new RoadVehicule(truck));
+            Trucks.Add(new RoadVehicule(truck,this));
 
         currentDelay = FrameDelayBetweenTrucks;
 

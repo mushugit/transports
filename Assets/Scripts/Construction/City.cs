@@ -18,6 +18,7 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
 
     HCargoGenerator cargoGenerator;
     HLinkHandler linkHandler;
+    HColor colorHandler;
 
     #region ICargoProvider Properties
     [JsonProperty]
@@ -43,41 +44,19 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
 
     #region IHasColor
     [JsonProperty]
-    public float ColorR { get { return Color.r; } }
+    public float ColorR { get { return colorHandler.ColorR; } }
     [JsonProperty]
-    public float ColorG { get { return Color.g; } }
+    public float ColorG { get { return colorHandler.ColorG; } }
     [JsonProperty]
-    public float ColorB { get { return Color.b; } }
+    public float ColorB { get { return colorHandler.ColorB; } }
     [JsonProperty]
-    public float ColorA { get { return Color.a; } }
-    private Color color = Color.black;
-    public Color Color
-    {
-        get
-        {
-            if (color != Color.black)
-                return color;
-            else
-            {
-                var internalRenderer = GlobalRenderer?.GetComponentInChildren<Renderer>();
-                if (internalRenderer != null)
-                    return internalRenderer.material.color;
-                else return Color.black;
-            }
-        }
-    }
+    public float ColorA { get { return colorHandler.ColorA; } }
+
+    public Color Color { get { return colorHandler.Color; } }
+
     public void SetColor(Color color)
     {
-        this.color = color;
-        var renderers = GlobalRenderer?.GetComponentsInChildren<Renderer>();
-        if (renderers != null)
-        {
-            foreach (Renderer r in renderers)
-            {
-                Debug.Log($"Set color of {this} to {color}");
-                r.material.color = color;
-            }
-        }
+        colorHandler.SetColor(color);
     }
     #endregion
 
@@ -121,6 +100,7 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
     {
         cargoGenerator = new HCargoGenerator(UpdateInformations, this, HCargoGenerator.CargoLevel.LowCargo);
         linkHandler = new HLinkHandler(this._Cell, UpdateInformations);
+        colorHandler = new HColor(this);
 
         InitCity(position, name);
 
@@ -129,6 +109,7 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
     {
         cargoGenerator = new HCargoGenerator(UpdateInformations, this, HCargoGenerator.CargoLevel.LowCargo);
         linkHandler = new HLinkHandler(this._Cell, UpdateInformations);
+        colorHandler = new HColor(this);
 
         InitCity(position, name, color);
     }
@@ -137,6 +118,7 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
     {
         cargoGenerator = new HCargoGenerator(UpdateInformations, this, cargoChance, cargoProduction, exactCargo);
         linkHandler = new HLinkHandler(this._Cell, UpdateInformations);
+        colorHandler = new HColor(this);
 
         InitCity(position, name, color);
     }
@@ -146,6 +128,7 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
     public City(City dummyCity)
         : base(dummyCity._Cell, World.Instance?.CityPrefab, World.Instance?.CityContainer)
     {
+        IsOriginal = false;
         SetupCity(dummyCity._Cell, dummyCity.Name, dummyCity.CargoChance, dummyCity.CargoProduction, dummyCity.ExactCargo, dummyCity.Color);
     }
 
@@ -160,8 +143,8 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
         float colorR, float colorG, float colorB, float colorA)
         : base(_cell, World.Instance?.CityPrefab, World.Instance?.CityContainer)
     {
+        IsOriginal = false;
         var c = new Color(colorR, colorG, colorB, colorA);
-        Debug.Log($"Set color of {this} to {c}");
         SetupCity(_cell, name, cargoChance, cargoProduction, exactCargo, c);
     }
     #endregion

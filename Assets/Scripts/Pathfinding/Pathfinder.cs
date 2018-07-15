@@ -55,7 +55,7 @@ class Pathfinder<Node> where Node : IHasNeighbours<Node>, IHasRelativeDistance, 
 				queue.Enqueue(newPath.TotalCost + estimate(n), newPath);
 			}
 		}
-		Debug.Log($"\tNOT found ({start} to {destination})");
+		//Debug.Log($"\tNOT found ({start} to {destination})");
 		Path = null;
 		return Path;
 	}

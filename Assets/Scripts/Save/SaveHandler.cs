@@ -10,7 +10,7 @@ public class SaveHandler
     public static readonly string Extention = ".json";
     public static readonly string Folder = "saves";
 
-    public static readonly string MinCompatibleVersion = "0.0.5.3";
+    public static readonly string MinCompatibleVersion = "0.0.5.4";
 
     private static readonly string savePath = Application.persistentDataPath + Path.DirectorySeparatorChar + Folder + Path.DirectorySeparatorChar;
 

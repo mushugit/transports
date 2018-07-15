@@ -11,6 +11,7 @@ public class Industry : Construction, IEquatable<Industry>, IFluxSource, ICargoS
 {
     HCargoGenerator cargoGenerator;
     HLinkHandler linkHandler;
+    HColor colorHandler;
 
     private static Dictionary<City, int> numberOfIndustryPerCity;
 
@@ -43,6 +44,8 @@ public class Industry : Construction, IEquatable<Industry>, IFluxSource, ICargoS
     {
         cargoGenerator = new HCargoGenerator(UpdateLabel, this);
         linkHandler = new HLinkHandler(cell, null);
+        colorHandler = new HColor(this);
+
         var city = World.Instance?.ClosestCity(cell);
         if (city != null)
         {
@@ -56,12 +59,15 @@ public class Industry : Construction, IEquatable<Industry>, IFluxSource, ICargoS
         UpdateLabel();
     }
 
-    public Industry(Industry dummyIndustry)
-        : base(dummyIndustry._Cell, World.Instance?.IndustryPrefab, World.Instance?.IndustryContainer)
+    public Industry(Industry dummy)
+        : base(dummy._Cell, World.Instance?.IndustryPrefab, World.Instance?.IndustryContainer)
     {
-        cargoGenerator = new HCargoGenerator(UpdateLabel, this, dummyIndustry.CargoChance, dummyIndustry.CargoProduction, dummyIndustry.ExactCargo);
-        linkHandler = new HLinkHandler(dummyIndustry._Cell, null);
-        Name = dummyIndustry.Name;
+        IsOriginal = false;
+        cargoGenerator = new HCargoGenerator(UpdateLabel, this, dummy.CargoChance, dummy.CargoProduction, dummy.ExactCargo);
+        linkHandler = new HLinkHandler(dummy._Cell, null);
+        colorHandler = new HColor(this);
+        Name = dummy.Name;
+        SetColor(dummy.Color);
     }
 
     [JsonConstructor]
@@ -69,8 +75,11 @@ public class Industry : Construction, IEquatable<Industry>, IFluxSource, ICargoS
         float colorR, float colorG, float colorB, float colorA)
         : base(_cell, World.Instance?.IndustryPrefab, World.Instance?.IndustryContainer)
     {
+        IsOriginal = false;
         cargoGenerator = new HCargoGenerator(UpdateLabel, this, cargoChance, cargoProduction, exactCargo);
         linkHandler = new HLinkHandler(_cell, null);
+        colorHandler = new HColor(this);
+
         Name = name;
         SetColor(new Color(colorR, colorG, colorB, colorA));
     }
@@ -107,40 +116,19 @@ public class Industry : Construction, IEquatable<Industry>, IFluxSource, ICargoS
 
     #region IHasColor
     [JsonProperty]
-    public float ColorR { get { return Color.r; } }
+    public float ColorR { get { return colorHandler.ColorR; } }
     [JsonProperty]
-    public float ColorG { get { return Color.g; } }
+    public float ColorG { get { return colorHandler.ColorG; } }
     [JsonProperty]
-    public float ColorB { get { return Color.b; } }
+    public float ColorB { get { return colorHandler.ColorB; } }
     [JsonProperty]
-    public float ColorA { get { return Color.a; } }
-    private Color color = Color.black;
-    public Color Color
-    {
-        get
-        {
-            if (color != Color.black)
-                return color;
-            else
-            {
-                var internalRenderer = GlobalRenderer?.GetComponentInChildren<Renderer>();
-                if (internalRenderer != null)
-                    return internalRenderer.material.color;
-                else return Color.black;
-            }
-        }
-    }
+    public float ColorA { get { return colorHandler.ColorA; } }
+
+    public Color Color { get { return colorHandler.Color; } }
+
     public void SetColor(Color color)
     {
-        this.color = color;
-        var renderers = GlobalRenderer?.GetComponentsInChildren<Renderer>();
-        if (renderers != null)
-        {
-            foreach (Renderer r in renderers)
-            {
-                r.material.color = color;
-            }
-        }
+        colorHandler.SetColor(color);
     }
     #endregion
 

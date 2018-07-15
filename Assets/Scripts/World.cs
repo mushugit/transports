@@ -66,6 +66,7 @@ public class World : MonoBehaviour
 
     public static void ReloadLevel()
     {
+        Instance = null;
         Simulation.Clear();
         PauseMenu.ForceResume();
         SceneManager.LoadScene(worldLoadSceneIndex);
@@ -108,6 +109,7 @@ public class World : MonoBehaviour
 
     private void Awake()
     {
+        UnityEngine.Debug.Log("World Awake");
         Instance = this;
 
         LocalEconomy = new Economy(EconomyTemplate.Difficulty.Free);
@@ -212,7 +214,7 @@ public class World : MonoBehaviour
 
     IEnumerator Load()
     {
-        UnityEngine.Debug.Log($"Load");
+        UnityEngine.Debug.Log("Loading");
         var w = (int)width;
         var h = (int)height;
         Constructions = new Construction[w, h];
@@ -241,7 +243,7 @@ public class World : MonoBehaviour
             if (c is Depot)
             {
                 var d = c as Depot;
-                BuildDepot(d._Cell, d.Direction);
+                BuildDepot(c as Depot);
             }
             if (c is Road)
             {
@@ -512,6 +514,30 @@ public class World : MonoBehaviour
             return true;
     }
 
+    private void _BuildDepot(Depot dummy)
+    {
+        int cost;
+        if (!CheckCost("build_depot", "construire un dépôt", out cost))
+            return;
+
+        AudioManager.Player.Play("buildCity");
+        var c = new Depot(dummy);
+
+        Constructions[c._Cell.X, c._Cell.Y] = c;
+
+        var neighborsRoads = new List<Road>();
+        foreach (Road neighborsRoad in Neighbors(c._Cell))
+        {
+            if (!neighborsRoads.Contains(neighborsRoad))
+                neighborsRoads.Add(neighborsRoad);
+        }
+
+        foreach (Road neighborsRoad in neighborsRoads)
+        {
+            UpdateRoad(neighborsRoad);
+        }
+    }
+
     private void _BuildDepot(Cell pos, int direction)
     {
         int cost;
@@ -545,6 +571,11 @@ public class World : MonoBehaviour
     public void BuildDepot(Cell pos)
     {
         _BuildDepot(pos, Builder.RotationDirection);
+    }
+
+    public void BuildDepot(Depot dummy)
+    {
+        _BuildDepot(dummy);
     }
 
     public void BuildIndustry(Industry dummy)
