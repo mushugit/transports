@@ -91,6 +91,7 @@ public class Flux
         GetPath();
         if (Path != null)
         {
+            //Debug.Log($"Reference {trueSource} ({dummy.Source}) => {trueTarget} ({dummy.Target})");
             Source.ReferenceFlux(this);
             Target.ReferenceFlux(this);
             AllFlux.Add(this);

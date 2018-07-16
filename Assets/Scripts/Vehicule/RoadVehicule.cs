@@ -75,7 +75,7 @@ public class RoadVehicule
         : this(dummy.Speed, dummy.Source, dummy.Target, dummy.CurrentCell, dummy.TargetCell,
              dummy.HasArrived, dummy.Position, dummy.Distance, dummy.Ticks)
     {
-        Debug.Log($"Loaded truck at {dummy.CurrentCell}");
+        //Debug.Log($"Loaded truck at {dummy.CurrentCell}");
         this.flux = flux;
     }
 

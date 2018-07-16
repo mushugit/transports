@@ -82,6 +82,7 @@ public class SaveHandler
         var stream = File.OpenText(fullFilePath);
         var jsonStream = new JsonTextReader(stream);
 
+        World.ClearInstance();
         WorldSave saveData = null;
         try
         {

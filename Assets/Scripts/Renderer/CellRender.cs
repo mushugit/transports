@@ -168,10 +168,11 @@ public class CellRender : MonoBehaviour, IPointerClickHandler
 				{
 					World.Instance.BuildRoad(currentPoint);
 				}
-				if (Builder.TypeOfBuild == typeof(City))
-				{
-					World.Instance.BuildCity(currentPoint);
-				}
+                if (Builder.TypeOfBuild == typeof(City))
+                {
+                    World.Instance.BuildCity(currentPoint);
+                    Builder.CancelAction();
+                }
 				if (Builder.TypeOfBuild == typeof(Depot))
 				{
 					World.Instance.BuildDepot(currentPoint);

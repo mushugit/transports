@@ -65,7 +65,7 @@ public class HColor : IHasColor
 
     public static void GetInitialColor(Construction construction, Component p)
     {
-        var c = Random.ColorHSV();
+        var c = Random.ColorHSV(0, 1, 1, 1, 0.49f, 0.51f);
         if (construction != null && !construction.IsOriginal)
         {
             if (construction is IHasColor)

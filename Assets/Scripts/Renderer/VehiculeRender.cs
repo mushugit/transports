@@ -22,7 +22,7 @@ public class VehiculeRender : MonoBehaviour
 
     public void Init(Cell start, Cell finish, float speed, float position = 0)
     {
-        Debug.Log($"Truck init at {start}, target at {finish} (p={position} s={speed})");
+        //Debug.Log($"Truck init at {start}, target at {finish} (p={position} s={speed})");
         this.Speed = speed;
         if (finish != null)
         {

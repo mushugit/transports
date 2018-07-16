@@ -72,6 +72,15 @@ public class World : MonoBehaviour
         SceneManager.LoadScene(worldLoadSceneIndex);
     }
 
+    public static void ClearInstance()
+    {
+        Instance?.Cities.Clear();
+        Instance?.Industries.Clear();
+
+        Flux.AllFlux.Clear();
+        Instance = null;
+    }
+
     public static void Loose()
     {
         SceneManager.LoadScene(looseSceneIndex);
@@ -254,8 +263,10 @@ public class World : MonoBehaviour
         yield return StartCoroutine(BuildRoads(roads));
 
         itemLoading = "Chargement des flux";
+        UnityEngine.Debug.Log($"Flux à charger : {loadData.AllFlux.Count}");
         foreach (Flux f in loadData.AllFlux)
         {
+            UnityEngine.Debug.Log($"\tFlux : {f}");
             Simulation.AddFlux(f);
         }
         progressLoading++;

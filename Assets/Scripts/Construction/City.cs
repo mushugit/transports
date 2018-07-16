@@ -193,7 +193,7 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
     #region IFluxReferencer
     public void ReferenceFlux(Flux flux)
     {
-        //Debug.Log($"Add {this} : {flux}");
+        //Debug.Log($"Add to {this}(O={IsOriginal}) : {flux}");
         if (flux.Target == this)
             IncomingFlux.Add(flux.Source, flux);
         else
@@ -301,10 +301,6 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
             InfoWindow = WindowFactory.BuildTextInfo(Name, screenPosition, this);
         }
     }
-
-
-
-
 
     public string InfoText()
     {
