@@ -218,7 +218,6 @@ public class Industry : Construction, IEquatable<Industry>, IFluxSource, ICargoS
         return Name;
     }
 
-
     public static int Quantity(int w, int h)
     {
         var averageSquareSize = Mathf.Sqrt(w * h);
@@ -230,7 +229,7 @@ public class Industry : Construction, IEquatable<Industry>, IFluxSource, ICargoS
 
     }
 
-    private static void InitCityReference()
+    public static void InitCityReference()
     {
         if (numberOfIndustryPerCity == null)
         {

@@ -64,12 +64,12 @@ public class World : MonoBehaviour
 
     public static bool DisplayLabel = true;
 
-    public static void ReloadLevel()
+    public static void ReloadLevel(int sceneIndex)
     {
         Instance = null;
         Simulation.Clear();
-        PauseMenu.ForceResume();
-        SceneManager.LoadScene(worldLoadSceneIndex);
+        //PauseMenu.ForceResume();
+        SceneManager.LoadScene(sceneIndex);
     }
 
     public static void ClearInstance()
@@ -239,6 +239,7 @@ public class World : MonoBehaviour
 
         itemLoading = "Chargement des constructions";
         var roads = new List<Cell>();
+        var industryToLoad = new List<Industry>();
         foreach (Construction c in loadData.Constructions)
         {
             if (c is City)
@@ -247,7 +248,8 @@ public class World : MonoBehaviour
             }
             if (c is Industry)
             {
-                BuildIndustry(c as Industry);
+                //Load industry later as they need the list of cities for names
+                industryToLoad.Add(c as Industry);
             }
             if (c is Depot)
             {
@@ -259,6 +261,11 @@ public class World : MonoBehaviour
                 roads.Add(c._Cell);
             }
             progressLoading++;
+        }
+        Industry.InitCityReference();
+        foreach(Industry i in industryToLoad)
+        {
+            BuildIndustry(i);
         }
         yield return StartCoroutine(BuildRoads(roads));
 

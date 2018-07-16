@@ -21,8 +21,7 @@ public class SaveGameItem : MonoBehaviour {
 			var loadMenu = GetComponentInParent<LoadMenu>();
 			loadMenu.Back();
 			var pauseMenu = GetComponentInParent<PauseMenu>();
-			pauseMenu.Resume();
-			Message.ShowError("Erreur de chargement de la sauvegarde", errorMessage);
+            PauseMenu.Display($"Erreur de chargement de la sauvegarde {errorMessage}",true);
 		}
 	}
 }

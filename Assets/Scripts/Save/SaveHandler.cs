@@ -70,7 +70,7 @@ public class SaveHandler
 
         stream?.Close();
 
-        InfoText.Display($"Jeu sauvegardé sous {saveName}");
+        PauseMenu.Display($"Jeu sauvegardé sous {saveName}");
         errorMessage = "";
         return true;
     }
@@ -105,7 +105,7 @@ public class SaveHandler
         if (CheckVersionCompatibility(saveData.Version))
         {
             World.loadData = saveData;
-            World.ReloadLevel();
+            World.ReloadLevel(World.worldLoadSceneIndex);
             errorMessage = "";
             return true;
         }
