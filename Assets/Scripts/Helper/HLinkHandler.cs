@@ -1,8 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 
 public class HLinkHandler : ILinkable
 {
     public delegate void LinkUpdatedDelegate();
+    public delegate void LinkUpdateTextDelegate(string message);
+    public delegate IEnumerator DoLinkCoroutine(IEnumerable<Cell> path);
+    public delegate IEnumerator UpdateLinkCoroutine(ILinkable a, ILinkable b);
 
     public List<ILinkable> Linked { get; private set; }
     public List<ILinkable> Unreachable { get; private set; }
@@ -48,6 +52,20 @@ public class HLinkHandler : ILinkable
         }
         if (addedACity)
             linkUpdatedDelegate?.Invoke();
+    }
+
+    public static IEnumerator UpdateUnreachable(ILinkable a, ILinkable b)
+    {
+        var allAUnreachable = new List<ILinkable>(a.Unreachable) { a };
+        var allBUnreachable = new List<ILinkable>(b.Unreachable) { b };
+
+        foreach (ILinkable c in a.Unreachable)
+            c.AddUnreachable(allBUnreachable);
+        a.AddUnreachable(allBUnreachable);
+        foreach (ILinkable c in b.Unreachable)
+            c.AddUnreachable(allAUnreachable);
+        b.AddUnreachable(allAUnreachable);
+        yield return null;
     }
 
     public void AddLinkTo(ILinkable c)
@@ -159,6 +177,87 @@ public class HLinkHandler : ILinkable
     public double FlyDistance(IHasCell cell)
     {
         return _Cell.FlyDistance(cell);
+    }
+
+    public static IEnumerator Link(IPathable<Cell> a, IPathable<Cell> b, LinkUpdateTextDelegate callback,
+        DoLinkCoroutine linkCoroutine, UpdateLinkCoroutine updateCoroutine)
+    {
+        if (!a.IsLinkedTo(b))
+        {
+            if ((a.Linked == null && b.Linked == null) || (a.Linked != null && b.Linked != null))
+            {
+                if (a.RoadInDirection(b._Cell) < b.RoadInDirection(a._Cell))
+                {
+                    var c = a;
+                    a = b;
+                    b = c;
+                }
+            }
+            else
+            {
+                if (a.Linked == null)
+                {
+                    var c = a;
+                    a = b;
+                    b = c;
+                }
+            }
+
+            if (a is IHasName && b is IHasName)
+            {
+                var aNamed = a as IHasName;
+                var bNamed = b as IHasName;
+                callback("Relie " + aNamed.Name + " vers " + bNamed.Name);
+            }
+            else
+                callback("Relie");
+
+            var pf = new Pathfinder<Cell>(0, 0, null);
+            yield return World.Instance?.StartCoroutine(pf.RoutineFindPath(a._Cell, b._Cell));
+            if (pf.Path != null && pf.Path.TotalCost > 0)
+            {
+                //UnityEngine.Debug.Log($"Path from {a.Name} to {b.Name}");
+                yield return World.Instance?.StartCoroutine(linkCoroutine(pf.Path)); // BuildRoads(pf.Path));
+                yield return World.Instance?.StartCoroutine(updateCoroutine(a, b)); // UpdateLink(a, b));
+            }
+            else
+            {
+                //UnityEngine.Debug.Log($"NO PATH from {a.Name} to {b.Name} ({pf.Path})");
+            }
+        }
+    }
+
+    public static IEnumerator UpdateLink(ILinkable a, ILinkable b)
+    {
+        var allALink = new List<ILinkable>(a.Linked) { a };
+        var allBLink = new List<ILinkable>(b.Linked) { b };
+
+        foreach (ILinkable c in a.Linked)
+            c.AddLinkTo(allBLink);
+        a.AddLinkTo(allBLink);
+        foreach (ILinkable c in b.Linked)
+            c.AddLinkTo(allALink);
+        b.AddLinkTo(allALink);
+        yield return null;
+    }
+
+    public static bool IsConnectable(int direction, Construction c)
+    {
+        if (c == null)
+            return false;
+
+        if (c is Construction)
+        {
+            if (c is Depot)
+            {
+                var d = c as Depot;
+                return direction == d.Direction;
+            }
+            else
+                return true;
+        }
+
+        return false;
     }
 }
 

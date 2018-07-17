@@ -1,16 +1,13 @@
-﻿using System;
+﻿
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.UI;
 
-class WindowFactory : MonoBehaviour
+public class WindowFactory : MonoBehaviour
 {
-	public GameObject windowTextInfoPrefab;
-	public GameObject windowFluxSetupPrefab;
-	public GameObject parent;
+	public GameObject WindowTextInfoPrefab;
+	public GameObject WindowFluxSetupPrefab;
+	public GameObject Parent;
 
 	private static WindowFactory instance;
 	private static List<Window> windows;
@@ -39,7 +36,7 @@ class WindowFactory : MonoBehaviour
 	public WindowFluxSetup _BuildFluxSetup(string title, Vector3 position)
 	{
 		position.z = 0;
-		var windowCanvasObject = Instantiate(windowFluxSetupPrefab, parent.transform);
+		var windowCanvasObject = Instantiate(WindowFluxSetupPrefab, Parent.transform);
 
 		var windowObjectRef = windowCanvasObject.GetComponentInChildren<WindowReferencer>();
 		var windowObject = windowObjectRef.GameObjectWindow;
@@ -72,7 +69,7 @@ class WindowFactory : MonoBehaviour
 	public WindowTextInfo _BuildTextInfo(string title, Vector3 position, City c)
 	{
 		position.z = 0;
-		var windowCanvasObject = Instantiate(windowTextInfoPrefab, parent.transform);
+		var windowCanvasObject = Instantiate(WindowTextInfoPrefab, Parent.transform);
 
 		var windowObjectRef = windowCanvasObject.GetComponentInChildren<WindowReferencer>();
 		var windowObject = windowObjectRef.GameObjectWindow;
@@ -94,7 +91,7 @@ class WindowFactory : MonoBehaviour
 	public WindowTextInfo _BuildTextInfo(string title, Vector3 position, string message, Color tint)
 	{
 		position.z = 0;
-		var windowCanvasObject = Instantiate(windowTextInfoPrefab, parent.transform);
+		var windowCanvasObject = Instantiate(WindowTextInfoPrefab, Parent.transform);
 
 		var windowObjectRef = windowCanvasObject.GetComponentInChildren<WindowReferencer>();
 		var windowObject = windowObjectRef.GameObjectWindow;

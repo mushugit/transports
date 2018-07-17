@@ -34,7 +34,7 @@ public class Cam : MonoBehaviour
 	{
 		camRadius = camRadiusRatio * Mathf.Max(World.width, World.height);
 		//Debug.Log($"Cam radius {camRadius}");
-		var defaultPositionRef = new Vector3(
+		defaultPositionRef = new Vector3(
 			(World.width / 2) + defaultCoord,
 			defaultZoomPosition,
 			(World.height / 2) + defaultCoord

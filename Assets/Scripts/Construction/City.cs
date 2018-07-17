@@ -7,7 +7,7 @@ using System;
 using UnityEngine.EventSystems;
 
 [JsonObject(MemberSerialization.OptIn)]
-public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, ICargoStocker, ICargoGenerator, ILinkable, IHasName
+public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, ICargoStocker, ICargoGenerator, IPathable<Cell>, IHasName
 {
     private static List<string> cityNames = null;
 
@@ -38,7 +38,12 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
     #region ILinkable Properties
     public List<ILinkable> Linked { get { return linkHandler.Linked; } }
     public List<ILinkable> Unreachable { get { return linkHandler.Unreachable; } }
-    #endregion  
+    #endregion
+
+    #region IHasCoord properties
+    public int X { get { return _Cell.X; } }
+    public int Y { get { return _Cell.Y; } }
+    #endregion
 
     public WindowTextInfo InfoWindow = null;
 
@@ -57,6 +62,13 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
     public void SetColor(Color color)
     {
         colorHandler.SetColor(color);
+    }
+    #endregion
+
+    #region IHasNeighbour
+    public IEnumerable<Cell> Neighbours(List<Type> passable)
+    {
+        return _Cell.Neighbours(passable);
     }
     #endregion
 

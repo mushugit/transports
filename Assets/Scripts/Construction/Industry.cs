@@ -7,7 +7,7 @@ using System;
 using UnityEngine.EventSystems;
 
 [JsonObject(MemberSerialization.OptIn)]
-public class Industry : Construction, IEquatable<Industry>, IFluxSource, ICargoStocker, ICargoGenerator, ILinkable, IHasName
+public class Industry : Construction, IEquatable<Industry>, IFluxSource, ICargoStocker, ICargoGenerator, IPathable<Cell>, IHasName
 {
     HCargoGenerator cargoGenerator;
     HLinkHandler linkHandler;
@@ -23,7 +23,12 @@ public class Industry : Construction, IEquatable<Industry>, IFluxSource, ICargoS
     #region ILinkable Properties
     public List<ILinkable> Linked { get { return linkHandler.Linked; } }
     public List<ILinkable> Unreachable { get { return linkHandler.Unreachable; } }
-    #endregion  
+    #endregion
+
+    #region IHasCoord properties
+    public int X { get { return _Cell.X; } }
+    public int Y { get { return _Cell.Y; } }
+    #endregion
 
     #region ICargoProvider properties
     [JsonProperty]
@@ -129,6 +134,13 @@ public class Industry : Construction, IEquatable<Industry>, IFluxSource, ICargoS
     public void SetColor(Color color)
     {
         colorHandler.SetColor(color);
+    }
+    #endregion
+
+    #region IHasNeighbour
+    public IEnumerable<Cell> Neighbours(List<Type> passable)
+    {
+        return _Cell.Neighbours(passable);
     }
     #endregion
 

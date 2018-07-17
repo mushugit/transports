@@ -67,5 +67,17 @@ public class Economy
 		return template.Gain(operationName);
 	}
 
+    public static bool CheckCost(Economy economy, string operationName, string messageOperation, out int cost, int quantity = 1)
+    {
+        if (!economy.DoCost(operationName, out cost, quantity))
+        {
+            Message.ShowError("Pas assez d'argent",
+                $"Vous ne pouvez pas {messageOperation} celà coûte {cost} et vous avez {economy.Balance}");
+            return false;
+        }
+        else
+            return true;
+    }
+
 }
 

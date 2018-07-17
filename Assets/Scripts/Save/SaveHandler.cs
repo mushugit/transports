@@ -58,7 +58,7 @@ public class SaveHandler
             {
                 File.Delete(fullFilePath);
             }
-            catch(Exception e)
+            catch(Exception)
             {
                 sb.Append($"\nFichier corrompu toujours présent !\n");
             }

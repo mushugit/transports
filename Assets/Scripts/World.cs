@@ -21,7 +21,6 @@ public class World : MonoBehaviour
     public static float height = width;
 
     #region Unity editor properties
-
     [Header("World Gen settings")]
 
     public int minCityDistance = 4;
@@ -52,7 +51,6 @@ public class World : MonoBehaviour
     public static readonly int worldLoadSceneIndex = 1;
     public static readonly int looseSceneIndex = 3;
 
-
     public Construction[,] Constructions { get; private set; }
 
     public List<City> Cities;
@@ -68,7 +66,6 @@ public class World : MonoBehaviour
     {
         Instance = null;
         Simulation.Clear();
-        //PauseMenu.ForceResume();
         SceneManager.LoadScene(sceneIndex);
     }
 
@@ -91,6 +88,11 @@ public class World : MonoBehaviour
         var loader = Instance.GetComponentInParent<LevelLoader>();
         if (loader != null)
             DestroyImmediate(loader.gameObject);
+    }
+
+    private void SetLoading(string text)
+    {
+        itemLoading = text;
     }
 
     void Update()
@@ -129,9 +131,6 @@ public class World : MonoBehaviour
 
     private void RecalculateLinks()
     {
-        /*var sw = new Stopwatch();
-		sw.Start();*/
-
         var linkableItems = new List<ILinkable>();
         linkableItems.AddRange(Cities);
         linkableItems.AddRange(Industries);
@@ -151,13 +150,12 @@ public class World : MonoBehaviour
                     if (path?.TotalCost > 0)
                     {
                         //UnityEngine.Debug.Log($"Found path of {path.TotalCost} steps from {c} to {otherCity}");
-                        StartCoroutine(UpdateLink(item, otherItem));
-
+                        StartCoroutine(HLinkHandler.UpdateLink(item, otherItem));
                     }
                     else
                     {
                         //UnityEngine.Debug.Log($"No path from {c} to {otherCity}");
-                        UpdateUnreachable(item, otherItem);
+                        HLinkHandler.UpdateUnreachable(item, otherItem);
                     }
                 }
             }
@@ -168,23 +166,6 @@ public class World : MonoBehaviour
                 cp.UpdateAllOutgoingFlux();
             }
         }
-
-        /*sw.Stop();
-		DisplayTimeSpan("RecalculateLinks", sw.Elapsed, 1);*/
-    }
-
-    IEnumerator UpdateUnreachable(ILinkable a, ILinkable b)
-    {
-        var allAUnreachable = new List<ILinkable>(a.Unreachable) { a };
-        var allBUnreachable = new List<ILinkable>(b.Unreachable) { b };
-
-        foreach (ILinkable c in a.Unreachable)
-            c.AddUnreachable(allBUnreachable);
-        a.AddUnreachable(allBUnreachable);
-        foreach (ILinkable c in b.Unreachable)
-            c.AddUnreachable(allAUnreachable);
-        b.AddUnreachable(allAUnreachable);
-        yield return null;
     }
 
     void Start()
@@ -195,7 +176,7 @@ public class World : MonoBehaviour
         {
             UpdateWorldSize();
             InitLoader();
-            StartCoroutine(Generate());
+            StartCoroutine(GenerateMap());
         }
         else
         {
@@ -203,7 +184,7 @@ public class World : MonoBehaviour
             height = loadData.Height;
             UpdateWorldSize();
             InitLoader(loadData.Constructions.Count + loadData.AllFlux.Count);
-            StartCoroutine(Load());
+            StartCoroutine(LoadMap());
         }
     }
 
@@ -221,7 +202,7 @@ public class World : MonoBehaviour
         cam?.Center();
     }
 
-    IEnumerator Load()
+    IEnumerator LoadMap()
     {
         UnityEngine.Debug.Log("Loading");
         var w = (int)width;
@@ -263,7 +244,7 @@ public class World : MonoBehaviour
             progressLoading++;
         }
         Industry.InitCityReference();
-        foreach(Industry i in industryToLoad)
+        foreach (Industry i in industryToLoad)
         {
             BuildIndustry(i);
         }
@@ -310,7 +291,7 @@ public class World : MonoBehaviour
         }
     }
 
-    IEnumerator Generate()
+    IEnumerator GenerateMap()
     {
         var w = (int)width;
         var h = (int)height;
@@ -330,7 +311,7 @@ public class World : MonoBehaviour
             var closestCity = ClosestCityUnlinked(c);
             if (closestCity != null)
             {
-                yield return StartCoroutine(Link(c, closestCity));
+                yield return StartCoroutine(HLinkHandler.Link(c, closestCity, SetLoading, BuildRoads, HLinkHandler.UpdateLink));
             }
             progressLoading++;
         }
@@ -342,7 +323,7 @@ public class World : MonoBehaviour
             var closestCity = ClosestCityUnlinked(i);
             if (closestCity != null)
             {
-                yield return StartCoroutine(Link(i, closestCity));
+                yield return StartCoroutine(HLinkHandler.Link(i, closestCity, SetLoading, BuildRoads, HLinkHandler.UpdateLink));
             }
             progressLoading++;
         }
@@ -355,67 +336,6 @@ public class World : MonoBehaviour
         yield return StartCoroutine(Simulation.Run());
     }
 
-    IEnumerator Link(ILinkable a, ILinkable b)
-    {
-        if (!a.IsLinkedTo(b))
-        {
-            if ((a.Linked == null && b.Linked == null) || (a.Linked != null && b.Linked != null))
-            {
-                if (a.RoadInDirection(b._Cell) < b.RoadInDirection(a._Cell))
-                {
-                    var c = a;
-                    a = b;
-                    b = c;
-                }
-            }
-            else
-            {
-                if (a.Linked == null)
-                {
-                    var c = a;
-                    a = b;
-                    b = c;
-                }
-            }
-
-            if (a is IHasName && b is IHasName)
-            {
-                var aNamed = a as IHasName;
-                var bNamed = b as IHasName;
-                itemLoading = "Relie " + aNamed.Name + " vers " + bNamed.Name;
-            }
-            else
-                itemLoading = "Relie";
-
-            var pf = new Pathfinder<Cell>(0, 0, null);
-            yield return StartCoroutine(pf.RoutineFindPath(a._Cell, b._Cell));
-            if (pf.Path != null && pf.Path.TotalCost > 0)
-            {
-                //UnityEngine.Debug.Log($"Path from {a.Name} to {b.Name}");
-                yield return StartCoroutine(BuildRoads(pf.Path));
-                yield return StartCoroutine(UpdateLink(a, b));
-            }
-            else
-            {
-                //UnityEngine.Debug.Log($"NO PATH from {a.Name} to {b.Name} ({pf.Path})");
-            }
-        }
-    }
-
-    IEnumerator UpdateLink(ILinkable a, ILinkable b)
-    {
-        var allALink = new List<ILinkable>(a.Linked) { a };
-        var allBLink = new List<ILinkable>(b.Linked) { b };
-
-        foreach (ILinkable c in a.Linked)
-            c.AddLinkTo(allBLink);
-        a.AddLinkTo(allBLink);
-        foreach (ILinkable c in b.Linked)
-            c.AddLinkTo(allALink);
-        b.AddLinkTo(allALink);
-        yield return null;
-    }
-
     void Terrain(float width, float height)
     {
         var t = Instantiate(TerrainPrefab, Vector3.zero, Quaternion.identity);
@@ -424,43 +344,8 @@ public class World : MonoBehaviour
         c?.SetScale(width, height);
     }
 
-    public void DestroyConstruction(Cell p)
-    {
-        var c = Constructions[p.X, p.Y];
-        if (c != null)
-        {
-            if (c is Road)
-            {
-                DestroyRoad(p);
-                RecalculateLinks();
-            }
-            if (c is Industry)
-            {
-                DestroyIndustry(p);
-                RecalculateLinks();
-            }
-            if (c is City)
-            {
-                DestroyCity(p);
-                RecalculateLinks();
-            }
-            if (c is Depot)
-                DestroyDepot(p);
-        }
-
-        var neighborsRoads = new List<Road>();
-        foreach (Road neighborsRoad in Neighbors(p))
-        {
-            if (!neighborsRoads.Contains(neighborsRoad))
-                neighborsRoads.Add(neighborsRoad);
-        }
-
-        foreach (Road neighborsRoad in neighborsRoads)
-        {
-            UpdateRoad(neighborsRoad);
-        }
-    }
-
+    #region Construction Operation
+    #region Construction Generator
     void GenerateIndustry(int w, int h)
     {
         var quantity = Industry.Quantity(w, h);
@@ -490,7 +375,6 @@ public class World : MonoBehaviour
         }
     }
 
-
     void GenerateCity(int w, int h)
     {
         var quantity = City.Quantity(w, h);
@@ -519,23 +403,72 @@ public class World : MonoBehaviour
             }
         }
     }
+    #endregion
 
-    public static bool CheckCost(string operationName, string messageOperation, out int cost, int quantity = 1)
+    #region Construction Build
+    public void BuildRoad(Cell pos)
     {
-        if (!LocalEconomy.DoCost(operationName, out cost, quantity))
+        int cost;
+        if (!Economy.CheckCost(LocalEconomy, "build_road", "construire une route", out cost))
+            return;
+
+        AudioManager.Player.Play("buildRoad");
+        Road road = new Road(pos);
+        Constructions[pos.X, pos.Y] = road;
+
+        road.UpdateConnections();
+        var neighbors = Neighbors(pos);
+        foreach (Road r in neighbors)
+            r.UpdateConnections();
+
+        RecalculateLinks();
+    }
+
+    public IEnumerator BuildRoads(IEnumerable<Cell> path)
+    {
+        //UnityEngine.Debug.Log("Road from " + path.First() + " to " + path.Last());
+        var countLoop = 0d;
+        var constructedRoads = new List<Road>();
+        foreach (Cell p in path)
         {
-            Message.ShowError("Pas assez d'argent",
-                $"Vous ne pouvez pas {messageOperation} celà coûte {cost} et vous avez {LocalEconomy.Balance}");
-            return false;
+            countLoop++;
+            if (Constructions[p.X, p.Y] == null)
+            {
+                Road r = new Road(p);
+                constructedRoads.Add(r);
+                Constructions[p.X, p.Y] = r;
+            }
+            if (countLoop % coroutineYieldRate == 0)
+                yield return null;
         }
-        else
-            return true;
+
+        var neighborsRoads = new List<Road>();
+        foreach (Road r in constructedRoads)
+        {
+            countLoop++;
+
+            foreach (Road neighborsRoad in Neighbors(r._Cell))
+            {
+                if (!neighborsRoads.Contains(neighborsRoad))
+                    neighborsRoads.Add(neighborsRoad);
+            }
+
+            r.UpdateConnections();
+            foreach (Road neighborsRoad in neighborsRoads)
+            {
+                neighborsRoad.UpdateConnections();
+            }
+
+            if (countLoop % coroutineYieldRate == 0)
+                yield return null;
+        }
+        yield return null;
     }
 
     private void _BuildDepot(Depot dummy)
     {
         int cost;
-        if (!CheckCost("build_depot", "construire un dépôt", out cost))
+        if (!Economy.CheckCost(LocalEconomy, "build_depot", "construire un dépôt", out cost))
             return;
 
         AudioManager.Player.Play("buildCity");
@@ -543,23 +476,13 @@ public class World : MonoBehaviour
 
         Constructions[c._Cell.X, c._Cell.Y] = c;
 
-        var neighborsRoads = new List<Road>();
-        foreach (Road neighborsRoad in Neighbors(c._Cell))
-        {
-            if (!neighborsRoads.Contains(neighborsRoad))
-                neighborsRoads.Add(neighborsRoad);
-        }
-
-        foreach (Road neighborsRoad in neighborsRoads)
-        {
-            UpdateRoad(neighborsRoad);
-        }
+        Road.UpdateAllRoad(Neighbors(c._Cell));
     }
 
     private void _BuildDepot(Cell pos, int direction)
     {
         int cost;
-        if (!CheckCost("build_depot", "construire un dépôt", out cost))
+        if (!Economy.CheckCost(LocalEconomy, "build_depot", "construire un dépôt", out cost))
             return;
 
         AudioManager.Player.Play("buildCity");
@@ -567,18 +490,7 @@ public class World : MonoBehaviour
 
         Constructions[pos.X, pos.Y] = c;
 
-        var neighborsRoads = new List<Road>();
-        foreach (Road neighborsRoad in Neighbors(pos))
-        {
-            if (!neighborsRoads.Contains(neighborsRoad))
-                neighborsRoads.Add(neighborsRoad);
-        }
-
-        foreach (Road neighborsRoad in neighborsRoads)
-        {
-            UpdateRoad(neighborsRoad);
-        }
-
+        Road.UpdateAllRoad(Neighbors(pos));
     }
 
     public void BuildDepot(Cell pos, int direction)
@@ -599,7 +511,7 @@ public class World : MonoBehaviour
     public void BuildIndustry(Industry dummy)
     {
         int cost;
-        if (!CheckCost("build_industry", "fonder une nouvelle industrie", out cost))
+        if (!Economy.CheckCost(LocalEconomy, "build_industry", "fonder une nouvelle industrie", out cost))
             return;
 
         AudioManager.Player.Play("buildCity");
@@ -609,50 +521,15 @@ public class World : MonoBehaviour
         Constructions[center.X, center.Y] = i;
         Industries.Add(i);
 
-        var neighborsRoads = new List<Road>();
-        foreach (Road neighborsRoad in Neighbors(center))
-        {
-            if (!neighborsRoads.Contains(neighborsRoad))
-                neighborsRoads.Add(neighborsRoad);
-        }
-
-        foreach (Road neighborsRoad in neighborsRoads)
-        {
-            UpdateRoad(neighborsRoad);
-        }
+        Road.UpdateAllRoad(Neighbors(center));
 
         RecalculateLinks();
-    }
-
-    public void BuildCity(City dummy)
-    {
-        int cost;
-        if (!CheckCost("build_city", "bâtir une nouvelle ville", out cost))
-            return;
-
-        var c = new City(dummy);
-        var center = dummy._Cell;
-
-        Constructions[center.X, center.Y] = c;
-        Cities.Add(c);
-
-        var neighborsRoads = new List<Road>();
-        foreach (Road neighborsRoad in Neighbors(center))
-        {
-            if (!neighborsRoads.Contains(neighborsRoad))
-                neighborsRoads.Add(neighborsRoad);
-        }
-
-        foreach (Road neighborsRoad in neighborsRoads)
-        {
-            UpdateRoad(neighborsRoad);
-        }
     }
 
     public void BuildIndustry(Cell center)
     {
         int cost;
-        if (!CheckCost("build_industry", "fonder une nouvelle industrie", out cost))
+        if (!Economy.CheckCost(LocalEconomy, "build_industry", "fonder une nouvelle industrie", out cost))
             return;
 
         AudioManager.Player.Play("buildCity");
@@ -661,25 +538,30 @@ public class World : MonoBehaviour
         Constructions[center.X, center.Y] = i;
         Industries.Add(i);
 
-        var neighborsRoads = new List<Road>();
-        foreach (Road neighborsRoad in Neighbors(center))
-        {
-            if (!neighborsRoads.Contains(neighborsRoad))
-                neighborsRoads.Add(neighborsRoad);
-        }
-
-        foreach (Road neighborsRoad in neighborsRoads)
-        {
-            UpdateRoad(neighborsRoad);
-        }
+        Road.UpdateAllRoad(Neighbors(center));
 
         RecalculateLinks();
+    }
+
+    public void BuildCity(City dummy)
+    {
+        int cost;
+        if (!Economy.CheckCost(LocalEconomy, "build_city", "bâtir une nouvelle ville", out cost))
+            return;
+
+        var c = new City(dummy);
+        var center = dummy._Cell;
+
+        Constructions[center.X, center.Y] = c;
+        Cities.Add(c);
+
+        Road.UpdateAllRoad(Neighbors(center));
     }
 
     public void BuildCity(Cell center)
     {
         int cost;
-        if (!CheckCost("build_city", "bâtir une nouvelle ville", out cost))
+        if (!Economy.CheckCost(LocalEconomy, "build_city", "bâtir une nouvelle ville", out cost))
             return;
 
         AudioManager.Player.Play("buildCity");
@@ -688,25 +570,59 @@ public class World : MonoBehaviour
         Constructions[center.X, center.Y] = c;
         Cities.Add(c);
 
-        var neighborsRoads = new List<Road>();
-        foreach (Road neighborsRoad in Neighbors(center))
-        {
-            if (!neighborsRoads.Contains(neighborsRoad))
-                neighborsRoads.Add(neighborsRoad);
-        }
-
-        foreach (Road neighborsRoad in neighborsRoads)
-        {
-            UpdateRoad(neighborsRoad);
-        }
+        Road.UpdateAllRoad(Neighbors(center));
 
         RecalculateLinks();
+    }
+    #endregion
+
+    #region Construction Destroy
+    public void DestroyConstruction(Cell p)
+    {
+        var c = Constructions[p.X, p.Y];
+        if (c != null)
+        {
+            if (c is Road)
+            {
+                DestroyRoad(p);
+                RecalculateLinks();
+            }
+            if (c is Industry)
+            {
+                DestroyIndustry(p);
+                RecalculateLinks();
+            }
+            if (c is City)
+            {
+                DestroyCity(p);
+                RecalculateLinks();
+            }
+            if (c is Depot)
+                DestroyDepot(p);
+        }
+
+        Road.UpdateAllRoad(Neighbors(p));
+    }
+
+    public void DestroyRoad(Cell pos)
+    {
+        int cost;
+        if (!Economy.CheckCost(LocalEconomy, "destroy_road", "détruire une route", out cost))
+            return;
+
+        var r = Constructions[pos.X, pos.Y] as Road;
+
+        Road.UpdateAllRoad(Neighbors(r._Cell));
+
+        Constructions[pos.X, pos.Y] = null;
+
+        r.Destroy();
     }
 
     public void DestroyIndustry(Cell center)
     {
         int cost;
-        if (!CheckCost("destroy_industry", "raser une industrie", out cost))
+        if (!Economy.CheckCost(LocalEconomy, "destroy_industry", "raser une industrie", out cost))
             return;
 
         var i = Constructions[center.X, center.Y] as Industry;
@@ -718,7 +634,7 @@ public class World : MonoBehaviour
     public void DestroyCity(Cell center)
     {
         int cost;
-        if (!CheckCost("destroy_city", "raser une ville", out cost))
+        if (!Economy.CheckCost(LocalEconomy, "destroy_city", "raser une ville", out cost))
             return;
 
         var c = Constructions[center.X, center.Y] as City;
@@ -730,172 +646,17 @@ public class World : MonoBehaviour
     public void DestroyDepot(Cell center)
     {
         int cost;
-        if (!CheckCost("destroy_depot", "détruire un dépôt", out cost))
+        if (!Economy.CheckCost(LocalEconomy, "destroy_depot", "détruire un dépôt", out cost))
             return;
 
         var d = Constructions[center.X, center.Y] as Depot;
         d.Destroy();
         Constructions[center.X, center.Y] = null;
     }
+    #endregion
+    #endregion
 
-    public void UpdateRoad(Road r)
-    {
-        var north = North(r);
-        var east = East(r);
-        var south = South(r);
-        var west = West(r);
-        var isLinkNorth = IsLinkable(2, north);
-        var isLinkEast = IsLinkable(3, east);
-        var isLinkSouth = IsLinkable(0, south);
-        var isLinkWest = IsLinkable(1, west);
-        //UnityEngine.Debug.Log($"Update de {r.Point} : n={isLinkNorth} e={isLinkEast} s={isLinkSouth} w={isLinkWest}");
-        r.UpdateConnexions(isLinkNorth, isLinkEast, isLinkSouth, isLinkWest);
-    }
-
-    public bool IsLinkable(int direction, Construction c)
-    {
-        if (c == null)
-            return false;
-
-        if (c is Construction)
-        {
-            if (c is Depot)
-            {
-                var d = c as Depot;
-                return direction == d.Direction;
-            }
-            else
-                return true;
-        }
-
-        return false;
-    }
-
-    public void BuildRoad(Cell pos)
-    {
-        int cost;
-        if (!CheckCost("build_road", "construire une route", out cost))
-            return;
-
-        AudioManager.Player.Play("buildRoad");
-        Road road = new Road(pos);
-        Constructions[pos.X, pos.Y] = road;
-
-        UpdateRoad(road);
-        var neighbors = Neighbors(pos);
-        foreach (Road r in neighbors)
-            UpdateRoad(r);
-
-        RecalculateLinks();
-    }
-
-    public IEnumerator BuildRoads(Path<Cell> path)
-    {
-        //UnityEngine.Debug.Log("Road from " + path.First() + " to " + path.Last());
-        var countLoop = 0d;
-        var constructedRoads = new List<Road>();
-        foreach (Cell p in path)
-        {
-            countLoop++;
-            if (Constructions[p.X, p.Y] == null)
-            {
-                Road r = new Road(p);
-                constructedRoads.Add(r);
-                Constructions[p.X, p.Y] = r;
-            }
-            if (countLoop % coroutineYieldRate == 0)
-                yield return null;
-        }
-
-        var neighborsRoads = new List<Road>();
-        foreach (Road r in constructedRoads)
-        {
-            countLoop++;
-
-            foreach (Road neighborsRoad in Neighbors(r._Cell))
-            {
-                if (!neighborsRoads.Contains(neighborsRoad))
-                    neighborsRoads.Add(neighborsRoad);
-            }
-
-            UpdateRoad(r);
-            foreach (Road neighborsRoad in neighborsRoads)
-            {
-                UpdateRoad(neighborsRoad);
-            }
-
-            if (countLoop % coroutineYieldRate == 0)
-                yield return null;
-        }
-        yield return null;
-    }
-
-    public IEnumerator BuildRoads(List<Cell> path)
-    {
-        //UnityEngine.Debug.Log("Road from " + path.First() + " to " + path.Last());
-        var countLoop = 0d;
-        var constructedRoads = new List<Road>();
-        foreach (Cell p in path)
-        {
-            countLoop++;
-            if (Constructions[p.X, p.Y] == null)
-            {
-                Road r = new Road(p);
-                constructedRoads.Add(r);
-                Constructions[p.X, p.Y] = r;
-            }
-            if (countLoop % coroutineYieldRate == 0)
-                yield return null;
-        }
-
-        var neighborsRoads = new List<Road>();
-        foreach (Road r in constructedRoads)
-        {
-            countLoop++;
-
-            foreach (Road neighborsRoad in Neighbors(r._Cell))
-            {
-                if (!neighborsRoads.Contains(neighborsRoad))
-                    neighborsRoads.Add(neighborsRoad);
-            }
-
-            UpdateRoad(r);
-            foreach (Road neighborsRoad in neighborsRoads)
-            {
-                UpdateRoad(neighborsRoad);
-            }
-
-            if (countLoop % coroutineYieldRate == 0)
-                yield return null;
-        }
-        yield return null;
-    }
-
-    public void DestroyRoad(Cell pos)
-    {
-        int cost;
-        if (!CheckCost("destroy_road", "détruire une route", out cost))
-            return;
-
-        var r = Constructions[pos.X, pos.Y] as Road;
-
-        var neighborsRoads = new List<Road>();
-        foreach (Road neighborsRoad in Neighbors(r._Cell))
-        {
-            if (!neighborsRoads.Contains(neighborsRoad))
-                neighborsRoads.Add(neighborsRoad);
-        }
-
-        foreach (Road neighborsRoad in neighborsRoads)
-        {
-            UpdateRoad(neighborsRoad);
-        }
-
-        Constructions[pos.X, pos.Y] = null;
-
-        r.Destroy();
-    }
-
+    #region Neighbor
     public int CountNeighbors(Construction c)
     {
         int count = 0;
@@ -948,7 +709,6 @@ public class World : MonoBehaviour
         return null;
     }
 
-
     public List<Road> Neighbors(Cell point)
     {
         var neighbors = new List<Road>();
@@ -981,14 +741,9 @@ public class World : MonoBehaviour
 
         return neighbors;
     }
+    #endregion
 
-    public static void DisplayTimeSpan(string label, TimeSpan ts, int divisor)
-    {
-        var t = (long)ts.TotalMilliseconds * 10 * 1000 / divisor;
-        UnityEngine.Debug.Log($"{label}:{new TimeSpan(t)} ({ts}/{divisor})");
-    }
-
-
+    #region City distances
     City ClosestCityUnlinked(ILinkable item)
     {
         var minDistance = int.MaxValue;
@@ -1007,7 +762,6 @@ public class World : MonoBehaviour
                         closestCity = otherCity;
                     }
                 }
-
             }
         }
 
@@ -1015,9 +769,7 @@ public class World : MonoBehaviour
 		if (closestCity != null)
 			UnityEngine.Debug.Log("[WORLD] " + c.Name + " est proche et non lié de " + closestCity.Name);
 		else
-			UnityEngine.Debug.Log("[WORLD] " + c.Name + " est lié à tout");
-		*/
-
+			UnityEngine.Debug.Log("[WORLD] " + c.Name + " est lié à tout");z*/
         return closestCity;
     }
 
@@ -1077,6 +829,5 @@ public class World : MonoBehaviour
         }
         return farestCity;
     }
-
-
+    #endregion
 }
