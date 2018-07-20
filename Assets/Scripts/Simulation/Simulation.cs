@@ -38,7 +38,7 @@ public class Simulation
 	public static void AddFlux(IFluxSource source, IFluxTarget target, int quantity = 1)
 	{
 		int cost;
-		if (!World.CheckCost("flux_create", "ajouter un flux", out cost))
+		if (!Economy.CheckCost(World.LocalEconomy,"flux_create", "ajouter un flux", out cost))
 			return;
 
         if (source.OutgoingFlux.ContainsKey(target))
@@ -65,7 +65,7 @@ public class Simulation
 	public static void AddFlux(Flux dummyFlux)
 	{
 		int cost;
-		if (!World.CheckCost("flux_create", "ajouter un flux", out cost))
+		if (!Economy.CheckCost(World.LocalEconomy,"flux_create", "ajouter un flux", out cost))
 			return;
 
 		var f = new Flux(dummyFlux);

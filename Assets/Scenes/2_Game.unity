@@ -1197,6 +1197,65 @@ CanvasRenderer:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 415399922}
   m_CullTransparentMesh: 0
+--- !u!1 &438556253 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1681415699552772, guid: 092ca235a3c0c094fa9f3d3a3139d235,
+    type: 2}
+  m_PrefabInternal: {fileID: 1730365158}
+--- !u!114 &438556254
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 438556253}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3a8a9a991d7b064993dc14911c9432e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sounds:
+  - name: Mining by Moonlight
+    clip: {fileID: 8300000, guid: 5ef3141169e596a4ca225b0e70a66560, type: 3}
+    isMusic: 1
+    volume: 0.077
+    pitch: 1
+    Loop: 0
+    source: {fileID: 0}
+  - name: Bass Vibes
+    clip: {fileID: 8300000, guid: d8331671919b1c74fb9cbc4b8f6f3040, type: 3}
+    isMusic: 1
+    volume: 0.2
+    pitch: 1
+    Loop: 0
+    source: {fileID: 0}
+  - name: Ultralounge
+    clip: {fileID: 8300000, guid: 54cee3e55e93eba42857eda6b9814517, type: 3}
+    isMusic: 1
+    volume: 0.133
+    pitch: 1
+    Loop: 0
+    source: {fileID: 0}
+  - name: buildRoad
+    clip: {fileID: 8300000, guid: 1b9fab97bab4eb44994f74c61d497981, type: 3}
+    isMusic: 0
+    volume: 0.077
+    pitch: 1
+    Loop: 0
+    source: {fileID: 0}
+  - name: buildCity
+    clip: {fileID: 8300000, guid: 21c707f58636f8942a07b67ee0f6ecf4, type: 3}
+    isMusic: 0
+    volume: 0.064
+    pitch: 1
+    Loop: 0
+    source: {fileID: 0}
+  - name: destroy
+    clip: {fileID: 8300000, guid: bbe3f2aa13a6b9446bc51d046f79eaec, type: 3}
+    isMusic: 0
+    volume: 0.064
+    pitch: 1
+    Loop: 0
+    source: {fileID: 0}
 --- !u!1 &466025866
 GameObject:
   m_ObjectHideFlags: 0
@@ -3148,11 +3207,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41e461033cac2904386bdb234af13ea0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  windowTextInfoPrefab: {fileID: 1418657973775764, guid: d1fed285a02bd904985583927be85646,
+  WindowTextInfoPrefab: {fileID: 1418657973775764, guid: d1fed285a02bd904985583927be85646,
     type: 2}
-  windowFluxSetupPrefab: {fileID: 1180158681611838, guid: 36404ae4dfd0bab44abaefbc81f8c51b,
+  WindowFluxSetupPrefab: {fileID: 1180158681611838, guid: 36404ae4dfd0bab44abaefbc81f8c51b,
     type: 2}
-  parent: {fileID: 920439081}
+  Parent: {fileID: 920439081}
 --- !u!1 &960582020
 GameObject:
   m_ObjectHideFlags: 0
@@ -6238,7 +6297,8 @@ Prefab:
       propertyPath: m_RootOrder
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 114755695311858484, guid: 092ca235a3c0c094fa9f3d3a3139d235, type: 2}
   m_SourcePrefab: {fileID: 100100000, guid: 092ca235a3c0c094fa9f3d3a3139d235, type: 2}
   m_IsPrefabAsset: 0
 --- !u!1 &1730529415 stripped

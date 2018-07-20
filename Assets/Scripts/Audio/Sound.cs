@@ -1,6 +1,8 @@
 ﻿using UnityEngine.Audio;
 using UnityEngine;
+using System;
 
+[Serializable]
 public class Sound {
 
 	public string name;

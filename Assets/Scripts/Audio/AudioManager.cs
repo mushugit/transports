@@ -6,6 +6,7 @@ public class AudioManager : MonoBehaviour
 {
 
 	public Sound[] sounds;
+
 	private Sound[] music;
 	private static int currentMusic = 0;
 
