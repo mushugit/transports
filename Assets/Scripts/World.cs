@@ -66,7 +66,7 @@ public class World : MonoBehaviour
     public static void ReloadLevel(int sceneIndex)
     {
         Instance = null;
-        Simulation.Clear();
+        ServiceLocator.GetInstance<Simulation>().Clear();
         SceneManager.LoadScene(sceneIndex);
     }
 
@@ -131,6 +131,8 @@ public class World : MonoBehaviour
     {
         Debug.Log("World Awake");
         Instance = this;
+        ServiceLocator.Register<World, World>(this);
+        ServiceLocator.Init();
 
         LocalEconomy = new Economy(EconomyTemplate.Difficulty.Free);
         Constructions = new Construction[(int)width, (int)height];
@@ -223,7 +225,7 @@ public class World : MonoBehaviour
         Industries = new List<Industry>(Industry.Quantity(w, h));
 
         Cell.ResetCellSystem();
-        Simulation.Clear();
+        ServiceLocator.GetInstance<Simulation>().Clear();
 
         ItemLoading = "Chargement du terrain";
         Terrain(width, height);
@@ -271,7 +273,7 @@ public class World : MonoBehaviour
         foreach (var f in LoadData.AllFlux)
         {
             Debug.Log($"\tFlux : {f}");
-            Simulation.AddFlux(f);
+            ServiceLocator.GetInstance<Simulation>().AddFlux(f);
         }
 
         ProgressLoading++;
@@ -281,7 +283,7 @@ public class World : MonoBehaviour
 
         LocalEconomy = new Economy(EconomyTemplate.Difficulty.Normal);
         CompleteLoading();
-        yield return StartCoroutine(Simulation.Run());
+        yield return StartCoroutine(ServiceLocator.GetInstance<Simulation>().Run());
     }
 
     private void CompleteLoading()
@@ -351,7 +353,7 @@ public class World : MonoBehaviour
 
         LocalEconomy = new Economy(EconomyTemplate.Difficulty.Normal);
         CompleteLoading();
-        yield return StartCoroutine(Simulation.Run());
+        yield return StartCoroutine(ServiceLocator.GetInstance<Simulation>().Run());
     }
 
     private void Terrain(float width, float height)

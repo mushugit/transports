@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class WindowFluxContent : MonoBehaviour
@@ -20,7 +18,7 @@ public class WindowFluxContent : MonoBehaviour
 
         var cityTarget = World.Instance.Cities[target.value];
 
-        Simulation.AddFlux(sourceConstruction, cityTarget);
+        ServiceLocator.GetInstance<Simulation>().AddFlux(sourceConstruction, cityTarget);
     }
 
 }

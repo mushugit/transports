@@ -2,29 +2,33 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class Simulation
+public class Simulation
 {
-    public static readonly float TickFrequency = 0.02f;
-    public static bool Running;
+    public const float TickFrequency = 0.02f;
 
-    private static readonly List<Flux> _flux;
+    public bool Running;
 
-    static Simulation()
+    private readonly List<Flux> _flux;
+
+    private World _world;
+
+    public Simulation(World world)
     {
         _flux = new List<Flux>();
+        _world = world;
     }
 
-    public static IEnumerator Run()
+    public IEnumerator Run()
     {
         Running = true;
         while (Running)
         {
-            foreach (var c in World.Instance.Cities)
+            foreach (var c in _world.Cities)
             {
                 c.GenerateCargo();
             }
 
-            foreach (var i in World.Instance.Industries)
+            foreach (var i in _world.Industries)
             {
                 i.GenerateCargo();
             }
@@ -38,7 +42,7 @@ public static class Simulation
         }
     }
 
-    public static void AddFlux(IFluxSource source, IFluxTarget target, int quantity = 1)
+    public void AddFlux(IFluxSource source, IFluxTarget target, int quantity = 1)
     {
         int cost;
         if (!Economy.CheckCost(World.LocalEconomy, "flux_create", "ajouter un flux", out cost))
@@ -67,7 +71,7 @@ public static class Simulation
         }
     }
 
-    public static void AddFlux(Flux dummyFlux)
+    public void AddFlux(Flux dummyFlux)
     {
         int cost;
         if (!Economy.CheckCost(World.LocalEconomy, "flux_create", "ajouter un flux", out cost))
@@ -88,18 +92,18 @@ public static class Simulation
         _flux.Add(f);
     }
 
-    public static void RemoveFlux(Flux f)
+    public void RemoveFlux(Flux f)
     {
         _flux.Remove(f);
     }
 
-    public static void Clear()
+    public void Clear()
     {
         _flux.Clear();
         Running = false;
     }
 
-    public static void CityDestroyed(City c)
+    public void CityDestroyed(City c)
     {
         foreach (var flux in _flux)
         {
