@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 [JsonObject(MemberSerialization.OptIn)]
 public class Flux
@@ -40,7 +39,7 @@ public class Flux
     }
 
     public static List<Flux> AllFlux = new List<Flux>();
- 
+
     public Flux(IFluxSource source, IFluxTarget target, int truckQuantity)
     {
         Source = source;
@@ -84,7 +83,7 @@ public class Flux
         AvailableTrucks = dummy.AvailableTrucks;
         Trucks = new List<RoadVehicule>(AvailableTrucks);
         foreach (RoadVehicule truck in dummy.Trucks)
-            Trucks.Add(new RoadVehicule(truck,this));
+            Trucks.Add(new RoadVehicule(truck, this));
 
         currentDelay = FrameDelayBetweenTrucks;
 
@@ -105,13 +104,13 @@ public class Flux
 
     public void UpdateTruckPath()
     {
-        foreach (RoadVehicule truck in Trucks)
+        foreach (var truck in Trucks)
             truck.UpdatePath();
     }
 
     private Path<Cell> GetPath()
     {
-        var pf = new Pathfinder<Cell>(speed, 0, new List<Type>() { typeof(Road), typeof(City), typeof(Industry) });
+        var pf = new Pathfinder<Cell>(new List<Type>() { typeof(Road), typeof(City), typeof(Industry) }, speed);
         pf.FindPath(Target._Cell, Source._Cell);
         Path = pf.Path;
         return pf.Path;

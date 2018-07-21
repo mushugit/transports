@@ -13,9 +13,14 @@ public class QuestionMenu : MonoBehaviour {
 
     private static QuestionMenu instance;
 
-    private YesNoResponse callback;
+    private YesNoResponse _callback;
 
-    private void Start()
+    //private void Start()
+    //{
+    //    instance = this;
+    //}
+
+    public QuestionMenu()
     {
         instance = this;
     }
@@ -24,7 +29,7 @@ public class QuestionMenu : MonoBehaviour {
     {
         Title.text = $"- {title} -";
         Message.text = message;
-        this.callback = callback;
+        _callback = callback;
         QuestionMenuObject.SetActive(true);
     }
 
@@ -36,7 +41,7 @@ public class QuestionMenu : MonoBehaviour {
     private void Answer(bool response)
     {
         QuestionMenuObject.SetActive(false);
-        callback(response);
+        _callback(response);
     }
 
     public void Yes()

@@ -1,33 +1,31 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class BottomButtons : MonoBehaviour {
+public class BottomButtons : MonoBehaviour
+{
+    public Component fluxWindowPrefab;
 
-	public Component fluxWindowPrefab;
+    public void BuildCity()
+    {
+        Builder.City();
+    }
 
-	public void BuildCity()
-	{
-		Builder.City();
-	}
+    public void BuildRoad()
+    {
+        Builder.Road();
+    }
 
-	public void BuildRoad()
-	{
-		Builder.Road();
-	}
+    public void Bulldoze()
+    {
+        Builder.Bulldoze();
+    }
 
-	public void Bulldoze()
-	{
-		Builder.Bulldoze();
-	}
+    public void BuildDepot()
+    {
+        Builder.Depot();
+    }
 
-	public void BuildDepot()
-	{
-		Builder.Depot();
-	}
-
-	public void CreateFlux()
-	{
-		WindowFactory.BuildFluxSetup("Créer un flux de transport", new Vector3(Screen.width / 2, Screen.height / 2, 0));
-	}
+    public void CreateFlux()
+    {
+        WindowFactory.BuildFluxSetup("Créer un flux de transport", new Vector3(Screen.width / 2, Screen.height / 2, 0));
+    }
 }

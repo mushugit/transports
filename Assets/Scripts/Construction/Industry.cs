@@ -20,6 +20,11 @@ public class Industry : Construction, IEquatable<Industry>, IFluxSource, ICargoS
     public string Name { get; private set; }
     #endregion
 
+    public override string BuildOperation { get { return "build_industry"; } }
+    public override string DestroyOperation { get { return "destroy_industry"; } }
+    public override string BuildLabel { get { return "fonder une industrue"; } }
+    public override string DestroyLabel { get { return "détruire une industrie"; } }
+
     #region ILinkable Properties
     public List<ILinkable> Linked { get { return linkHandler.Linked; } }
     public List<ILinkable> Unreachable { get { return linkHandler.Unreachable; } }

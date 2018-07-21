@@ -12,6 +12,8 @@ public class WorldSave
 	public float Width;
 	[JsonProperty]
 	public float Height;
+    [JsonProperty]
+    public int Balance;
 
 	public List<Construction> Constructions = new List<Construction>();
 

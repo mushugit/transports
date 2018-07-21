@@ -29,7 +29,7 @@ public class PauseMenu : MonoBehaviour
 
     private void Update()
     {
-        if (World.gameLoading)
+        if (World.GameLoading)
             return;
 
 

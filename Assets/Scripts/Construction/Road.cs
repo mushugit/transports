@@ -7,6 +7,11 @@ using UnityEngine.EventSystems;
 [JsonObject(MemberSerialization.OptIn)]
 public class Road : Construction
 {
+    public override string BuildOperation { get { return "build_road"; } }
+    public override string DestroyOperation { get { return "destroy_road"; } }
+    public override string BuildLabel { get { return "construire une route"; } }
+    public override string DestroyLabel { get { return "détruire une route"; } }
+
     #region Constructor
     [JsonConstructor]
     public Road(Cell cell)
