@@ -123,7 +123,7 @@ public class Flux
         {
             currentDelay = 0;
             AvailableTrucks--;
-            var truck = new RoadVehicule(speed, GetPath(), Source, Target, this);
+            var truck = new RoadVehicule(speed, GetPath(), Source, Target, this, 2);
             Trucks.Add(truck);
             return true;
         }

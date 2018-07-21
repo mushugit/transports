@@ -11,6 +11,7 @@ public class VehiculeRender : MonoBehaviour
     private float factor = 30;
 
     public RoadVehicule vehicule;
+    public bool CanMove { get; private set; } = false;
 
     public static Component Build(Component vehiculePrefab, Vector3 startingPosition, RoadVehicule vehicule)
     {
@@ -30,7 +31,7 @@ public class VehiculeRender : MonoBehaviour
             if (position != 0)
                 transform.position = Vector3.MoveTowards(new Vector3(start.X, 0, start.Y), this.finish, position);
         }
-
+        CheckCanMove();
     }
 
     public void InitColor(Color truckColor, Color cargoColor)
@@ -41,10 +42,31 @@ public class VehiculeRender : MonoBehaviour
         cr.material.color = cargoColor;
     }
 
-    void FixedUpdate()
+    public void FixedUpdate()
     {
         //Debug.Log($"S={Speed} T={Time.fixedDeltaTime} M={Factor * Speed * Time.fixedDeltaTime}");
-        transform.position = Vector3.MoveTowards(transform.position, finish, factor * Speed * Time.fixedDeltaTime);
+        if (CanMove)
+            transform.position = Vector3.MoveTowards(transform.position, finish, factor * Speed * Time.fixedDeltaTime);
+        else
+            CheckCanMove();
+    }
+
+
+    private void CheckCanMove()
+    {
+        var parent = vehicule.ParentVehicule;
+        if (parent == null)
+        {
+            CanMove = true;
+        }
+        else
+        {
+            if (parent.NextVehiculeSteps > RoadVehicule.frameskipToNextVehicule && parent.VehiculeObjetRenderer.CanMove)
+            {
+                parent.NextLeaving();
+                CanMove = true;
+            }
+        }
     }
 
     private void OnValidate()

@@ -7,6 +7,8 @@ using UnityEngine;
 [JsonObject(MemberSerialization.OptIn)]
 public class RoadVehicule
 {
+    public static readonly int frameskipToNextVehicule = 50;
+
     [JsonProperty]
     public float Speed;
 
@@ -23,7 +25,7 @@ public class RoadVehicule
 
     private readonly Flux flux;
 
-    private readonly VehiculeRender vr;
+    public VehiculeRender VehiculeObjetRenderer { get; private set; }
     private readonly Component vrComponent;
 
     [JsonProperty]
@@ -39,10 +41,17 @@ public class RoadVehicule
     [JsonProperty]
     public double Ticks { get; private set; }
 
+    [JsonProperty]
+    public RoadVehicule NextVehicule { get; private set; }
+    public RoadVehicule ParentVehicule { get; private set; }
+
+    [JsonProperty]
+    public int NextVehiculeSteps { get; private set; } = 0;
+
     #region constructor
     [JsonConstructor]
     public RoadVehicule(float speed, IFluxSource source, IFluxTarget target, Cell currentCell, Cell targetCell,
-        bool hasArrived, float position, float distance, double ticks)
+        bool hasArrived, float position, float distance, double ticks, RoadVehicule nextVehicule, int nextVehiculeSteps)
     {
         this.Speed = speed;
         this.Source = source;
@@ -60,26 +69,29 @@ public class RoadVehicule
         if (prefab != null)
         {
             vrComponent = VehiculeRender.Build(prefab, new Vector3(source._Cell.X, 0, source._Cell.Y), this);
-            vr = vrComponent.GetComponent<VehiculeRender>();
-            vr.InitColor(source.Color, target.Color);
-            vr.Init(CurrentCell, TargetCell, Speed, Position / Distance);
+            VehiculeObjetRenderer = vrComponent.GetComponent<VehiculeRender>();
+            VehiculeObjetRenderer.InitColor(source.Color, target.Color);
+            VehiculeObjetRenderer.Init(CurrentCell, TargetCell, Speed, Position / Distance);
         }
 
         HasArrived = hasArrived;
         this.Ticks = ticks;
 
         UpdatePath();
+        NextVehicule = nextVehicule;
+        NextVehiculeSteps = nextVehiculeSteps;
     }
 
     public RoadVehicule(RoadVehicule dummy, Flux flux)
         : this(dummy.Speed, dummy.Source, dummy.Target, dummy.CurrentCell, dummy.TargetCell,
-             dummy.HasArrived, dummy.Position, dummy.Distance, dummy.Ticks)
+             dummy.HasArrived, dummy.Position, dummy.Distance, dummy.Ticks, dummy.NextVehicule, dummy.NextVehiculeSteps)
     {
         //Debug.Log($"Loaded truck at {dummy.CurrentCell}");
         this.flux = flux;
     }
 
-    public RoadVehicule(float speed, Path<Cell> initialPath, IFluxSource source, IFluxTarget target, Flux flux)
+    public RoadVehicule(float speed, Path<Cell> initialPath, IFluxSource source, IFluxTarget target, Flux flux,
+        int followingTrucks, RoadVehicule parent = null)
     {
         this.Speed = speed;
         //Debug.Log($"Truck speed = {this.speed}");
@@ -94,8 +106,8 @@ public class RoadVehicule
         if (prefab != null)
         {
             vrComponent = VehiculeRender.Build(prefab, new Vector3(source._Cell.X, 0, source._Cell.Y), this);
-            vr = vrComponent.GetComponent<VehiculeRender>();
-            vr.InitColor(source.Color, target.Color);
+            VehiculeObjetRenderer = vrComponent.GetComponent<VehiculeRender>();
+            VehiculeObjetRenderer.InitColor(source.Color, target.Color);
         }
 
         Position = 0;
@@ -107,10 +119,18 @@ public class RoadVehicule
 
         HasArrived = false;
         MoveCell();
+
+        NextVehiculeSteps = 0;
+        ParentVehicule = parent;
+
+        if (followingTrucks > 0)
+        {
+            NextVehicule = new RoadVehicule(speed, initialPath, source, target, flux, followingTrucks - 1, this);
+        }
     }
     #endregion
 
-    public void MoveCell()
+    private void MoveCell()
     {
         if (path != null)
         {
@@ -128,7 +148,7 @@ public class RoadVehicule
 
                 Distance = (float)CurrentCell.FlyDistance(TargetCell);
 
-                vr.Init(CurrentCell, TargetCell, Speed);
+                VehiculeObjetRenderer.Init(CurrentCell, TargetCell, Speed);
                 //Debug.Log($"Truck has to move from {currentCell} to {targetCell} (d={distance})");
             }
             else
@@ -154,6 +174,7 @@ public class RoadVehicule
     {
         if (HasArrived)
         {
+            NextVehicule?.CheckArrived();
             GameObject.Destroy(vrComponent.gameObject);
         }
     }
@@ -161,6 +182,13 @@ public class RoadVehicule
     public void Tick()
     {
         Ticks++;
+        NextVehiculeSteps++;
+        NextVehicule?.Tick();
+    }
+
+    public void NextLeaving()
+    {
+        NextVehiculeSteps = 0;
     }
 
     public void Move()
@@ -168,6 +196,7 @@ public class RoadVehicule
         if (path != null)
         {
             Position += Speed;
+            NextVehicule?.Move();
             //Debug.Log($"Truck tracer {position} for distance {distance} (s={speed})");
             if (Position >= Distance)
                 MoveCell();
@@ -195,8 +224,15 @@ public class RoadVehicule
             //Debug.Log($"No path found from {targetCell} to {target._Cell}");
             pathPosition = null;
         }
+        NextVehicule?.UpdatePath();
+    }
 
-
+    public int ConvoySize()
+    {
+        if (NextVehicule != null)
+            return 1 + NextVehicule.ConvoySize();
+        else
+            return 1;
     }
 }
 
