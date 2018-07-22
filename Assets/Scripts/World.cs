@@ -65,8 +65,7 @@ public class World : MonoBehaviour
 
     public static void ReloadLevel(int sceneIndex)
     {
-        Instance = null;
-        ServiceLocator.GetInstance<Simulation>().Clear();
+        ClearInstance();
         SceneManager.LoadScene(sceneIndex);
     }
 
@@ -74,6 +73,9 @@ public class World : MonoBehaviour
     {
         Instance?.Cities.Clear();
         Instance?.Industries.Clear();
+
+        if (Instance != null)
+            ServiceLocator.GetInstance<Simulation>()?.Clear();
 
         Flux.AllFlux.Clear();
         Instance = null;
@@ -127,7 +129,7 @@ public class World : MonoBehaviour
         TotalLoading = 1 + forcedLoadCount;
     }
 
-    private void Awake()
+    public void Awake()
     {
         Debug.Log("World Awake");
         Instance = this;
@@ -181,8 +183,10 @@ public class World : MonoBehaviour
         }
     }
 
-    private void Start()
+    public void Start()
     {
+        Instance = this;
+        ServiceLocator.Init();
         Application.targetFrameRate = 60;
 
         if (LoadData == null)
