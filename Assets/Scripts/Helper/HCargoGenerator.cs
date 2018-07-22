@@ -93,6 +93,11 @@ public class HCargoGenerator : ICargoProvider, ICargoGenerator
             return false;
     }
 
+    public int PeekCargo()
+    {
+        return Cargo;
+    }
+
     public void UpdateAllOutgoingFlux()
     {
         foreach (var flux in OutgoingFlux)
