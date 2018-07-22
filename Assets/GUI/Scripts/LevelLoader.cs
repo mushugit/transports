@@ -6,9 +6,9 @@ using UnityEngine.UI;
 public class LevelLoader : MonoBehaviour
 {
     public GameObject LoadCanvas;
-    public Slider progressBar;
-    public Text progressIndicator;
-    public Text detailLabel;
+    public Slider ProgressBar;
+    public Text ProgressIndicator;
+    public Text DetailLabel;
     public GameObject oldCamera;
     public GameObject oldLight;
 
@@ -21,28 +21,28 @@ public class LevelLoader : MonoBehaviour
     IEnumerator UpdateLoading()
     {
         var loadingOperation = SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex + 1, LoadSceneMode.Additive);
-        detailLabel.text = "Pré chargement du niveau";
+        DetailLabel.text = "Pré chargement du niveau";
 
 
-		while (!loadingOperation.isDone && World.gameLoading)
+        while (!loadingOperation.isDone && World.GameLoading)
         {
             var progress = loadingOperation.progress;
             progress = Mathf.Clamp01(loadingOperation.progress / 0.9f) / 2f;
-            progressBar.value = progress;
-            progressIndicator.text = string.Format("{0} %", Mathf.Round(progress * 100));
+            ProgressBar.value = progress;
+            ProgressIndicator.text = string.Format("{0} %", Mathf.Round(progress * 100));
             yield return null;
         }
 
-		DestroyImmediate(oldCamera);
-		DestroyImmediate(oldLight);
+        DestroyImmediate(oldCamera);
+        DestroyImmediate(oldLight);
 
-		while (World.gameLoading)
+        while (World.GameLoading)
         {
             var progress = 0.5f;
-            detailLabel.text = World.itemLoading;
-            progress += (World.progressLoading / World.totalLoading)/2f;
-            progressBar.value = progress;
-            progressIndicator.text = string.Format("{0} %", Mathf.Floor(progress * 100));
+            DetailLabel.text = World.ItemLoading;
+            progress += (World.ProgressLoading / World.TotalLoading) / 2f;
+            ProgressBar.value = progress;
+            ProgressIndicator.text = string.Format("{0} %", Mathf.Floor(progress * 100));
             yield return null;
         }
 

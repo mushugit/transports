@@ -1,28 +1,28 @@
 ﻿using TMPro;
 using UnityEngine;
 
-public class SaveGameItem : MonoBehaviour {
+public class SaveGameItem : MonoBehaviour
+{
 
-	public TextMeshProUGUI textItem;
+    public TextMeshProUGUI textItem;
 
-	private string fullName;
+    private string fullName;
 
-	public void Text(string displayName, string fullName)
-	{
-		textItem.text = displayName;
-		this.fullName = fullName;
-	}
+    public void Text(string displayName, string fullName)
+    {
+        textItem.text = displayName;
+        this.fullName = fullName;
+    }
 
-	public void Load()
-	{
-		string errorMessage;
-		if (!SaveHandler.Load(fullName, out errorMessage))
-		{
-			var loadMenu = GetComponentInParent<LoadMenu>();
-			loadMenu.Back();
-			var pauseMenu = GetComponentInParent<PauseMenu>();
-			pauseMenu.Resume();
-			Message.ShowError("Erreur de chargement de la sauvegarde", errorMessage);
-		}
-	}
+    public void Load()
+    {
+        string errorMessage;
+        var loadMenu = GetComponentInParent<LoadMenu>();
+        var pauseMenu = GetComponentInParent<PauseMenu>();
+        if (!SaveHandler.Load(fullName, out errorMessage))
+        {
+            PauseMenu.Display($"Erreur de chargement de la sauvegarde {errorMessage}", true);
+        }
+        loadMenu.Back();
+    }
 }

@@ -1,92 +1,126 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Simulation
 {
-	public static readonly float TickFrequency = 0.02f;
+    public const float TickFrequency = 0.02f;
 
-	private static List<Flux> flux;
+    public bool Running;
 
-	static Simulation()
-	{
-		flux = new List<Flux>();
-	}
+    private readonly List<Flux> _flux;
 
-	public static IEnumerator Run()
-	{
-		while (true)
-		{
-			foreach (City c in World.Instance.Cities)
-			{
-				c.GenerateCargo();
-			}
-			foreach(Flux f in flux)
-			{
-				f.Move();
-			}
-			yield return new WaitForSeconds(TickFrequency);
-		}
-	}
+    private World _world;
 
-	public static void AddFlux(City source, City target)
-	{
-		int cost;
-		if (!World.CheckCost("flux_create", "ajouter un flux", out cost))
-			return;
+    public Simulation(World world)
+    {
+        _flux = new List<Flux>();
+        _world = world;
+    }
 
-		var f = new Flux(source, target);
+    public IEnumerator Run()
+    {
+        Running = true;
+        while (Running)
+        {
+            foreach (var c in _world.Cities)
+            {
+                c.GenerateCargo();
+            }
 
-		if(f.Distance <= 0)
-		{
-			Message.ShowError("Flux impossible",
-				$"Impossible de trouver un flux de {source} vers {target} par la route.");
-			World.LocalEconomy.Credit(cost);
-			return;
-		}
+            foreach (var i in _world.Industries)
+            {
+                i.GenerateCargo();
+            }
 
-		flux.Add(f);
-	}
+            foreach (var f in _flux)
+            {
+                f.Move();
+            }
 
-	public static void AddFlux(Flux dummyFlux)
-	{
-		int cost;
-		if (!World.CheckCost("flux_create", "ajouter un flux", out cost))
-			return;
+            yield return new WaitForSeconds(TickFrequency);
+        }
+    }
 
-		var f = new Flux(dummyFlux);
+    public void AddFlux(IFluxSource source, IFluxTarget target, RoadVehiculeCharacteristics type, int quantity = 1)
+    {
+        int cost;
+        if (!Economy.CheckCost(World.LocalEconomy, "flux_create", "ajouter un flux", out cost))
+        {
+            return;
+        }
 
-		if (f.Distance <= 0)
-		{
-			Message.ShowError("Flux impossible",
-				$"Impossible de trouver un flux de {f.Source} vers {f.Target} par la route.");
-			World.LocalEconomy.Credit(cost);
-			return;
-		}
+        if (source.OutgoingFlux.ContainsKey(target))
+        {
+            var f = source.OutgoingFlux[target];
+            f.AddTrucks(quantity, type);
+        }
+        else
+        {
+            var f = new Flux(source, target, quantity, type);
 
-		flux.Add(f);
-	}
+            if (f.Path == null)
+            {
+                Message.ShowError("Flux impossible",
+                    $"Impossible de trouver un flux de {source} vers {target} par la route.");
+                World.LocalEconomy.Credit(cost);
+                return;
+            }
 
-	public static void RemoveFlux(Flux f)
-	{
-		flux.Remove(f);
-	}
+            _flux.Add(f);
+        }
+    }
 
-	public static void CityDestroyed(City c)
-	{
-		foreach(Flux f in flux)
-		{
-			if(f.Source == c || f.Target == c)
-			{
-				RemoveFlux(f);
-				Flux.RemoveFlux(f);
-				if (f.Source == c)
-					f.Target.RemoveFlux(f);
-				else
-					f.Source.RemoveFlux(f);
-			}
-		}
-	}
+    public void AddFlux(Flux dummyFlux)
+    {
+        int cost;
+        if (!Economy.CheckCost(World.LocalEconomy, "flux_create", "ajouter un flux", out cost))
+        {
+            return;
+        }
+
+        var f = new Flux(dummyFlux);
+
+        if (f.Path == null)
+        {
+            Message.ShowError("Flux impossible",
+                $"Impossible de trouver un flux de {f.Source} vers {f.Target} par la route.");
+            World.LocalEconomy.Credit(cost);
+            return;
+        }
+
+        _flux.Add(f);
+    }
+
+    public void RemoveFlux(Flux f)
+    {
+        _flux.Remove(f);
+    }
+
+    public void Clear()
+    {
+        _flux.Clear();
+        Running = false;
+    }
+
+    public void CityDestroyed(City c)
+    {
+        foreach (var flux in _flux)
+        {
+            if (flux.Source == c || flux.Target == c)
+            {
+                RemoveFlux(flux);
+                Flux.RemoveFlux(flux);
+                if (flux.Source == c)
+                {
+                    flux.Target.RemoveFlux(flux);
+                }
+                else
+                {
+                    flux.Source.RemoveFlux(flux);
+                }
+            }
+        }
+    }
 }
 

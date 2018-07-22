@@ -77,7 +77,10 @@ public class EconomyTemplate
 			{ "build_city",							(int)Math.Round(20000 * mCost) },
 			{ "destroy_city",                       (int)Math.Round(10000 * mCost) },
 
-			{ "build_road",                         (int)Math.Round(50 * mCost) },
+            { "build_industry",                         (int)Math.Round(2000 * mCost) },
+            { "destroy_industry",                       (int)Math.Round(1000 * mCost) },
+
+            { "build_road",                         (int)Math.Round(50 * mCost) },
 			{ "destroy_road",                       (int)Math.Round(25 * mCost) },
 
 			{ "build_depot",                        (int)Math.Round(250 * mCost) },

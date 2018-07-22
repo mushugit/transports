@@ -1,6 +1,6 @@
-﻿public interface IHasRelativeDistance<N>
+﻿public interface IHasRelativeDistance
 {
-	int ManhattanDistance(N node);
-	double FlyDistance(N node);
+	int ManhattanDistance(IHasCell node);
+	double FlyDistance(IHasCell node);
 }
 
