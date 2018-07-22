@@ -1,9 +1,9 @@
-﻿using UnityEngine;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Newtonsoft.Json;
-using System;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 [JsonObject(MemberSerialization.OptIn)]
@@ -283,6 +283,11 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
     public bool ProvideCargo(int quantity)
     {
         return cargoGenerator.ProvideCargo(quantity);
+    }
+
+    public int PeekCargo()
+    {
+        return cargoGenerator.PeekCargo();
     }
 
     public void UpdateAllOutgoingFlux()

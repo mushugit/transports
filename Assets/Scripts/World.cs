@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -204,7 +203,12 @@ public class World : MonoBehaviour
 
     IEnumerator LoadMap()
     {
-        UnityEngine.Debug.Log("Loading");
+        Debug.Log("Loading");
+        if (loadData.Balance.HasValue)
+        {
+            LocalEconomy = new Economy(EconomyTemplate.Difficulty.Free, loadData.Balance.Value);
+        }
+
         var w = (int)width;
         var h = (int)height;
         Constructions = new Construction[w, h];
@@ -262,7 +266,14 @@ public class World : MonoBehaviour
         itemLoading = "Chargement terminé";
         gameLoading = false;
 
-        LocalEconomy = new Economy(EconomyTemplate.Difficulty.Normal);
+        if (loadData.DifficultyLevel.HasValue)
+        {
+            LocalEconomy.ChangeDifficulty(loadData.DifficultyLevel.Value);
+        }
+        else
+        {
+            LocalEconomy.ChangeDifficulty(EconomyTemplate.Difficulty.Normal);
+        }
         CompleteLoading();
         yield return StartCoroutine(Simulation.Run());
     }
@@ -331,7 +342,7 @@ public class World : MonoBehaviour
         itemLoading = "Chargement terminé";
         gameLoading = false;
 
-        LocalEconomy = new Economy(EconomyTemplate.Difficulty.Normal);
+        LocalEconomy.ChangeDifficulty(EconomyTemplate.Difficulty.Normal);
         CompleteLoading();
         yield return StartCoroutine(Simulation.Run());
     }

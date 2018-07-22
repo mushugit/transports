@@ -1,9 +1,7 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 [JsonObject(MemberSerialization.OptIn)]
@@ -73,6 +71,8 @@ public class Industry : Construction, IEquatable<Industry>, IFluxSource, ICargoS
         colorHandler = new HColor(this);
         Name = dummy.Name;
         SetColor(dummy.Color);
+
+        UpdateLabel();
     }
 
     [JsonConstructor]
@@ -94,6 +94,11 @@ public class Industry : Construction, IEquatable<Industry>, IFluxSource, ICargoS
     public bool ProvideCargo(int quantity)
     {
         return cargoGenerator.ProvideCargo(quantity);
+    }
+
+    public int PeekCargo()
+    {
+        return cargoGenerator.PeekCargo();
     }
 
     public void ReferenceFlux(Flux flux)

@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class WindowFluxContent : MonoBehaviour
@@ -8,19 +6,48 @@ public class WindowFluxContent : MonoBehaviour
 
     public Dropdown source;
     public Dropdown target;
+    public Text quantity;
+    public Dropdown type;
 
     public void AddFlux()
     {
-        IFluxSource sourceConstruction;
+        Simulation.AddFlux(GetSource(), GetTarget(), GetCharacteristics(), GetQuantity());
+    }
+
+    private IFluxSource GetSource()
+    {
         var cityCount = World.Instance.Cities.Count;
         if (source.value < cityCount)
-            sourceConstruction = World.Instance.Cities[source.value];
+            return World.Instance.Cities[source.value];
         else
-            sourceConstruction = World.Instance.Industries[source.value - cityCount];
+            return World.Instance.Industries[source.value - cityCount];
+    }
 
-        var cityTarget = World.Instance.Cities[target.value];
+    private IFluxTarget GetTarget()
+    {
+        return World.Instance.Cities[target.value];
+    }
 
-        Simulation.AddFlux(sourceConstruction, cityTarget);
+    private int GetQuantity()
+    {
+        var intQuantity = 1;
+        if (int.TryParse(quantity.text, out intQuantity))
+            return intQuantity;
+        else
+            return 1;
+    }
+
+    private RoadVehiculeCharacteristics GetCharacteristics()
+    {
+        switch (type.value)
+        {
+            case 0:
+                return new RoadVehiculeCharacteristics(1, Flux.DefaultSpeed);
+            case 1:
+                return new RoadVehiculeCharacteristics(2, Flux.DefaultSpeed / 1.75f);
+            default:
+                return new RoadVehiculeCharacteristics(1, Flux.DefaultSpeed);
+        }
     }
 
 }

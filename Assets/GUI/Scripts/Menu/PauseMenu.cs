@@ -22,7 +22,7 @@ public class PauseMenu : MonoBehaviour
 
     private void Start()
     {
-        timeScale = Time.timeScale;
+        timeScale = 1;
         Resume();
         instance = this;
     }
@@ -124,8 +124,8 @@ public class PauseMenu : MonoBehaviour
         if (!isSaved)
         {
             PauseMenuObject.SetActive(false);
-            QuestionMenu.YesNoQuestion("Quitter", 
-                "Votre partie n'est pas sauveardée.\nVoulez-vous vraiment retourner à l'accueil sans sauvegarder ? (votre partie sera perdue)", 
+            QuestionMenu.YesNoQuestion("Quitter",
+                "Votre partie n'est pas sauveardée.\nVoulez-vous vraiment retourner à l'accueil sans sauvegarder ? (votre partie sera perdue)",
                 InternalReturnStart);
         }
         else
@@ -147,8 +147,8 @@ public class PauseMenu : MonoBehaviour
         if (!isSaved)
         {
             PauseMenuObject.SetActive(false);
-            QuestionMenu.YesNoQuestion("Quitter", 
-                "Votre partie n'est pas sauveardée.\nVoulez-vous vraiment quitter sans sauvegarder ? (votre partie sera perdue)", 
+            QuestionMenu.YesNoQuestion("Quitter",
+                "Votre partie n'est pas sauveardée.\nVoulez-vous vraiment quitter sans sauvegarder ? (votre partie sera perdue)",
                 InternalQuit);
         }
         else

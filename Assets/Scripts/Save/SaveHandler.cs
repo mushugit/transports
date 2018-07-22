@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEngine;
@@ -58,7 +57,7 @@ public class SaveHandler
             {
                 File.Delete(fullFilePath);
             }
-            catch(Exception)
+            catch (Exception)
             {
                 sb.Append($"\nFichier corrompu toujours présent !\n");
             }

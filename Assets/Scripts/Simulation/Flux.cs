@@ -1,12 +1,11 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 [JsonObject(MemberSerialization.OptIn)]
 public class Flux
 {
-    public static float FrameDelayBetweenTrucks = 50;
+    public const float FrameDelayBetweenTrucks = 50;
 
     [JsonProperty]
     public IFluxSource Source { get; private set; }
@@ -18,18 +17,19 @@ public class Flux
     public bool IsWaitingForDelivery { get; set; } = false;
     public bool IsWaitingForPath { get; set; } = false;
 
-    private static readonly float defaultSpeed = 0.1f;
+    public const float DefaultSpeed = 0.1f;
 
-    private readonly float speed;
+    private readonly float _speed;
 
     [JsonProperty]
-    public int AvailableTrucks { get; private set; }
+    public Queue<RoadVehiculeCharacteristics> AvailableTrucks { get; private set; }
     [JsonProperty]
     public int TotalCargoMoved { get; private set; }
     [JsonProperty]
     public List<RoadVehicule> Trucks { get; private set; }
+
     [JsonProperty]
-    private float currentDelay;
+    public float CurrentDelay { get; private set; }
 
     public Path<Cell> Path { get; private set; }
 
@@ -40,17 +40,18 @@ public class Flux
     }
 
     public static List<Flux> AllFlux = new List<Flux>();
- 
-    public Flux(IFluxSource source, IFluxTarget target, int truckQuantity)
+
+    public Flux(IFluxSource source, IFluxTarget target, int truckQuantity, RoadVehiculeCharacteristics type)
     {
         Source = source;
         Target = target;
-        speed = defaultSpeed;
+        _speed = DefaultSpeed;
         TotalCargoMoved = 0;
-        AvailableTrucks = truckQuantity;
+        AvailableTrucks = new Queue<RoadVehiculeCharacteristics>(truckQuantity);
         Trucks = new List<RoadVehicule>(truckQuantity);
-        currentDelay = FrameDelayBetweenTrucks;
+        CurrentDelay = FrameDelayBetweenTrucks;
 
+        AddTrucks(truckQuantity, type);
         GetPath();
 
         if (Path != null)
@@ -62,15 +63,16 @@ public class Flux
     }
 
     [JsonConstructor]
-    public Flux(IFluxSource source, IFluxTarget target, int availableTrucks, int totalCargoMoved, List<RoadVehicule> trucks, float currentDelay)
+    public Flux(IFluxSource source, IFluxTarget target, int totalCargoMoved, float currentDelay,
+        Queue<RoadVehiculeCharacteristics> availableTrucks, List<RoadVehicule> trucks)
     {
         Source = source;
         Target = target;
-        speed = defaultSpeed;
+        _speed = DefaultSpeed;
         TotalCargoMoved = totalCargoMoved;
         AvailableTrucks = availableTrucks;
-        this.Trucks = trucks;
-        this.currentDelay = currentDelay;
+        Trucks = trucks;
+        CurrentDelay = currentDelay;
     }
 
     public Flux(Flux dummy)
@@ -79,14 +81,16 @@ public class Flux
         var trueTarget = World.Instance.Constructions[dummy.Target._Cell.X, dummy.Target._Cell.Y] as IFluxTarget;
         Source = trueSource;
         Target = trueTarget;
-        speed = defaultSpeed;
+        _speed = DefaultSpeed;
         TotalCargoMoved = dummy.TotalCargoMoved;
-        AvailableTrucks = dummy.AvailableTrucks;
-        Trucks = new List<RoadVehicule>(AvailableTrucks);
-        foreach (RoadVehicule truck in dummy.Trucks)
-            Trucks.Add(new RoadVehicule(truck,this));
 
-        currentDelay = FrameDelayBetweenTrucks;
+        AvailableTrucks = dummy.AvailableTrucks;
+        Trucks = new List<RoadVehicule>(dummy.Trucks.Capacity);
+
+        CurrentDelay = FrameDelayBetweenTrucks;
+
+        foreach (RoadVehicule truck in dummy.Trucks)
+            Trucks.Add(new RoadVehicule(truck, this));
 
         GetPath();
         if (Path != null)
@@ -96,13 +100,16 @@ public class Flux
             Target.ReferenceFlux(this);
             AllFlux.Add(this);
         }
-    }
+        else
+        {
+            IsWaitingForPath = true;
+        }
 
-    public void AddTrucks(int quantity)
-    {
-        AvailableTrucks += quantity;
+        if (AvailableTrucks.Count > 0 && AvailableTrucks.Peek().Capacity > Source.PeekCargo())
+        {
+            IsWaitingForInput = true;
+        }
     }
-
     public void UpdateTruckPath()
     {
         foreach (RoadVehicule truck in Trucks)
@@ -111,19 +118,18 @@ public class Flux
 
     private Path<Cell> GetPath()
     {
-        var pf = new Pathfinder<Cell>(speed, 0, new List<Type>() { typeof(Road), typeof(City), typeof(Industry) });
+        var pf = new Pathfinder<Cell>(_speed, 0, new List<Type>() { typeof(Road), typeof(City), typeof(Industry) });
         pf.FindPath(Target._Cell, Source._Cell);
         Path = pf.Path;
         return pf.Path;
     }
 
-    private bool Consume()
+    private bool Consume(int quantity)
     {
-        if (Source.ProvideCargo(1))
+        if (Source.ProvideCargo(quantity))
         {
-            currentDelay = 0;
-            AvailableTrucks--;
-            var truck = new RoadVehicule(speed, GetPath(), Source, Target, this, 2);
+            var characteristics = AvailableTrucks.Dequeue();
+            var truck = new RoadVehicule(characteristics, GetPath(), Source, Target, this);
             Trucks.Add(truck);
             return true;
         }
@@ -133,26 +139,35 @@ public class Flux
         }
     }
 
-    public bool Distribute(double ticks, double actualDistance, RoadVehicule truck)
+    public bool Distribute(double ticks, double actualDistance, RoadVehicule truck, int quantity)
     {
         var delivered = true;
         if (delivered)
         {
             truck.HasArrived = true;
-            AvailableTrucks++;
+            AvailableTrucks.Enqueue(truck.Characteristics);
+
             var walkingDistance = Source.ManhattanDistance(Target) * Pathfinder<Cell>.WalkingSpeed;
             var obtainedGain = World.LocalEconomy.GetGain("flux_deliver_percell");
-            var gain = (int)Math.Round((walkingDistance - actualDistance) * obtainedGain);
+            var gain = ((int)Math.Round((walkingDistance - actualDistance) * obtainedGain)) * quantity;
             World.LocalEconomy.Credit(gain);
             TotalCargoMoved++;
         }
         return delivered;
     }
 
+    public void AddTrucks(int quantity, RoadVehiculeCharacteristics type)
+    {
+        for (int i = 0; i < quantity; i++)
+        {
+            AvailableTrucks.Enqueue(type);
+        }
+    }
+
     public void Move()
     {
         int cost;
-        currentDelay++;
+        CurrentDelay++;
         World.LocalEconomy.ForcedCost("flux_running", out cost);
         IsWaitingForInput = false;
         IsWaitingForDelivery = false;
@@ -167,14 +182,16 @@ public class Flux
 
         Trucks.RemoveAll(r => r.HasArrived);
 
-        if (AvailableTrucks > 0 && currentDelay >= FrameDelayBetweenTrucks)
+        //Debug.Log($"Check consume : a={AvailableTrucks.Count} d={CurrentDelay} n={((AvailableTrucks.Count > 0) ? AvailableTrucks.Peek().Capacity : 0)} c={Source.PeekCargo()}");
+        if (AvailableTrucks.Count > 0 && CurrentDelay >= FrameDelayBetweenTrucks)
         {
-            if (!Consume())
+            if (!Consume(AvailableTrucks.Peek().Capacity))
             {
                 IsWaitingForInput = true;
             }
             else
             {
+                CurrentDelay = 0;
             }
         }
 
