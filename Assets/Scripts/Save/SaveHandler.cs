@@ -103,8 +103,8 @@ public class SaveHandler
 
         if (CheckVersionCompatibility(saveData.Version))
         {
-            World.loadData = saveData;
-            World.ReloadLevel(World.worldLoadSceneIndex);
+            World.LoadData = saveData;
+            World.ReloadLevel(World.WorldLoadSceneIndex);
             errorMessage = "";
             return true;
         }

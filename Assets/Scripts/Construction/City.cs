@@ -20,6 +20,11 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
     HLinkHandler linkHandler;
     HColor colorHandler;
 
+    public override string BuildOperation { get { return "build_city"; } }
+    public override string DestroyOperation { get { return "destroy_city"; } }
+    public override string BuildLabel { get { return "fonder une ville"; } }
+    public override string DestroyLabel { get { return "détruire une ville"; } }
+
     #region ICargoProvider Properties
     [JsonProperty]
     public float CargoChance { get { return cargoGenerator.CargoChance; } }
@@ -84,55 +89,42 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
     static City()
     {
         var allCityNames = Resources.Load("Text/CityNames/françaises") as TextAsset;
-        cityNames = allCityNames.text.Split('\n').ToList();
+        cityNames = allCityNames.text.Split(new []{ Environment.NewLine, "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+
+        SanitizeNames();
+    }
+
+    private static void SanitizeNames()
+    {
+        //TODO nettoyer les noms
     }
 
     #region Initializer
-    private void InitCity(Cell position, string name, Color color)
+    private void InitCity(Cell position, string name, Color? color = null)
     {
         _Cell = position;
         Name = name;
         UpdateLabel();
 
-        SetColor(color);
+        if (color.HasValue)
+            SetColor(color.Value);
 
         IncomingFlux = new Dictionary<ICargoProvider, Flux>();
     }
 
-    private void InitCity(Cell position, string name)
+    private void SetupCity(Cell position, string name, Color? color = null,
+        float? cargoChance = null, float? cargoProduction = null, float? exactCargo = null)
     {
-        _Cell = position;
-        Name = name;
-        UpdateLabel();
+        if (!cargoChance.HasValue || !cargoProduction.HasValue || !exactCargo.HasValue)
+            cargoGenerator = new HCargoGenerator(UpdateInformations, this, HCargoGenerator.CargoLevel.LowCargo);
+        else
+            cargoGenerator = new HCargoGenerator(UpdateInformations, this, cargoChance.Value, cargoProduction.Value, exactCargo.Value);
 
-        IncomingFlux = new Dictionary<ICargoProvider, Flux>();
-    }
-
-    private void SetupCity(Cell position, string name)
-    {
-        cargoGenerator = new HCargoGenerator(UpdateInformations, this, HCargoGenerator.CargoLevel.LowCargo);
-        linkHandler = new HLinkHandler(this._Cell, UpdateInformations);
-        colorHandler = new HColor(this);
-
-        InitCity(position, name);
-
-    }
-    private void SetupCity(Cell position, string name, Color color)
-    {
-        cargoGenerator = new HCargoGenerator(UpdateInformations, this, HCargoGenerator.CargoLevel.LowCargo);
         linkHandler = new HLinkHandler(this._Cell, UpdateInformations);
         colorHandler = new HColor(this);
 
         InitCity(position, name, color);
-    }
 
-    private void SetupCity(Cell position, string name, float cargoChance, float cargoProduction, float exactCargo, Color color)
-    {
-        cargoGenerator = new HCargoGenerator(UpdateInformations, this, cargoChance, cargoProduction, exactCargo);
-        linkHandler = new HLinkHandler(this._Cell, UpdateInformations);
-        colorHandler = new HColor(this);
-
-        InitCity(position, name, color);
     }
     #endregion
 
@@ -141,7 +133,7 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
         : base(dummyCity._Cell, World.Instance?.CityPrefab, World.Instance?.CityContainer)
     {
         IsOriginal = false;
-        SetupCity(dummyCity._Cell, dummyCity.Name, dummyCity.CargoChance, dummyCity.CargoProduction, dummyCity.ExactCargo, dummyCity.Color);
+        SetupCity(dummyCity._Cell, dummyCity.Name, dummyCity.Color, dummyCity.CargoChance, dummyCity.CargoProduction, dummyCity.ExactCargo);
     }
 
     public City(Cell cell)
@@ -157,7 +149,7 @@ public class City : Construction, IEquatable<City>, IFluxSource, IFluxTarget, IC
     {
         IsOriginal = false;
         var c = new Color(colorR, colorG, colorB, colorA);
-        SetupCity(_cell, name, cargoChance, cargoProduction, exactCargo, c);
+        SetupCity(_cell, name, c, cargoChance, cargoProduction, exactCargo);
     }
     #endregion
 

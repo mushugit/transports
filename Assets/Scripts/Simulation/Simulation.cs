@@ -4,41 +4,51 @@ using UnityEngine;
 
 public class Simulation
 {
-    public static readonly float TickFrequency = 0.02f;
-    public static bool Running = false;
-    private static List<Flux> flux;
+    public const float TickFrequency = 0.02f;
 
-    static Simulation()
+    public bool Running;
+
+    private readonly List<Flux> _flux;
+
+    private World _world;
+
+    public Simulation(World world)
     {
-        flux = new List<Flux>();
+        _flux = new List<Flux>();
+        _world = world;
     }
 
-    public static IEnumerator Run()
+    public IEnumerator Run()
     {
         Running = true;
         while (Running)
         {
-            foreach (City c in World.Instance.Cities)
+            foreach (var c in _world.Cities)
             {
                 c.GenerateCargo();
             }
-            foreach (Industry i in World.Instance.Industries)
+
+            foreach (var i in _world.Industries)
             {
                 i.GenerateCargo();
             }
-            foreach (Flux f in flux)
+
+            foreach (var f in _flux)
             {
                 f.Move();
             }
+
             yield return new WaitForSeconds(TickFrequency);
         }
     }
 
-    public static void AddFlux(IFluxSource source, IFluxTarget target, RoadVehiculeCharacteristics type, int quantity = 1)
+    public void AddFlux(IFluxSource source, IFluxTarget target, RoadVehiculeCharacteristics type, int quantity = 1)
     {
         int cost;
         if (!Economy.CheckCost(World.LocalEconomy, "flux_create", "ajouter un flux", out cost))
+        {
             return;
+        }
 
         if (source.OutgoingFlux.ContainsKey(target))
         {
@@ -57,15 +67,17 @@ public class Simulation
                 return;
             }
 
-            flux.Add(f);
+            _flux.Add(f);
         }
     }
 
-    public static void AddFlux(Flux dummyFlux)
+    public void AddFlux(Flux dummyFlux)
     {
         int cost;
         if (!Economy.CheckCost(World.LocalEconomy, "flux_create", "ajouter un flux", out cost))
+        {
             return;
+        }
 
         var f = new Flux(dummyFlux);
 
@@ -77,32 +89,36 @@ public class Simulation
             return;
         }
 
-        flux.Add(f);
+        _flux.Add(f);
     }
 
-    public static void RemoveFlux(Flux f)
+    public void RemoveFlux(Flux f)
     {
-        flux.Remove(f);
+        _flux.Remove(f);
     }
 
-    public static void Clear()
+    public void Clear()
     {
-        flux.Clear();
+        _flux.Clear();
         Running = false;
     }
 
-    public static void CityDestroyed(City c)
+    public void CityDestroyed(City c)
     {
-        foreach (Flux f in flux)
+        foreach (var flux in _flux)
         {
-            if (f.Source == c || f.Target == c)
+            if (flux.Source == c || flux.Target == c)
             {
-                RemoveFlux(f);
-                Flux.RemoveFlux(f);
-                if (f.Source == c)
-                    f.Target.RemoveFlux(f);
+                RemoveFlux(flux);
+                Flux.RemoveFlux(flux);
+                if (flux.Source == c)
+                {
+                    flux.Target.RemoveFlux(flux);
+                }
                 else
-                    f.Source.RemoveFlux(f);
+                {
+                    flux.Source.RemoveFlux(flux);
+                }
             }
         }
     }

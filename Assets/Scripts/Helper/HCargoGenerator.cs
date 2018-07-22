@@ -38,19 +38,18 @@ public class HCargoGenerator : ICargoProvider, ICargoGenerator
 
 
     #region Constructors
-    public HCargoGenerator(CargoUpdatedDelegate cargoUpdatedDelegate, ICargoProvider parent)
-        : this(cargoUpdatedDelegate, parent, CargoLevel.MediumCargo)
-    { }
-
-    public HCargoGenerator(CargoUpdatedDelegate cargoUpdatedDelegate, ICargoProvider parent, CargoLevel cargoLevel)
+    public HCargoGenerator(CargoUpdatedDelegate cargoUpdatedDelegate, ICargoProvider parent, CargoLevel cargoLevel = CargoLevel.MediumCargo)
         : this(cargoUpdatedDelegate, parent, CargoChanceRange(cargoLevel), CargoProductionRange(cargoLevel))
     { }
 
-    public HCargoGenerator(CargoUpdatedDelegate cargoUpdatedDelegate, ICargoProvider parent, Vector2 cargoChanceRange, Vector2 cargoProductionRange)
-        : this(cargoUpdatedDelegate, parent, Random.Range(cargoChanceRange.x, cargoChanceRange.y), Random.Range(cargoProductionRange.x, cargoProductionRange.y), 0)
+    public HCargoGenerator(CargoUpdatedDelegate cargoUpdatedDelegate, ICargoProvider parent, 
+        Vector2 cargoChanceRange, Vector2 cargoProductionRange)
+        : this(cargoUpdatedDelegate, parent, Random.Range(cargoChanceRange.x, cargoChanceRange.y), 
+              Random.Range(cargoProductionRange.x, cargoProductionRange.y))
     { }
 
-    public HCargoGenerator(CargoUpdatedDelegate cargoUpdatedDelegate, ICargoProvider parent, float cargoChance, float cargoProduction, float exactCargo)
+    public HCargoGenerator(CargoUpdatedDelegate cargoUpdatedDelegate, ICargoProvider parent, 
+        float cargoChance, float cargoProduction, float exactCargo = 0)
     {
         OutgoingFlux = new Dictionary<ICargoAccepter, Flux>();
 

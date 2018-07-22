@@ -112,7 +112,7 @@ public class Flux
     }
     public void UpdateTruckPath()
     {
-        foreach (RoadVehicule truck in Trucks)
+        foreach (var truck in Trucks)
             truck.UpdatePath();
     }
 
