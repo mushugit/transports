@@ -118,7 +118,7 @@ public class Flux
 
     private Path<Cell> GetPath()
     {
-        var pf = new Pathfinder<Cell>(_speed, 0, new List<Type>() { typeof(Road), typeof(City), typeof(Industry) });
+        var pf = new Pathfinder<Cell>(new List<Type>() { typeof(Road), typeof(City), typeof(Industry) }, _speed);
         pf.FindPath(Target._Cell, Source._Cell);
         Path = pf.Path;
         return pf.Path;

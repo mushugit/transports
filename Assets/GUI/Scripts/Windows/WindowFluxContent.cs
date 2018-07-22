@@ -11,7 +11,7 @@ public class WindowFluxContent : MonoBehaviour
 
     public void AddFlux()
     {
-        Simulation.AddFlux(GetSource(), GetTarget(), GetCharacteristics(), GetQuantity());
+        ServiceLocator.GetInstance<Simulation>().AddFlux(GetSource(), GetTarget(), GetCharacteristics(), GetQuantity());
     }
 
     private IFluxSource GetSource()

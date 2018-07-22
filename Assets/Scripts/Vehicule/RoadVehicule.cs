@@ -189,7 +189,7 @@ public class RoadVehicule
 
     public void UpdatePath()
     {
-        var pf = new Pathfinder<Cell>(Characteristics.Speed, 0, new List<Type>() { typeof(Road), typeof(City), typeof(Industry) });
+        var pf = new Pathfinder<Cell>(new List<Type>() { typeof(Road), typeof(City), typeof(Industry) }, Characteristics.Speed);
         if (TargetCell == null)
             TargetCell = Source._Cell;
         pf.FindPath(Target._Cell, TargetCell);
