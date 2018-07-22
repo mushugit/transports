@@ -482,9 +482,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LoadCanvas: {fileID: 367780055}
-  progressBar: {fileID: 741080684}
-  progressIndicator: {fileID: 1078919848}
-  detailLabel: {fileID: 701381442}
+  ProgressBar: {fileID: 741080684}
+  ProgressIndicator: {fileID: 1078919848}
+  DetailLabel: {fileID: 701381442}
   oldCamera: {fileID: 780623010}
   oldLight: {fileID: 0}
 --- !u!1 &701381441

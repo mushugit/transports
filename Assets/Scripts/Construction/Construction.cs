@@ -16,6 +16,11 @@ public abstract class Construction
 
     public bool IsOriginal = true;
 
+    public abstract string DestroyOperation { get;  }
+    public abstract string BuildOperation { get; }
+    public abstract string DestroyLabel { get; }
+    public abstract string BuildLabel { get; }
+
     protected Construction(Cell cell, Component prefab, Transform container)
     {
         _Cell = cell;
@@ -57,7 +62,7 @@ public abstract class Construction
 
     public abstract void ClickHandler(PointerEventData eventData);
 
-    public virtual void Destroy()
+    public virtual void Demolish()
     {
         GameObject.Destroy(GlobalRenderer.gameObject);
     }

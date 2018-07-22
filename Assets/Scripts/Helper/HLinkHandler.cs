@@ -212,7 +212,7 @@ public class HLinkHandler : ILinkable
             else
                 callback("Relie");
 
-            var pf = new Pathfinder<Cell>(0, 0, null);
+            var pf = new Pathfinder<Cell>();
             yield return World.Instance?.StartCoroutine(pf.RoutineFindPath(a._Cell, b._Cell));
             if (pf.Path != null && pf.Path.TotalCost > 0)
             {

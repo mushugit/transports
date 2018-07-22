@@ -28,6 +28,11 @@ public class Depot : Construction, IHasColor
     }
     #endregion
 
+    public override string BuildOperation { get { return "build_depot"; } }
+    public override string DestroyOperation { get { return "destroy_depot"; } }
+    public override string BuildLabel { get { return "construire un dépôt"; } }
+    public override string DestroyLabel { get { return "détruire un dépôt"; } }
+
     #region Constructor
 
     public Depot(Cell cell, int direction)

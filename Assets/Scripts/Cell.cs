@@ -164,7 +164,7 @@ public class Cell : IComparable<Cell>, IHasNeighbours<Cell>, IHasRelativeDistanc
 
 	public List<Cell> Directions()
 	{
-		return new List<Cell>(4)
+		return new List<Cell>()
 		{
 			Left(),
 			Right(),
