@@ -56,6 +56,8 @@ public class World : MonoBehaviour
     public List<City> Cities;
     public List<Industry> Industries;
 
+    public HConstructionPattern ConstructionPattern { get; private set; }
+
     public static Vector3 Center { get; private set; } = new Vector3(width / 2f, 0f, height / 2f);
 
     //TODO: pass reference to class using it
@@ -229,6 +231,9 @@ public class World : MonoBehaviour
 
         var w = (int)width;
         var h = (int)height;
+
+        ConstructionPattern = new HConstructionPattern(w, h);
+
         Constructions = new Construction[w, h];
         Cities = new List<City>(City.Quantity(w, h));
         Industries = new List<Industry>(Industry.Quantity(w, h));
@@ -330,6 +335,8 @@ public class World : MonoBehaviour
         var w = (int)width;
         var h = (int)height;
 
+        ConstructionPattern = new HConstructionPattern(w, h);
+
         Constructions = new Construction[w, h];
         Cities = new List<City>(City.Quantity(w, h));
         Industries = new List<Industry>(Industry.Quantity(w, h));
@@ -416,6 +423,7 @@ public class World : MonoBehaviour
     {
         var quantity = City.Quantity(w, h);
         var n = 0;
+
         while (n < quantity)
         {
             var x = UnityEngine.Random.Range(0, w);
