@@ -23,7 +23,6 @@ public class World : MonoBehaviour
     #region Unity editor properties
 
     [Header("World Gen settings")]
-    public int minCityDistance = 4;
     public int minIndustryDistanceToCity = 2;
 
     [Header("General prefabs")]
@@ -232,7 +231,7 @@ public class World : MonoBehaviour
         var w = (int)width;
         var h = (int)height;
 
-        ConstructionPattern = new HConstructionPattern(w, h);
+        ConstructionPattern = new HConstructionPattern(this);
 
         Constructions = new Construction[w, h];
         Cities = new List<City>(City.Quantity(w, h));
@@ -335,7 +334,7 @@ public class World : MonoBehaviour
         var w = (int)width;
         var h = (int)height;
 
-        ConstructionPattern = new HConstructionPattern(w, h);
+        ConstructionPattern = new HConstructionPattern(this);
 
         Constructions = new Construction[w, h];
         Cities = new List<City>(City.Quantity(w, h));
@@ -423,30 +422,14 @@ public class World : MonoBehaviour
     {
         var quantity = City.Quantity(w, h);
         var n = 0;
+        var available = ConstructionPattern.InitialCitySpots();
 
-        while (n < quantity)
+        while (n < quantity && available.Count > 1)
         {
-            var x = UnityEngine.Random.Range(0, w);
-            var y = UnityEngine.Random.Range(0, h);
-            var center = new Cell(x, y);
-            if (Constructions[x, y] == null)
-            {
-                var canBuild = true;
-                foreach (var otherCity in Cities)
-                {
-                    if (otherCity.ManhattanDistance(center) < minCityDistance)
-                    {
-                        canBuild = false;
-                        break;
-                    }
-                }
-
-                if (canBuild)
-                {
-                    BuildCity(center);
-                    n++;
-                }
-            }
+            var cell = available[UnityEngine.Random.Range(0, available.Count - 1)];
+            BuildCity(cell);
+            n++;
+            available = ConstructionPattern.RemoveAround(available, cell, HConstructionPattern.MinCityDistance);
         }
     }
     #endregion Construction Generator

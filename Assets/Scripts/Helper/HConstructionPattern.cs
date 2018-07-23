@@ -1,46 +1,23 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class HConstructionPattern
 {
+    public const int MinCityDistance = 4;
+
     private int _blocSizeWidth;
     private int _blocSizeHeight;
 
     private int _width;
     private int _height;
 
-    private bool[,] _roadPattern;
-    private bool[,] _buildingPattern;
-    private bool[,] _connectablePattern;
+    private World _world;
 
-    public bool[,] RoadPattern
+    public HConstructionPattern(World world)
     {
-        get
-        {
-            return (_roadPattern ?? (_roadPattern = GenerateRoadPattern()));
-        }
-    }
-
-    public bool[,] BuildingPattern
-    {
-        get
-        {
-            return (_buildingPattern ?? (_buildingPattern = GenerateBuildingPattern()));
-        }
-    }
-
-    public bool[,] ConnectablePattern
-    {
-        get
-        {
-            return (_connectablePattern ?? (_connectablePattern = GenerateConnectablePattern()));
-        }
-    }
-
-
-    public HConstructionPattern(int width, int height)
-    {
-        _width = width;
-        _height = height;
+        _world = world;
+        _width = (int)World.width;
+        _height = (int)World.height;
         _blocSizeWidth = FindBlockSize(_width);
         _blocSizeHeight = FindBlockSize(_height);
     }
@@ -88,52 +65,27 @@ public class HConstructionPattern
         return (IsRoad(x, y) || IsRoad(x - 1, y) || IsRoad(x + 1, y) || IsRoad(x, y - 1) || IsRoad(x, y + 1));
     }
 
-    public bool[,] GenerateRoadPattern()
+    public List<Cell> InitialCitySpots()
     {
-        var _map = new bool[_width, _height];
-
-        for (int x = 0; x < _width; x += (_blocSizeWidth + 1))
-        {
-            for (int y = 0; y < _height; y++)
-            {
-                _map[x, y] = true;
-            }
-        }
-        for (int y = 0; y < _height; y += (_blocSizeHeight + 1))
-        {
-            for (int x = 0; x < _width; x++)
-            {
-                _map[x, y] = true;
-            }
-
-        }
-        return _map;
-    }
-
-    public bool[,] GenerateBuildingPattern()
-    {
-        var map = (bool[,])RoadPattern.Clone();
-        for (int x = 0; x < _width; x++)
-        {
-            for (int y = 0; y < _height; y++)
-            {
-                map[x, y] = !map[x, y];
-            }
-        }
-        return map;
-    }
-
-    public bool[,] GenerateConnectablePattern()
-    {
-        var _map = new bool[_width, _height];
+        var list = new List<Cell>();
 
         for (int x = 0; x < _width; x++)
         {
             for (int y = 0; y < _height; y++)
             {
-                _map[x, y] = IsConnectable(x, y);
+                if (IsConnectable(x, y))
+                {
+                    list.Add(new Cell(x, y));
+                }
             }
         }
-        return _map;
+
+        return list;
+    }
+
+    public List<Cell> RemoveAround(List<Cell> list, Cell cell, int removeDistance)
+    {
+        list.RemoveAll(cellItem => cell.ManhattanDistance(cellItem) <= removeDistance);
+        return list;
     }
 }
