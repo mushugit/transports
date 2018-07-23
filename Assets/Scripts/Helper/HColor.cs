@@ -61,7 +61,14 @@ public class HColor : IHasColor
         this.parent = parent;
     }
 
-    public static readonly string NoColorChangeTag = "NoColorChange";
+    private static void SetColor(Component p, Color c)
+    {
+        var renderers = p.GetComponentsInChildren<Renderer>();
+        foreach (Renderer r in renderers)
+        {
+            r.material.color = c;
+        }
+    }
 
     public static void GetInitialColor(Construction construction, Component p)
     {
@@ -79,10 +86,15 @@ public class HColor : IHasColor
             }
         }
 
-        var renderers = p.GetComponentsInChildren<Renderer>();
-        foreach (Renderer r in renderers)
+        SetColor(p, c);
+    }
+
+    public static void GetConstructionColor(Construction construction, Component p)
+    {
+        if (construction is IHasColor)
         {
-            r.material.color = c;
+            var coloredConstruction = construction as IHasColor;
+            SetColor(p, coloredConstruction.Color);
         }
     }
 }
